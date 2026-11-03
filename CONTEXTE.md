@@ -71,6 +71,30 @@ Retour, fonctionnement hors connexion (service worker), charte claire et très l
   portent toutes la phase « Série 2 »** (bug à corriger dans Media Sheet) ; l'heptathlon est regroupé
   en une seule épreuve.
 
+### Live d'un prestataire — Matsport (analysé le 3/11/2026 sur les CF Élites 2026)
+Quand un prestataire comme Matsport gère la réunion, ses pages s'appuient sur une interface de
+données JSON publique : `https://api-history.athle.matsport.com` (archives ; le live devrait suivre
+la même structure sur le domaine live, à vérifier lors d'une réunion en cours).
+- `GET /competitions/<idCompétition>?_withEvents=true` → journées (`schedules`), et pour chaque
+  épreuve / série : heure, nom (« 100m Hommes »), phase (« Tour 1 Série 1 », « Finale »), statut
+  (`OFFICIAL`…), type (A = course, F = concours), combinés.
+- `GET /events/<idÉpreuve>` → records (RF, RC, MPF, WR) ; `phaseLinks` (toutes les séries + bilan) ;
+  - courses (`trackResult`) : vent, et par athlète : couloir, dossard, place, temps, **Q/q**,
+    temps de réaction, SB, PB, `bestChange` (SB / PB / RC…) ;
+  - concours horizontaux (`horizontalResult`) : chaque essai avec vent, marque, classement après
+    l'essai, record battu à l'essai ;
+  - concours verticaux (`verticalResult`) : barres, et O / X / – à chaque essai ;
+  - fiche athlète : nom, club, pays, **`id_FFA`** et `id_WA` → jointure directe avec Media Sheet.
+- **Limite technique** : le serveur n'accepte que les pages Matsport (pas d'autorisation « CORS »).
+  Un site hébergé ailleurs ne peut pas lire ces données directement : il faut un **relais**. Solution
+  gratuite retenue : le même **Google Apps Script** que pour la saisie partagée (il récupère le JSON
+  côté Google et le renvoie au CIS), interrogé toutes les 10 à 20 s pendant la réunion.
+- À demander : l'accord du prestataire / de l'organisateur avant d'utiliser ces données en direct.
+
+**Fonctionnement hybride visé** : si un live est disponible, le CIS se remplit tout seul (perfs, Q/q,
+essais, vent) et garde nos stats et alertes ; sinon, saisie manuelle. Une saisie manuelle doit
+toujours pouvoir corriger ou compléter le live.
+
 ### Chaîne retenue
 Media Sheet (sur l'ordinateur, qui accède à la FFA) produit un **fichier unique pour le CIS** :
 programme + séries + règles de qualification + records par catégorie + MPF + stats Media Sheet.
@@ -85,4 +109,4 @@ Le CIS (site statique, GitHub Pages) lit ce fichier, fonctionne hors connexion e
 1. V1 « solo » sur données réelles de la J3 : horaire + vue Maintenant + fiches course et concours
    + saisie + Q/q + alertes.
 2. Export « CIS » depuis Media Sheet (et correction du bug de phase des séries).
-3. Synchronisation Google Sheets.
+3. Relais Google Apps Script : synchronisation des saisies + lecture d'un live prestataire (Matsport).
