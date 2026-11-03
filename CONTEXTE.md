@@ -99,14 +99,78 @@ Media Sheet (sur l'ordinateur, qui accède à la FFA) produit un **fichier uniqu
 programme + séries + règles de qualification + records par catégorie + MPF + stats Media Sheet.
 Le CIS (site statique, GitHub Pages) lit ce fichier, fonctionne hors connexion et garde les saisies.
 
+## Accord des fournisseurs de données (3/11/2026)
+Alexandre a l'accord de principe de la **FFA** et de **Matsport** pour utiliser les données de leurs sites
+(Direct athle.fr, live et archives Matsport) **dans le cadre de son activité de speaker**, et pour que
+l'outil serve aussi à d'autres speakers. Ce n'est pas une autorisation de publier ces données en accès
+libre : elles ne sont **jamais stockées dans le dépôt public**, le CIS les lit au moment de l'utilisation
+(fichier ouvert sur l'appareil, ou relais Google Apps Script).
+Exemple de live Matsport (CF Élites 2026) :
+`https://athle-history.matsport.com/competitions/36df6676-37a4-4396-aad0-935a0b262729/36df6676-37a4-4396-aad0-935a0b262729_SCH_20260724`
+
 ## Décisions
+- **Lecture des données séparée du reste** : `engine.js` transforme une source (aujourd'hui le fichier
+  Media Sheet) en un modèle unique de réunion (tours, séries, engagés, records). Les futures sources
+  (Direct FFA, Matsport) n'auront qu'à produire ce même modèle.
+- **Live Matsport et import athle.fr pour tous les speakers** (demandé le 3/11/2026, à faire après la V1) :
+  - le live Matsport doit marcher pour **tous les speakers** qui utilisent le CIS, pas seulement Alexandre ;
+  - on doit pouvoir **importer depuis le CIS** les données nécessaires, depuis le Direct athle.fr **ou**
+    depuis Matsport : programme, séries et couloirs, règles de qualification, records par catégorie, MPF,
+    puis les résultats en direct ;
+  - moyen retenu : un relais Google Apps Script gratuit dans le Drive d'Alexandre, ouvert aux utilisateurs
+    du CIS (il contourne le blocage « CORS ») ; le CIS l'interroge pendant la réunion ; une saisie manuelle
+    peut toujours corriger ou compléter le live ;
+  - accord FFA et Matsport obtenu par Alexandre (voir plus haut) ; les données restent lues au moment de
+    l'utilisation, jamais stockées dans le dépôt.
+- **Dépôt public, code seulement** : un dépôt privé n'apporterait rien (GitHub Pages gratuit exige un
+  dépôt public, et un site Pages reste public même depuis un dépôt privé payant). Les données de
+  meeting restent sur les appareils des speakers.
 - **Pas de recherche par dossard** dans le CIS piste/salle (utile seulement en running, trail, cross).
 - Tablette en priorité, téléphone en secours.
 - Saisie partagée : idée gardée pour la version 2 (Google Sheets + Apps Script).
 - Projet séparé de l'Ekiden : ce dépôt + un projet Claude dédié.
 
+## État de la V1 (3/11/2026)
+Fichiers : `index.html` (écran), `style.css`, `app.js` (affichage, saisie), `engine.js` (calculs),
+`sw.js` (hors connexion, **incrémenter `CACHE` à chaque publication**), `data/demo.json` (réunion
+**fictive** de démonstration, générée, aucune donnée réelle).
+
+- **Chargement** : bouton « Ouvrir le fichier de la réunion » → fichier Media Sheet `store/meetings/<id>.json`,
+  gardé dans l'appareil (IndexedDB). Saisies gardées dans l'appareil (localStorage), exportables / importables.
+- **Lecture Media Sheet** : les séries d'une même épreuve (même nom, sexe, catégorie, heure) sont regroupées en
+  un tour (« Séries », « Demi-finales ») ; heure des séries suivantes estimée (+8 min, marquée « ~ ») ;
+  SB/PB de l'épreuve tirés des listes SB/PB (bon engin : 4 kg, 106 cm…, perfs ventées « (F) » et « (NC) »
+  ignorées) ; records : RM, RE, RF (bilans « tous les temps »), RF par catégorie (records détenus par les
+  engagés : NU23R / NU20R / NU18R), RCH (record_meeting), MPM / MPE / MPF de l'année (MPF complétée par les
+  SB des engagés), minima A/B.
+- **Horloge** : heure réelle, ou heure simulée (activée d'office si la réunion n'est pas aujourd'hui).
+- **Horaire** : colonne à gauche (tiroir sur téléphone / tablette portrait), ligne « Maintenant », statuts,
+  Retard ±5 min (épreuves à venir), heure modifiable par épreuve. Suggestions « Maintenant » : épreuves en
+  cours ou qui commencent dans les 30 min.
+- **Épreuves côte à côte** : 1 à 4 sur tablette (mise en page compacte automatique quand c'est étroit),
+  onglets sur téléphone. Sur tablette en paysage, le pavé se range à gauche à la place de l'horaire.
+- **Courses** : onglets de séries + Bilan, saisie au pavé (2312 → 23"12, 15230 → 1'52"30), DNS/DNF/DQ,
+  vent par série, ordre couloirs / classement, Q/q automatiques (règle du fichier ou choisie au bouton
+  « Qualif »), corrigeables d'un tap, égalités signalées, « Créer la finale » avec les qualifiés (couloirs
+  à saisir).
+- **Concours horizontaux** : 6 essais (X, –, marque + vent pour longueur/triple), 8 meilleurs après 3 essais,
+  ordre inversé pour les essais 4-6, « À l'essai » / « Suivant », masquer les éliminés.
+- **Concours verticaux** : barres, O / X / –, rotation des sauteurs, éliminé après 3 échecs consécutifs,
+  classement officiel, barre suivante proposée, barrage signalé.
+- **Combinés** : total de points (V1 simple).
+- **Alertes** : à chaque saisie, comparaison selon la catégorie de l'athlète (records), en tenant compte des
+  perfs déjà réalisées dans le tour ; pastilles sur la ligne + bandeau prêt à lire ; vent > +2.0 signalé
+  « non homologable ». Historique de toutes les saisies, chacune annulable.
+- **Dictée vocale** (réseau nécessaire) et clavier physique (chiffres, Entrée, X, O, -).
+
+Limites connues : règles de qualification absentes des fichiers Media Sheet actuels (à choisir au bouton
+« Qualif ») ; RF et MPF par catégorie partiels tant que l'export CIS (Direct FFA) n'existe pas ; combinés
+réduits au total de points.
+
 ## Prochaines étapes
-1. V1 « solo » sur données réelles de la J3 : horaire + vue Maintenant + fiches course et concours
-   + saisie + Q/q + alertes.
-2. Export « CIS » depuis Media Sheet (et correction du bug de phase des séries).
-3. Relais Google Apps Script : synchronisation des saisies + lecture d'un live prestataire (Matsport).
+1. Retours d'Alexandre sur la V1 en conditions réelles.
+2. Export « CIS » depuis Media Sheet ou import direct (Direct FFA / Matsport) : règles de qualification,
+   heures exactes des séries, RF et MPF par catégorie (champ `records_cis` déjà lu par `engine.js`) ;
+   corriger le bug de phase des séries dans Media Sheet.
+3. Relais Google Apps Script pour tous les speakers : lecture du live Matsport, import athle.fr,
+   synchronisation des saisies entre appareils.

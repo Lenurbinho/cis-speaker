@@ -1,0 +1,2897 @@
+{
+ "id": "demo-meeting-fictif",
+ "date_maj": "2026-11-03T12:00:00",
+ "meeting": {
+  "nom": "Meeting de démonstration (données fictives)",
+  "sous_titre": "",
+  "date": "14 juin 2026",
+  "epreuves": [
+   {
+    "nom": "200m",
+    "sexe": "F",
+    "categorie": "SE",
+    "horaire": "14h00",
+    "jour": "",
+    "phase": "Série 1",
+    "qualification": "2Q+2q",
+    "record_meeting": "22\"60 — RECORDWOMAN Fictive (FRA, 2019)",
+    "minima_2026": "",
+    "minima_baremes": [
+     {
+      "nom": "Championnats fictifs",
+      "A": "22\"85",
+      "B": "23\"20"
+     }
+    ],
+    "startlist": [
+     {
+      "nom": "ROUSSEL Chloé",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "JUF",
+      "annee": "2007",
+      "couloir": "1",
+      "dossard": "854",
+      "sb": "200m : 23''94",
+      "pb": "200m : 23''94 (24)",
+      "club": "AS Forêt Claire",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "LACROIX Inès",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESF",
+      "annee": "2006",
+      "couloir": "2",
+      "dossard": "716",
+      "sb": "200m : 23''03",
+      "pb": "200m : 23''03 (24)",
+      "club": "AS Forêt Claire",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "1 CF U23 25 200m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "AUBERT Justine",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "JUF",
+      "annee": "2007",
+      "couloir": "3",
+      "dossard": "877",
+      "sb": "200m : 23''56",
+      "pb": "200m : 23''28 (24)",
+      "club": "Racing Plaine Nord",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 200m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "NU20R 200 m : 23''10 (Ville Fictive, 1 juin 2026)",
+      "tags": ""
+     },
+     {
+      "nom": "BLANCHARD Lou",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "1999",
+      "couloir": "4",
+      "dossard": "199",
+      "sb": "200m : 23''97",
+      "pb": "200m : 23''97 (25)",
+      "club": "CA Haute Colline",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 200m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "BENOIT Léa",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "1997",
+      "couloir": "5",
+      "dossard": "949",
+      "sb": "200m : 24''18",
+      "pb": "200m : 24''18 (26)",
+      "club": "Athlé Grand Port",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 200m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "PERRIN Jade",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESF",
+      "annee": "2004",
+      "couloir": "6",
+      "dossard": "975",
+      "sb": "200m : 23''19",
+      "pb": "200m : 23''05 (24)",
+      "club": "Stade Rivière Athlé",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 200m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "BENOIT Salomé",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "2003",
+      "couloir": "7",
+      "dossard": "373",
+      "sb": "200m : 23''43",
+      "pb": "200m : 23''20 (26)",
+      "club": "Stade Rivière Athlé",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "1 CF U23 25 200m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "RENAUD Zoé",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESF",
+      "annee": "2006",
+      "couloir": "8",
+      "dossard": "804",
+      "sb": "200m : 23''83",
+      "pb": "200m : 23''59 (26)",
+      "club": "US Vallée Verte",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 200m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     }
+    ],
+    "series": [],
+    "top_monde_2026": [
+     {
+      "rang": "1",
+      "nom": "Mondiale A",
+      "nat": "FRA",
+      "perf": "21\"70",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "top_europe_2026": [
+     {
+      "rang": "1",
+      "nom": "Européenne A",
+      "nat": "FRA",
+      "perf": "21\"75",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "top_france_2026": [
+     {
+      "rang": "1",
+      "nom": "Française A",
+      "nat": "FRA",
+      "perf": "22\"70",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_monde": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "21\"20",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_europe": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "21\"50",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_france": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "21\"90",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "podium_n1": [
+     {
+      "place": 1,
+      "athlete": "BONNET Anaïs",
+      "nat": "FRA",
+      "perf": "22\"90"
+     },
+     {
+      "place": 2,
+      "athlete": "GIRARD Lisa",
+      "nat": "FRA",
+      "perf": "23\"05"
+     },
+     {
+      "place": 3,
+      "athlete": "GAUTIER Elsa",
+      "nat": "FRA",
+      "perf": "23\"20"
+     }
+    ]
+   },
+   {
+    "nom": "200m",
+    "sexe": "F",
+    "categorie": "SE",
+    "horaire": "14h00",
+    "jour": "",
+    "phase": "Série 2",
+    "qualification": "2Q+2q",
+    "record_meeting": "22\"60 — RECORDWOMAN Fictive (FRA, 2019)",
+    "minima_2026": "",
+    "minima_baremes": [
+     {
+      "nom": "Championnats fictifs",
+      "A": "22\"85",
+      "B": "23\"20"
+     }
+    ],
+    "startlist": [
+     {
+      "nom": "BARBIER Lisa",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "2003",
+      "couloir": "1",
+      "dossard": "569",
+      "sb": "200m : 23''58",
+      "pb": "200m : 23''27 (24)",
+      "club": "Entente Trois Ponts",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "1 CF U23 25 200m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "BERTIN Nina",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "2002",
+      "couloir": "2",
+      "dossard": "508",
+      "sb": "200m : 24''32",
+      "pb": "200m : 23''95 (25)",
+      "club": "US Vallée Verte",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "1 CF U23 25 200m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "FLEURY Louise",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESF",
+      "annee": "2004",
+      "couloir": "3",
+      "dossard": "742",
+      "sb": "200m : 23''99",
+      "pb": "200m : 23''96 (24)",
+      "club": "Racing Plaine Nord",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "HUET Alice",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESF",
+      "annee": "2004",
+      "couloir": "4",
+      "dossard": "796",
+      "sb": "200m : 23''83",
+      "pb": "200m : 23''67 (26)",
+      "club": "Stade Rivière Athlé",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 200m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "BRUN Léa",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "JUF",
+      "annee": "2007",
+      "couloir": "5",
+      "dossard": "839",
+      "sb": "200m : 23''37",
+      "pb": "200m : 23''37 (26)",
+      "club": "Entente Trois Ponts",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "1 CF U23 25 200m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "✓ Championnats fictifs B",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "FONTAINE Margaux",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESF",
+      "annee": "2004",
+      "couloir": "6",
+      "dossard": "256",
+      "sb": "200m : 24''47",
+      "pb": "200m : 24''07 (25)",
+      "club": "Athlé Pays des Lacs",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "MEUNIER Marion",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESF",
+      "annee": "2005",
+      "couloir": "7",
+      "dossard": "345",
+      "sb": "200m : 23''09",
+      "pb": "200m : 23''02 (24)",
+      "club": "US Vallée Verte",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "FLEURY Jade",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "1995",
+      "couloir": "8",
+      "dossard": "775",
+      "sb": "200m : 24''31",
+      "pb": "200m : 23''97 (25)",
+      "club": "AS Forêt Claire",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "1 CF U23 25 200m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     }
+    ],
+    "series": [],
+    "top_monde_2026": [
+     {
+      "rang": "1",
+      "nom": "Mondiale A",
+      "nat": "FRA",
+      "perf": "21\"70",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "top_europe_2026": [
+     {
+      "rang": "1",
+      "nom": "Européenne A",
+      "nat": "FRA",
+      "perf": "21\"75",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "top_france_2026": [
+     {
+      "rang": "1",
+      "nom": "Française A",
+      "nat": "FRA",
+      "perf": "22\"70",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_monde": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "21\"20",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_europe": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "21\"50",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_france": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "21\"90",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "podium_n1": [
+     {
+      "place": 1,
+      "athlete": "COLLIN Mathilde",
+      "nat": "FRA",
+      "perf": "22\"90"
+     },
+     {
+      "place": 2,
+      "athlete": "BARBIER Clara",
+      "nat": "FRA",
+      "perf": "23\"05"
+     },
+     {
+      "place": 3,
+      "athlete": "LEMAIRE Héloïse",
+      "nat": "FRA",
+      "perf": "23\"20"
+     }
+    ]
+   },
+   {
+    "nom": "200m",
+    "sexe": "F",
+    "categorie": "SE",
+    "horaire": "14h00",
+    "jour": "",
+    "phase": "Série 3",
+    "qualification": "2Q+2q",
+    "record_meeting": "22\"60 — RECORDWOMAN Fictive (FRA, 2019)",
+    "minima_2026": "",
+    "minima_baremes": [
+     {
+      "nom": "Championnats fictifs",
+      "A": "22\"85",
+      "B": "23\"20"
+     }
+    ],
+    "startlist": [
+     {
+      "nom": "DUVAL Noémie",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "JUF",
+      "annee": "2007",
+      "couloir": "1",
+      "dossard": "330",
+      "sb": "200m : 24''48",
+      "pb": "200m : 24''15 (24)",
+      "club": "CA Haute Colline",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "BERTIN Anaïs",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESF",
+      "annee": "2006",
+      "couloir": "2",
+      "dossard": "746",
+      "sb": "200m : 23''75",
+      "pb": "200m : 23''75 (24)",
+      "club": "US Vallée Verte",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "BRUN Jade",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "2000",
+      "couloir": "3",
+      "dossard": "319",
+      "sb": "200m : 23''80",
+      "pb": "200m : 23''65 (26)",
+      "club": "Athlé Pays des Lacs",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 200m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "REY Justine",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "1999",
+      "couloir": "4",
+      "dossard": "462",
+      "sb": "200m : 23''24",
+      "pb": "200m : 23''24 (25)",
+      "club": "Racing Plaine Nord",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 200m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "BONNET Camille",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "JUF",
+      "annee": "2007",
+      "couloir": "5",
+      "dossard": "354",
+      "sb": "200m : 23''32",
+      "pb": "200m : 23''07 (24)",
+      "club": "US Vallée Verte",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 200m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "LACROIX Maëlle",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "1994",
+      "couloir": "6",
+      "dossard": "553",
+      "sb": "200m : 23''35",
+      "pb": "200m : 23''35 (26)",
+      "club": "Stade Rivière Athlé",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "AUBERT Lina",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "JUF",
+      "annee": "2008",
+      "couloir": "7",
+      "dossard": "592",
+      "sb": "200m : 23''11",
+      "pb": "200m : 23''11 (24)",
+      "club": "Racing Plaine Nord",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "HUET Lina",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "2000",
+      "couloir": "8",
+      "dossard": "392",
+      "sb": "200m : 23''65",
+      "pb": "200m : 23''49 (25)",
+      "club": "AS Forêt Claire",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 200m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     }
+    ],
+    "series": [],
+    "top_monde_2026": [
+     {
+      "rang": "1",
+      "nom": "Mondiale A",
+      "nat": "FRA",
+      "perf": "21\"70",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "top_europe_2026": [
+     {
+      "rang": "1",
+      "nom": "Européenne A",
+      "nat": "FRA",
+      "perf": "21\"75",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "top_france_2026": [
+     {
+      "rang": "1",
+      "nom": "Française A",
+      "nat": "FRA",
+      "perf": "22\"70",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_monde": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "21\"20",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_europe": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "21\"50",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_france": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "21\"90",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "podium_n1": [
+     {
+      "place": 1,
+      "athlete": "BLANCHARD Clara",
+      "nat": "FRA",
+      "perf": "22\"90"
+     },
+     {
+      "place": 2,
+      "athlete": "ARNAUD Lou",
+      "nat": "FRA",
+      "perf": "23\"05"
+     },
+     {
+      "place": 3,
+      "athlete": "BONNET Manon",
+      "nat": "FRA",
+      "perf": "23\"20"
+     }
+    ]
+   },
+   {
+    "nom": "110m Haies",
+    "sexe": "H",
+    "categorie": "SE",
+    "horaire": "15h00",
+    "jour": "",
+    "phase": "1/2 finale 1",
+    "qualification": "3Q+2q",
+    "record_meeting": "13\"05 — RECORDMAN Fictif (FRA, 2018)",
+    "minima_2026": "",
+    "minima_baremes": [
+     {
+      "nom": "Championnats fictifs",
+      "A": "13\"20",
+      "B": "13\"40"
+     }
+    ],
+    "startlist": [
+     {
+      "nom": "MEUNIER Hugo",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "JUM",
+      "annee": "2007",
+      "couloir": "1",
+      "dossard": "158",
+      "sb": "110m Haies (106) : 13''56",
+      "pb": "110m Haies (106) : 13''38 (26)",
+      "club": "Stade Rivière Athlé",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "1 CF U23 25 110m haies",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "PREVOST Nathan",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEM",
+      "annee": "2002",
+      "couloir": "2",
+      "dossard": "352",
+      "sb": "110m Haies (106) : 13''85",
+      "pb": "110m Haies (106) : 13''78 (26)",
+      "club": "Athlé Grand Port",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "LAMBERT Raphaël",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESM",
+      "annee": "2005",
+      "couloir": "3",
+      "dossard": "367",
+      "sb": "110m Haies (106) : 13''95",
+      "pb": "110m Haies (106) : 13''77 (24)",
+      "club": "CA Haute Colline",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "1 CF U23 25 110m haies",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "GAUTIER Louis",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEM",
+      "annee": "1998",
+      "couloir": "4",
+      "dossard": "869",
+      "sb": "110m Haies (106) : 13''97",
+      "pb": "110m Haies (106) : 13''77 (24)",
+      "club": "AC Bord de Mer",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 110m haies",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "NOEL Théo",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESM",
+      "annee": "2005",
+      "couloir": "5",
+      "dossard": "235",
+      "sb": "110m Haies (106) : 13''39",
+      "pb": "110m Haies (106) : 13''39 (25)",
+      "club": "Stade Rivière Athlé",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "1 CF U23 25 110m haies",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "ARNAUD Enzo",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEM",
+      "annee": "2002",
+      "couloir": "6",
+      "dossard": "926",
+      "sb": "110m Haies (106) : 13''80",
+      "pb": "110m Haies (106) : 13''63 (26)",
+      "club": "AS Forêt Claire",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "BERTIN Noah",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "JUM",
+      "annee": "2007",
+      "couloir": "7",
+      "dossard": "370",
+      "sb": "110m Haies (106) : 13''97",
+      "pb": "110m Haies (106) : 13''94 (24)",
+      "club": "Stade Rivière Athlé",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "1 CF U23 25 110m haies",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "ARNAUD Axel",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEM",
+      "annee": "2003",
+      "couloir": "8",
+      "dossard": "973",
+      "sb": "110m Haies (106) : 13''48",
+      "pb": "110m Haies (106) : 13''48 (25)",
+      "club": "AS Forêt Claire",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 110m haies",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     }
+    ],
+    "series": [],
+    "top_monde_2026": [
+     {
+      "rang": "1",
+      "nom": "Mondiale A",
+      "nat": "FRA",
+      "perf": "12\"80",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "top_europe_2026": [
+     {
+      "rang": "1",
+      "nom": "Européenne A",
+      "nat": "FRA",
+      "perf": "12\"85",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "top_france_2026": [
+     {
+      "rang": "1",
+      "nom": "Française A",
+      "nat": "FRA",
+      "perf": "13\"20",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_monde": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "12\"75",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_europe": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "12\"85",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_france": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "12\"90",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "podium_n1": [
+     {
+      "place": 1,
+      "athlete": "COLLIN Hugo",
+      "nat": "FRA",
+      "perf": "13\"35"
+     },
+     {
+      "place": 2,
+      "athlete": "LAMBERT Romain",
+      "nat": "FRA",
+      "perf": "13\"50"
+     },
+     {
+      "place": 3,
+      "athlete": "LACROIX Quentin",
+      "nat": "FRA",
+      "perf": "13\"65"
+     }
+    ]
+   },
+   {
+    "nom": "110m Haies",
+    "sexe": "H",
+    "categorie": "SE",
+    "horaire": "15h00",
+    "jour": "",
+    "phase": "1/2 finale 2",
+    "qualification": "3Q+2q",
+    "record_meeting": "13\"05 — RECORDMAN Fictif (FRA, 2018)",
+    "minima_2026": "",
+    "minima_baremes": [
+     {
+      "nom": "Championnats fictifs",
+      "A": "13\"20",
+      "B": "13\"40"
+     }
+    ],
+    "startlist": [
+     {
+      "nom": "GIRARD Lucas",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEM",
+      "annee": "1997",
+      "couloir": "1",
+      "dossard": "265",
+      "sb": "110m Haies (106) : 13''60",
+      "pb": "110m Haies (106) : 13''56 (26)",
+      "club": "Olympique Côte Sud",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 110m haies",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "MARCHAND Théo",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESM",
+      "annee": "2005",
+      "couloir": "2",
+      "dossard": "696",
+      "sb": "110m Haies (106) : 13''43",
+      "pb": "110m Haies (106) : 13''39 (26)",
+      "club": "Athlé Pays des Lacs",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 110m haies",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "GIRARD Noah",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEM",
+      "annee": "1996",
+      "couloir": "3",
+      "dossard": "798",
+      "sb": "110m Haies (106) : 13''59",
+      "pb": "110m Haies (106) : 13''58 (24)",
+      "club": "Stade Rivière Athlé",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 110m haies",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "PICARD Axel",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESM",
+      "annee": "2004",
+      "couloir": "4",
+      "dossard": "985",
+      "sb": "110m Haies (106) : 13''86",
+      "pb": "110m Haies (106) : 13''82 (24)",
+      "club": "Athlé Pays des Lacs",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 110m haies",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "MULLER Gabriel",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEM",
+      "annee": "1999",
+      "couloir": "5",
+      "dossard": "921",
+      "sb": "110m Haies (106) : 14''04",
+      "pb": "110m Haies (106) : 13''94 (26)",
+      "club": "US Vallée Verte",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 110m haies",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "FONTAINE Mathis",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEM",
+      "annee": "1996",
+      "couloir": "6",
+      "dossard": "304",
+      "sb": "110m Haies (106) : 13''91",
+      "pb": "110m Haies (106) : 13''90 (25)",
+      "club": "CA Haute Colline",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 110m haies",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "CARON Lucas",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEM",
+      "annee": "1997",
+      "couloir": "7",
+      "dossard": "985",
+      "sb": "110m Haies (106) : 13''83",
+      "pb": "110m Haies (106) : 13''77 (24)",
+      "club": "Entente Trois Ponts",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 110m haies",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "CHEVALIER Mathis",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "JUM",
+      "annee": "2007",
+      "couloir": "8",
+      "dossard": "218",
+      "sb": "110m Haies (106) : 13''95",
+      "pb": "110m Haies (106) : 13''78 (25)",
+      "club": "Athlé Pays des Lacs",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 110m haies",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     }
+    ],
+    "series": [],
+    "top_monde_2026": [
+     {
+      "rang": "1",
+      "nom": "Mondiale A",
+      "nat": "FRA",
+      "perf": "12\"80",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "top_europe_2026": [
+     {
+      "rang": "1",
+      "nom": "Européenne A",
+      "nat": "FRA",
+      "perf": "12\"85",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "top_france_2026": [
+     {
+      "rang": "1",
+      "nom": "Française A",
+      "nat": "FRA",
+      "perf": "13\"20",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_monde": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "12\"75",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_europe": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "12\"85",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_france": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "12\"90",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "podium_n1": [
+     {
+      "place": 1,
+      "athlete": "GIRARD Théo",
+      "nat": "FRA",
+      "perf": "13\"35"
+     },
+     {
+      "place": 2,
+      "athlete": "PREVOST Raphaël",
+      "nat": "FRA",
+      "perf": "13\"50"
+     },
+     {
+      "place": 3,
+      "athlete": "ROGER Gabriel",
+      "nat": "FRA",
+      "perf": "13\"65"
+     }
+    ]
+   },
+   {
+    "nom": "Heptathlon",
+    "sexe": "F",
+    "categorie": "SE",
+    "horaire": "12h30",
+    "jour": "",
+    "phase": "",
+    "qualification": "",
+    "record_meeting": "6 400 pts — RECORDWOMAN Fictive (FRA, 2019)",
+    "minima_2026": "",
+    "minima_baremes": [
+     {
+      "nom": "Championnats fictifs",
+      "A": "6450",
+      "B": "6250"
+     }
+    ],
+    "startlist": [
+     {
+      "nom": "LACROIX Léa",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "1993",
+      "couloir": "1",
+      "dossard": "825",
+      "sb": "Heptathlon JSF : 5 703 pts",
+      "pb": "Heptathlon JSF : 5 703 pts (25)",
+      "club": "AC Bord de Mer",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "1 CF U23 25 heptathlon jsf",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "LACROIX Jade",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "2003",
+      "couloir": "2",
+      "dossard": "968",
+      "sb": "Heptathlon JSF : 5 331 pts",
+      "pb": "Heptathlon JSF : 5 415 pts (24)",
+      "club": "Entente Trois Ponts",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 heptathlon jsf",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "PICARD Lisa",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "JUF",
+      "annee": "2007",
+      "couloir": "3",
+      "dossard": "530",
+      "sb": "Heptathlon JSF : 5 619 pts",
+      "pb": "Heptathlon JSF : 5 694 pts (26)",
+      "club": "Racing Plaine Nord",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "1 CF U23 25 heptathlon jsf",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "NOEL Margaux",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESF",
+      "annee": "2005",
+      "couloir": "4",
+      "dossard": "393",
+      "sb": "Heptathlon JSF : 5 553 pts",
+      "pb": "Heptathlon JSF : 5 693 pts (24)",
+      "club": "Racing Plaine Nord",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 heptathlon jsf",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "MAILLARD Noémie",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESF",
+      "annee": "2006",
+      "couloir": "5",
+      "dossard": "273",
+      "sb": "Heptathlon JSF : 5 501 pts",
+      "pb": "Heptathlon JSF : 5 555 pts (26)",
+      "club": "Stade Rivière Athlé",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 heptathlon jsf",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "TESSIER Océane",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESF",
+      "annee": "2004",
+      "couloir": "6",
+      "dossard": "925",
+      "sb": "Heptathlon JSF : 5 793 pts",
+      "pb": "Heptathlon JSF : 5 853 pts (24)",
+      "club": "Athlé Pays des Lacs",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "RENAUD Pauline",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "2003",
+      "couloir": "7",
+      "dossard": "689",
+      "sb": "Heptathlon JSF : 5 570 pts",
+      "pb": "Heptathlon JSF : 5 588 pts (24)",
+      "club": "Racing Plaine Nord",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 heptathlon jsf",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "RENAUD Emma",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESF",
+      "annee": "2004",
+      "couloir": "8",
+      "dossard": "897",
+      "sb": "Heptathlon JSF : 5 564 pts",
+      "pb": "Heptathlon JSF : 5 565 pts (25)",
+      "club": "US Vallée Verte",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "1 CF U23 25 heptathlon jsf",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     }
+    ],
+    "series": [],
+    "top_monde_2026": [
+     {
+      "rang": "1",
+      "nom": "Mondiale A",
+      "nat": "FRA",
+      "perf": "6800",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "top_europe_2026": [
+     {
+      "rang": "1",
+      "nom": "Européenne A",
+      "nat": "FRA",
+      "perf": "6795",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "top_france_2026": [
+     {
+      "rang": "1",
+      "nom": "Française A",
+      "nat": "FRA",
+      "perf": "6150",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_monde": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "7250",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_europe": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "7000",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_france": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "6800",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "podium_n1": [
+     {
+      "place": 1,
+      "athlete": "LEFEVRE Alice",
+      "nat": "FRA",
+      "perf": "6360"
+     },
+     {
+      "place": 2,
+      "athlete": "BONNET Julie",
+      "nat": "FRA",
+      "perf": "6340"
+     },
+     {
+      "place": 3,
+      "athlete": "ROUSSEL Alice",
+      "nat": "FRA",
+      "perf": "6320"
+     }
+    ]
+   },
+   {
+    "nom": "Perche",
+    "sexe": "H",
+    "categorie": "SE",
+    "horaire": "14h50",
+    "jour": "",
+    "phase": "",
+    "qualification": "",
+    "record_meeting": "5m80 — RECORDMAN Fictif (FRA, 2018)",
+    "minima_2026": "",
+    "minima_baremes": [
+     {
+      "nom": "Championnats fictifs",
+      "A": "5m70",
+      "B": "5m60"
+     }
+    ],
+    "startlist": [
+     {
+      "nom": "BENOIT Kylian",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEM",
+      "annee": "2000",
+      "couloir": "1",
+      "dossard": "727",
+      "sb": "Perche : 5m19",
+      "pb": "Perche : 5m27 (26)",
+      "club": "AS Forêt Claire",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 perche",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "MAILLARD Enzo",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESM",
+      "annee": "2004",
+      "couloir": "2",
+      "dossard": "960",
+      "sb": "Perche : 5m23",
+      "pb": "Perche : 5m30 (26)",
+      "club": "Entente Trois Ponts",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 perche",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "RENAUD Maxime",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "JUM",
+      "annee": "2007",
+      "couloir": "3",
+      "dossard": "378",
+      "sb": "Perche : 5m31",
+      "pb": "Perche : 5m32 (25)",
+      "club": "CA Haute Colline",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "BLANCHARD Tom",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "JUM",
+      "annee": "2007",
+      "couloir": "4",
+      "dossard": "165",
+      "sb": "Perche : 5m36",
+      "pb": "Perche : 5m36 (25)",
+      "club": "Racing Plaine Nord",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 perche",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "NU20R Perche : 5m55 (Ville Fictive, 2 mai 2026)",
+      "tags": ""
+     },
+     {
+      "nom": "BENOIT Raphaël",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESM",
+      "annee": "2005",
+      "couloir": "5",
+      "dossard": "888",
+      "sb": "Perche : 5m54",
+      "pb": "Perche : 5m57 (26)",
+      "club": "AC Bord de Mer",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 perche",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "MARCHAND Baptiste",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESM",
+      "annee": "2005",
+      "couloir": "6",
+      "dossard": "651",
+      "sb": "Perche : 5m29",
+      "pb": "Perche : 5m41 (26)",
+      "club": "AS Forêt Claire",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "1 CF U23 25 perche",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "CARON Maxime",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESM",
+      "annee": "2005",
+      "couloir": "7",
+      "dossard": "784",
+      "sb": "Perche : 5m33",
+      "pb": "Perche : 5m33 (26)",
+      "club": "Racing Plaine Nord",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "1 CF U23 25 perche",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "MOREAU Axel",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESM",
+      "annee": "2006",
+      "couloir": "8",
+      "dossard": "677",
+      "sb": "Perche : 5m26",
+      "pb": "Perche : 5m26 (26)",
+      "club": "AC Bord de Mer",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "LACROIX Louis",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "JUM",
+      "annee": "2008",
+      "couloir": "9",
+      "dossard": "435",
+      "sb": "Perche : 5m31",
+      "pb": "Perche : 5m31 (24)",
+      "club": "Olympique Côte Sud",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 perche",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "HUET Maxime",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEM",
+      "annee": "2000",
+      "couloir": "10",
+      "dossard": "119",
+      "sb": "Perche : 5m30",
+      "pb": "Perche : 5m34 (26)",
+      "club": "AS Forêt Claire",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     }
+    ],
+    "series": [],
+    "top_monde_2026": [
+     {
+      "rang": "1",
+      "nom": "Mondiale A",
+      "nat": "FRA",
+      "perf": "6m10",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "top_europe_2026": [
+     {
+      "rang": "1",
+      "nom": "Européenne A",
+      "nat": "FRA",
+      "perf": "6m05",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "top_france_2026": [
+     {
+      "rang": "1",
+      "nom": "Française A",
+      "nat": "FRA",
+      "perf": "5m75",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_monde": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "6m20",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_europe": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "6m05",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_france": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "6m00",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "podium_n1": [
+     {
+      "place": 1,
+      "athlete": "ROGER Tom",
+      "nat": "FRA",
+      "perf": "5m40"
+     },
+     {
+      "place": 2,
+      "athlete": "DUPRE Simon",
+      "nat": "FRA",
+      "perf": "5m20"
+     },
+     {
+      "place": 3,
+      "athlete": "GIRARD Simon",
+      "nat": "FRA",
+      "perf": "5m00"
+     }
+    ]
+   },
+   {
+    "nom": "Triple Saut",
+    "sexe": "H",
+    "categorie": "SE",
+    "horaire": "15h05",
+    "jour": "",
+    "phase": "",
+    "qualification": "",
+    "record_meeting": "17m20 — RECORDMAN Fictif (FRA, 2018)",
+    "minima_2026": "",
+    "minima_baremes": [
+     {
+      "nom": "Championnats fictifs",
+      "A": "17m10",
+      "B": "16m80"
+     }
+    ],
+    "startlist": [
+     {
+      "nom": "RENAUD Jules",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEM",
+      "annee": "1995",
+      "couloir": "1",
+      "dossard": "584",
+      "sb": "Triple saut : 16m38",
+      "pb": "Triple saut : 16m38 (26)",
+      "club": "Stade Rivière Athlé",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "1 CF U23 25 triple saut",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "COLLIN Simon",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESM",
+      "annee": "2006",
+      "couloir": "2",
+      "dossard": "835",
+      "sb": "Triple saut : 15m88",
+      "pb": "Triple saut : 15m93 (24)",
+      "club": "Athlé Pays des Lacs",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 triple saut",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "JACOB Lucas",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEM",
+      "annee": "1999",
+      "couloir": "3",
+      "dossard": "506",
+      "sb": "Triple saut : 15m83",
+      "pb": "Triple saut : 16m01 (26)",
+      "club": "US Vallée Verte",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "RENAUD Théo",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESM",
+      "annee": "2004",
+      "couloir": "4",
+      "dossard": "915",
+      "sb": "Triple saut : 15m81",
+      "pb": "Triple saut : 16m02 (26)",
+      "club": "AC Bord de Mer",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 triple saut",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "LACROIX Kylian",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESM",
+      "annee": "2005",
+      "couloir": "5",
+      "dossard": "112",
+      "sb": "Triple saut : 15m91",
+      "pb": "Triple saut : 15m93 (25)",
+      "club": "Olympique Côte Sud",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "DUVAL Romain",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESM",
+      "annee": "2004",
+      "couloir": "6",
+      "dossard": "851",
+      "sb": "Triple saut : 15m82",
+      "pb": "Triple saut : 15m82 (26)",
+      "club": "Entente Trois Ponts",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 triple saut",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "JACOB Maxime",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESM",
+      "annee": "2004",
+      "couloir": "7",
+      "dossard": "385",
+      "sb": "Triple saut : 15m92",
+      "pb": "Triple saut : 15m99 (25)",
+      "club": "US Vallée Verte",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 triple saut",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "TESSIER Kylian",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESM",
+      "annee": "2005",
+      "couloir": "8",
+      "dossard": "286",
+      "sb": "Triple saut : 15m92",
+      "pb": "Triple saut : 15m92 (25)",
+      "club": "US Vallée Verte",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 triple saut",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "BRUN Maxime",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEM",
+      "annee": "2001",
+      "couloir": "9",
+      "dossard": "110",
+      "sb": "Triple saut : 15m42",
+      "pb": "Triple saut : 15m64 (26)",
+      "club": "US Vallée Verte",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "PICARD Antoine",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEM",
+      "annee": "2000",
+      "couloir": "10",
+      "dossard": "761",
+      "sb": "Triple saut : 15m69",
+      "pb": "Triple saut : 15m69 (26)",
+      "club": "Olympique Côte Sud",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 triple saut",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     }
+    ],
+    "series": [],
+    "top_monde_2026": [
+     {
+      "rang": "1",
+      "nom": "Mondiale A",
+      "nat": "FRA",
+      "perf": "17m80",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "top_europe_2026": [
+     {
+      "rang": "1",
+      "nom": "Européenne A",
+      "nat": "FRA",
+      "perf": "17m75",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "top_france_2026": [
+     {
+      "rang": "1",
+      "nom": "Française A",
+      "nat": "FRA",
+      "perf": "17m00",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_monde": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "18m10",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_europe": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "17m90",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_france": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "17m60",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "podium_n1": [
+     {
+      "place": 1,
+      "athlete": "LEROUX Nathan",
+      "nat": "FRA",
+      "perf": "16m80"
+     },
+     {
+      "place": 2,
+      "athlete": "ARNAUD Tom",
+      "nat": "FRA",
+      "perf": "16m60"
+     },
+     {
+      "place": 3,
+      "athlete": "GAUTIER Sacha",
+      "nat": "FRA",
+      "perf": "16m40"
+     }
+    ]
+   },
+   {
+    "nom": "Poids",
+    "sexe": "F",
+    "categorie": "SE",
+    "horaire": "15h25",
+    "jour": "",
+    "phase": "",
+    "qualification": "",
+    "record_meeting": "18m60 — RECORDWOMAN Fictive (FRA, 2019)",
+    "minima_2026": "",
+    "minima_baremes": [
+     {
+      "nom": "Championnats fictifs",
+      "A": "18m00",
+      "B": "17m60"
+     }
+    ],
+    "startlist": [
+     {
+      "nom": "LEMAIRE Salomé",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "2001",
+      "couloir": "1",
+      "dossard": "438",
+      "sb": "Poids (4 kg) : 14m85",
+      "pb": "Poids (4 kg) : 15m29 (25)",
+      "club": "Olympique Côte Sud",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 poids",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "COLLIN Anaïs",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "2001",
+      "couloir": "2",
+      "dossard": "880",
+      "sb": "Poids (4 kg) : 15m96",
+      "pb": "Poids (4 kg) : 16m20 (26)",
+      "club": "Athlé Pays des Lacs",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "1 CF U23 25 poids",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "REY Elsa",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "1996",
+      "couloir": "3",
+      "dossard": "403",
+      "sb": "Poids (4 kg) : 14m29",
+      "pb": "Poids (4 kg) : 14m65 (24)",
+      "club": "CA Haute Colline",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "1 CF U23 25 poids",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "MARCHAND Sarah",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "2001",
+      "couloir": "4",
+      "dossard": "399",
+      "sb": "Poids (4 kg) : 15m75",
+      "pb": "Poids (4 kg) : 15m80 (26)",
+      "club": "Athlé Pays des Lacs",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 poids",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "MARCHAND Romane",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "1995",
+      "couloir": "5",
+      "dossard": "152",
+      "sb": "Poids (4 kg) : 14m69",
+      "pb": "Poids (4 kg) : 15m30 (25)",
+      "club": "Olympique Côte Sud",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "GAUTIER Marion",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "2002",
+      "couloir": "6",
+      "dossard": "411",
+      "sb": "Poids (4 kg) : 16m32",
+      "pb": "Poids (4 kg) : 16m32 (24)",
+      "club": "US Vallée Verte",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "PICARD Anaïs",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESF",
+      "annee": "2005",
+      "couloir": "7",
+      "dossard": "404",
+      "sb": "Poids (4 kg) : 13m86",
+      "pb": "Poids (4 kg) : 14m52 (26)",
+      "club": "Racing Plaine Nord",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 poids",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "TESSIER Manon",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "ESF",
+      "annee": "2004",
+      "couloir": "8",
+      "dossard": "740",
+      "sb": "Poids (4 kg) : 14m82",
+      "pb": "Poids (4 kg) : 14m94 (24)",
+      "club": "Entente Trois Ponts",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "RENAUD Maëlle",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "1999",
+      "couloir": "9",
+      "dossard": "561",
+      "sb": "Poids (4 kg) : 15m09",
+      "pb": "Poids (4 kg) : 15m09 (26)",
+      "club": "Athlé Grand Port",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 poids",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     }
+    ],
+    "series": [],
+    "top_monde_2026": [
+     {
+      "rang": "1",
+      "nom": "Mondiale A",
+      "nat": "FRA",
+      "perf": "20m00",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "top_europe_2026": [
+     {
+      "rang": "1",
+      "nom": "Européenne A",
+      "nat": "FRA",
+      "perf": "19m95",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "top_france_2026": [
+     {
+      "rang": "1",
+      "nom": "Française A",
+      "nat": "FRA",
+      "perf": "17m20",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_monde": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "20m50",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_europe": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "19m90",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_france": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "18m80",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "podium_n1": [
+     {
+      "place": 1,
+      "athlete": "ARNAUD Inès",
+      "nat": "FRA",
+      "perf": "18m20"
+     },
+     {
+      "place": 2,
+      "athlete": "CARON Romane",
+      "nat": "FRA",
+      "perf": "18m00"
+     },
+     {
+      "place": 3,
+      "athlete": "ARNAUD Alice",
+      "nat": "FRA",
+      "perf": "17m80"
+     }
+    ]
+   },
+   {
+    "nom": "800m",
+    "sexe": "F",
+    "categorie": "SE",
+    "horaire": "16h10",
+    "jour": "",
+    "phase": "",
+    "qualification": "",
+    "record_meeting": "1'59\"60 — RECORDWOMAN Fictive (FRA, 2019)",
+    "minima_2026": "",
+    "minima_baremes": [
+     {
+      "nom": "Championnats fictifs",
+      "A": "1'59\"20",
+      "B": "2'00\"00"
+     }
+    ],
+    "startlist": [
+     {
+      "nom": "CARON Nina",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "1996",
+      "couloir": "1",
+      "dossard": "763",
+      "sb": "800m : 2'02''51",
+      "pb": "800m : 2'02''51 (24)",
+      "club": "Entente Trois Ponts",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "1 CF U23 25 800m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "BONNET Zoé",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "2002",
+      "couloir": "2",
+      "dossard": "395",
+      "sb": "800m : 2'03''83",
+      "pb": "800m : 2'03''07 (25)",
+      "club": "Stade Rivière Athlé",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 800m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "VIDAL Marion",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "JUF",
+      "annee": "2008",
+      "couloir": "3",
+      "dossard": "852",
+      "sb": "800m : 2'03''84",
+      "pb": "800m : 2'03''74 (25)",
+      "club": "Athlé Grand Port",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 800m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "LAMBERT Anaïs",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "2003",
+      "couloir": "4",
+      "dossard": "941",
+      "sb": "800m : 2'05''19",
+      "pb": "800m : 2'04''44 (25)",
+      "club": "Athlé Grand Port",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "REY Noémie",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "1999",
+      "couloir": "5",
+      "dossard": "750",
+      "sb": "800m : 2'03''15",
+      "pb": "800m : 2'02''92 (25)",
+      "club": "Stade Rivière Athlé",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "2 CFS U20 26 800m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "PICARD Océane",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "SEF",
+      "annee": "1995",
+      "couloir": "6",
+      "dossard": "437",
+      "sb": "800m : 2'03''14",
+      "pb": "800m : 2'03''14 (25)",
+      "club": "Olympique Côte Sud",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "3 CF 25 800m",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "GAUTIER Inès",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "JUF",
+      "annee": "2008",
+      "couloir": "7",
+      "dossard": "218",
+      "sb": "800m : 2'03''93",
+      "pb": "800m : 2'03''82 (25)",
+      "club": "AS Forêt Claire",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     },
+     {
+      "nom": "AUBERT Alice",
+      "nat": "FRA",
+      "pays": "France",
+      "cat": "JUF",
+      "annee": "2008",
+      "couloir": "8",
+      "dossard": "737",
+      "sb": "800m : 2'03''61",
+      "pb": "800m : 2'03''61 (25)",
+      "club": "Olympique Côte Sud",
+      "licence": "",
+      "entraineur": "",
+      "palmares_national": "Aucun",
+      "palmares_international": "Aucun",
+      "url": "",
+      "minima_status": "",
+      "bio": "",
+      "photo": "",
+      "records": "",
+      "tags": ""
+     }
+    ],
+    "series": [],
+    "top_monde_2026": [
+     {
+      "rang": "1",
+      "nom": "Mondiale A",
+      "nat": "FRA",
+      "perf": "1'55\"00",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "top_europe_2026": [
+     {
+      "rang": "1",
+      "nom": "Européenne A",
+      "nat": "FRA",
+      "perf": "1'55\"05",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "top_france_2026": [
+     {
+      "rang": "1",
+      "nom": "Française A",
+      "nat": "FRA",
+      "perf": "2'00\"10",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_monde": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "1'53\"80",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_europe": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "1'54\"50",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "alltime_france": [
+     {
+      "rang": "1",
+      "nom": "Légende A",
+      "nat": "FRA",
+      "perf": "1'55\"50",
+      "date": "01 JUN 2026",
+      "club": ""
+     }
+    ],
+    "podium_n1": [
+     {
+      "place": 1,
+      "athlete": "BARBIER Elsa",
+      "nat": "FRA",
+      "perf": "1'59\"90"
+     },
+     {
+      "place": 2,
+      "athlete": "BERTIN Sarah",
+      "nat": "FRA",
+      "perf": "2'00\"05"
+     },
+     {
+      "place": 3,
+      "athlete": "ARNAUD Noémie",
+      "nat": "FRA",
+      "perf": "2'00\"20"
+     }
+    ]
+   }
+  ],
+  "options": {
+   "salle": false,
+   "type_competition": "championnat"
+  },
+  "accent": "",
+  "logo": ""
+ }
+}

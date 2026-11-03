@@ -1,0 +1,5 @@
+# Jamais de données de meeting réelles dans ce dépôt public
+store/
+meetings/
+*.local.json
+saisies-*.json

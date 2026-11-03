@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#001d46">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CIS speaker">
+<meta name="robots" content="noindex">
+<title>CIS speaker</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="img/icon-192.png">
+<link rel="apple-touch-icon" href="img/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <button class="tb" id="bHor" data-act="toggleHor" aria-label="Afficher ou masquer l'horaire"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Horaire</span></button>
+  <div class="mt"><b id="mName">CIS speaker</b><small id="mDate"></small></div>
+  <button class="clock" id="clock" data-act="settings" aria-label="Horloge"><span id="clockT">--h--</span><small id="clockSim"></small></button>
+  <button class="tb" data-act="hist" aria-label="Historique des saisies"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg><span>Historique</span></button>
+  <button class="tb" data-act="settings" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg><span>Réglages</span></button>
+</header>
+<div class="offline">Hors connexion : tout fonctionne, les saisies restent sur cet appareil.</div>
+<div id="banner" class="banner off" data-act="hist"><div id="bannerTxt"></div><button class="bx" data-act="bannerClose" aria-label="Fermer l'alerte">✕</button></div>
+
+<div class="layout">
+  <aside id="hor" class="hor" aria-label="Horaire"></aside>
+  <main id="main">
+    <nav id="ptabs" class="ptabs" aria-label="Épreuves épinglées"></nav>
+    <div id="suggest" class="suggest"></div>
+    <div id="panels" class="panels"></div>
+  </main>
+</div>
+
+<!-- pavé de saisie -->
+<div id="kp" class="kp off" role="dialog" aria-label="Saisie">
+  <div class="kpl">
+    <div class="kpctx" id="kpCtx"></div>
+    <div class="kpfields">
+      <button class="kpf on" id="kpF1" data-act="kpField" data-f="1"><small id="kpL1">Perf</small><span id="kpV1"></span></button>
+      <button class="kpf" id="kpF2" data-act="kpField" data-f="2"><small>Vent</small><span id="kpV2"></span></button>
+    </div>
+    <div class="kpinfo" id="kpInfo"></div>
+    <div class="kpvox" id="kpVox"></div>
+  </div>
+  <div class="kpr" id="kpKeys"></div>
+</div>
+
+<!-- fenêtres -->
+<div id="sheet" class="sheet off" role="dialog">
+  <div class="sbox">
+    <div class="shead"><button class="back" data-act="sheetClose"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Retour</button><b id="sTitle"></b></div>
+    <div class="sbody" id="sBody"></div>
+  </div>
+</div>
+
+<input type="file" id="file" accept=".json,application/json" hidden>
+<input type="file" id="fileSaisies" accept=".json,application/json" hidden>
+
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
