@@ -39,8 +39,7 @@ une deuxième personne), et des **alertes** prêtes à annoncer.
    l'athlète** avec SB, PB, record du championnat, records de France / d'Europe / du monde de sa
    catégorie et toutes catégories, minima, meilleure perf française de l'année → pastille sur la
    ligne + bandeau « 1'52"30 : PB pour X, minima France espoirs ».
-7. **Recherche par dossard** : toutes les épreuves d'un athlète, horaires et perfs déjà saisies.
-8. **Saisie partagée** (version 2) : modifications identiques chez tous les utilisateurs via une
+7. **Saisie partagée** (version 2) : modifications identiques chez tous les utilisateurs via une
    **feuille Google Sheets + Apps Script** dans le Drive d'Alexandre (gratuit), synchronisation en
    quelques secondes, repli local sans réseau. GitHub écarté pour le direct.
 
@@ -101,6 +100,7 @@ programme + séries + règles de qualification + records par catégorie + MPF + 
 Le CIS (site statique, GitHub Pages) lit ce fichier, fonctionne hors connexion et garde les saisies.
 
 ## Décisions
+- **Pas de recherche par dossard** dans le CIS piste/salle (utile seulement en running, trail, cross).
 - Tablette en priorité, téléphone en secours.
 - Saisie partagée : idée gardée pour la version 2 (Google Sheets + Apps Script).
 - Projet séparé de l'Ekiden : ce dépôt + un projet Claude dédié.
