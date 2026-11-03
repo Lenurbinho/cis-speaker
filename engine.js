@@ -500,13 +500,56 @@ function speechToEntry(text, unit, type) {
   return { raw: String(nums[0]) + pad2(nums[1]) + cc };
 }
 
+// ---------- meilleures stats d'un athlète (ligne sous le nom) ----------
+var COMP_W = { JO: 100, CM: 90, CMS: 85, CE: 80, CES: 75, 'Jx': 45, ChMed: 40, FOJE: 40, CF: 30, CFS: 25 };
+var MOD_W = { U23: -25, U20: -30, U18: -35, Nat: -20, TC: -20, relais: -15, Senior: 0, Med: 0 };
+function placeTxt(p) {
+  if (p === '1') return '1er'; if (/^\d+$/.test(p)) return p + 'e';
+  if (p === '1/2') return '½ fin.'; if (p === '1/4') return '¼ fin.'; if (p === 'q') return 'séries';
+  return p;
+}
+function parsePalm(item, ev, intl) {
+  var t = String(item).trim().split(/\s+/); if (t.length < 2) return null;
+  var m = t[0].match(/^(1\/2|1\/4|\d+|q|DQ|NM|DNF|DNS|AB)?(.*)$/), place = m[1] || '', rest = m[2] ? [m[2]].concat(t.slice(1)) : t.slice(1);
+  var i = 0, comp = [];
+  while (i < rest.length && !/^\d{2}$/.test(rest[i])) comp.push(rest[i++]);
+  var year = rest[i] || '', evt = rest.slice(i + 1).join(' ');
+  if (!comp.length || !year || /^(DQ|NM|DNF|DNS|AB)$/.test(place)) return null;
+  var sc = COMP_W[comp[0]] != null ? COMP_W[comp[0]] : (intl ? 50 : 15);
+  comp.slice(1).forEach(function (c) { if (MOD_W[c] != null) sc += MOD_W[c]; });
+  var pn = /^\d+$/.test(place) ? +place : 0;
+  sc += pn === 1 ? 30 : pn === 2 ? 24 : pn === 3 ? 20 : pn && pn <= 8 ? 12 - (pn - 4) : pn ? 2 : place === '1/2' ? 6 : place === '1/4' ? 3 : 0;
+  var same = evt && ev && nk(evt).replace(/[^a-z0-9]/g, '').indexOf(ev.base.replace(/[^a-z0-9]/g, '')) === 0;
+  if (same) sc += 20;
+  if (/^4x/i.test(evt)) sc -= 10;
+  sc += (+year) * 0.3;
+  return { s: sc, t: placeTxt(place) + ' ' + comp.join(' ') + ' ' + year + (same || !evt ? '' : ' ' + evt) };
+}
+var REC_SHORT = { NR: 'RF', NU23R: 'RF U23', NU20R: 'RF U20', NU18R: 'RF U18' };
+function topStats(src, ev) {
+  var out = [];
+  String(src.records || '').split(' · ').forEach(function (r) {
+    var m = r.match(/^(NR|NU23R|NU20R|NU18R|RF Masters)\s+(.+?)\s*:\s*(\S+)/); if (!m) return;
+    var same = ev && matchesEvent(m[2], { base: ev.base, specs: ev.specs, salle: /piste courte|\(i\)/i.test(r) ? true : ev.salle, type: ev.type });
+    var lab = REC_SHORT[m[1]] || m[1];
+    out.push({ s: (m[1] === 'NR' ? 110 : m[1] === 'RF Masters' ? 45 : 90) + (same ? 20 : -15), t: lab + ' ' + (same ? '' : m[2] + ' ') + m[3].replace(/''/g, '"'), k: 'rec' });
+  });
+  if (src.minima_status) out.push({ s: 70, t: src.minima_status.replace(/^✓\s*/, '✓ minima ').replace(/\s+-\s+.+?(?=\s[AB]$)/, ''), k: 'min' });
+  [[src.palmares_international, true], [src.palmares_national, false]].forEach(function (x) {
+    if (!x[0] || x[0] === 'Aucun') return;
+    String(x[0]).split(' / ').forEach(function (it) { var p = parsePalm(it, ev, x[1]); if (p) { p.k = x[1] ? 'int' : 'nat'; out.push(p); } });
+  });
+  out.sort(function (a, b) { return b.s - a.s; });
+  return out;
+}
+
 root.CISE = {
   norm: norm, nk: nk, parsePerf: parsePerf, fmtPerf: fmtPerf, rawToValue: rawToValue, rawPreview: rawPreview, valueToRaw: valueToRaw,
   better: better, cmp: cmp, parseWind: parseWind, fmtWind: fmtWind, eventInfo: eventInfo, bestFromList: bestFromList,
   loadMeeting: loadMeeting, makeFinal: makeFinal, parseHour: parseHour, fmtHour: fmtHour, parseRule: parseRule,
   heatRanking: heatRanking, qualify: qualify, finalQ: finalQ, horizRanking: horizRanking, horizState: horizState,
   vertAthlete: vertAthlete, vertRanking: vertRanking, vertState: vertState, alertsFor: alertsFor, alertText: alertText,
-  speechToEntry: speechToEntry, displayName: displayName, STATUTS: STATUTS, CAT_LABEL: CAT_LABEL
+  speechToEntry: speechToEntry, topStats: topStats, displayName: displayName, STATUTS: STATUTS, CAT_LABEL: CAT_LABEL
 };
 if (typeof module !== 'undefined') module.exports = root.CISE;
 })(typeof window !== 'undefined' ? window : globalThis);

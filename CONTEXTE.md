@@ -163,6 +163,18 @@ Fichiers : `index.html` (écran), `style.css`, `app.js` (affichage, saisie), `en
   « non homologable ». Historique de toutes les saisies, chacune annulable.
 - **Dictée vocale** (réseau nécessaire) et clavier physique (chiffres, Entrée, X, O, -).
 
+Ajouts V1.1 (3/11/2026) :
+- **Ligne « meilleures stats »** sous le nom, avant SB/PB : records détenus, minima, meilleurs résultats
+  internationaux puis nationaux (classés par importance : JO > CM > CE… ; titres ; même épreuve d'abord ;
+  récents d'abord), 3 au maximum, puis une pastille « +N » s'il y en a d'autres (elle ouvre la fiche).
+- **Nom de l'athlète = lien vers sa fiche FFA** (ou World Athletics si Media Sheet donne ce lien), nouvel onglet.
+- **Partage des réunions entre appareils** : relais Google Apps Script dans le Drive d'Alexandre
+  (`relais/Code.gs`, mode d'emploi `relais/LISEZMOI.md`), protégé par un **code d'équipe**. Une réunion
+  ouverte sur un appareil est envoyée au relais ; les autres appareils la voient dans Réglages (et l'ouvrent
+  d'office s'ils n'ont rien d'ouvert), et reçoivent ses mises à jour (vérification toutes les 2 min).
+  Un **lien d'invitation** règle un nouvel appareil d'un coup. Les **saisies** ne sont pas encore partagées
+  (étape suivante, même relais).
+
 Limites connues : règles de qualification absentes des fichiers Media Sheet actuels (à choisir au bouton
 « Qualif ») ; RF et MPF par catégorie partiels tant que l'export CIS (Direct FFA) n'existe pas ; combinés
 réduits au total de points.
@@ -172,5 +184,5 @@ réduits au total de points.
 2. Export « CIS » depuis Media Sheet ou import direct (Direct FFA / Matsport) : règles de qualification,
    heures exactes des séries, RF et MPF par catégorie (champ `records_cis` déjà lu par `engine.js`) ;
    corriger le bug de phase des séries dans Media Sheet.
-3. Relais Google Apps Script pour tous les speakers : lecture du live Matsport, import athle.fr,
-   synchronisation des saisies entre appareils.
+3. Relais Google Apps Script (déjà en place pour les réunions) : synchronisation des saisies entre
+   appareils, lecture du live Matsport, import athle.fr, pour tous les speakers.

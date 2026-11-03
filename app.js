@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 var E = window.CISE;
-var VERSION = 'V1 · 3 nov. 2026';
+var VERSION = 'V1.1 · 3 nov. 2026';
 var $ = function (s) { return document.querySelector(s); };
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
@@ -151,8 +151,17 @@ function pillsHtml(r, a, v, w) {
 function refHtml(r, a) {
   return '<span class="c-r">' + (a.sb ? 'SB <b>' + fp(a.sb.v, r.unit) + '</b>' : 'SB –') + '<br>' + (a.pb ? 'PB <b>' + fp(a.pb.v, r.unit) + '</b>' : 'PB –') + '</span>';
 }
+function ficheUrl(a) { var u = a.src && a.src.url; return u && /^https?:\/\//.test(u) ? u : ''; }
+function statsHtml(r, h, a) {
+  if (!a._st) a._st = E.topStats(a.src || {}, r.info);
+  var st = a._st; if (!st.length) return '';
+  var more = st.length - 3;
+  return '<small class="stl"><span class="stt">' + st.slice(0, 3).map(function (x) { return '<span class="s-' + x.k + '">' + esc(x.t) + '</span>'; }).join(' · ') + '</span>' +
+    (more > 0 ? '<button class="more" data-act="fiche" data-r="' + r.id + '" data-h="' + h.id + '" data-k="' + esc(a.key) + '" aria-label="Voir toutes les stats">+' + more + '</button>' : '') + '</small>';
+}
 function nameHtml(r, h, a, extra) {
-  return '<span class="c-n"><b>' + esc(a.name) + '<button class="fi" data-act="fiche" data-r="' + r.id + '" data-h="' + h.id + '" data-k="' + esc(a.key) + '" aria-label="Fiche de l\'athlète">i</button></b><small><span class="ct">' + esc(a.cat) + '</span> · ' + esc(a.club || a.nat) + '</small>' + (extra || '') + '</span>';
+  var u = ficheUrl(a), nm = u ? '<a class="nl" href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(a.name) + '</a>' : esc(a.name);
+  return '<span class="c-n"><b>' + nm + '<button class="fi" data-act="fiche" data-r="' + r.id + '" data-h="' + h.id + '" data-k="' + esc(a.key) + '" aria-label="Fiche de l\'athlète">i</button></b><small><span class="ct">' + esc(a.cat) + '</span> · ' + esc(a.club || a.nat) + '</small>' + statsHtml(r, h, a) + (extra || '') + '</span>';
 }
 function isEdit(h, a) { return KP && KP.h === h.id && KP.k === a.key; }
 function ruleOf(r) { return S.rules[r.id] != null ? S.rules[r.id] : r.qualif; }
@@ -643,7 +652,9 @@ function fiche(r, h, a) {
   if (s.bio) html += '<h4>Bio</h4><p>' + esc(s.bio) + '</p>';
   if (s.sb) html += '<details><summary><b>Toutes ses perfs de la saison</b></summary><p>' + esc(s.sb).replace(/''/g, '"').replace(/ \| /g, '<br>') + '</p></details>';
   if (s.pb) html += '<details><summary><b>Tous ses records personnels</b></summary><p>' + esc(s.pb).replace(/''/g, '"').replace(/ \| /g, '<br>') + '</p></details>';
-  if (s.url) html += '<p><a href="' + esc(s.url) + '" target="_blank" rel="noopener">Fiche FFA ↗</a></p>';
+  var st = E.topStats(s, r.info);
+  if (st.length) html = html.replace('</div>', '</div><h4>Meilleures stats</h4><p>' + st.map(function (x) { return esc(x.t); }).join('<br>') + '</p>');
+  if (ficheUrl(a)) html += '<p><a class="btn" href="' + esc(ficheUrl(a)) + '" target="_blank" rel="noopener">Fiche ' + (/worldathletics/.test(s.url) ? 'World Athletics' : 'FFA') + ' ↗</a></p>';
   openSheet(a.name, html);
 }
 function recordsSheet(r) {
@@ -694,7 +705,7 @@ function settingsSheet() {
   var html = '';
   if (M) html += '<h4>Réunion</h4><p><b>' + esc(M.nom) + '</b> · ' + esc(M.date) + ' · ' + M.rounds.length + ' épreuves</p>';
   html += '<div class="row2"><button class="btn p" data-act="open">Ouvrir un fichier de réunion</button><button class="btn" data-act="demo">Données de démonstration</button></div>' +
-    '<p class="note">Le fichier (export Media Sheet) reste sur cet appareil : il n\'est jamais envoyé sur Internet. Pour le donner à un autre speaker, envoie-le-lui (mail, Drive partagé).</p>';
+    '<p class="note">Le fichier à ouvrir est celui de <b>Media Sheet</b> : dossier <b>store/meetings</b>, un fichier <b>.json</b> par réunion. ' + (relaisOk() ? 'Ouvert ici, il est aussi envoyé dans ton Drive pour tous les appareils du partage.' : 'Il reste sur cet appareil.') + '</p>' + shareSectionHtml();
   if (M) {
     html += '<h4>Horloge</h4><p>' + (sim ? 'Heure <b>simulée</b> (pour tester ou rejouer une réunion) : ' : 'Heure <b>réelle</b> de l\'appareil : ') + '<b>' + fh(nowMin()) + '</b></p>' +
       '<div class="row2"><input class="txt" type="time" id="simT" value="' + fh(nowMin()).replace('h', ':') + '"><button class="btn p" data-act="simSet">Simuler à partir de cette heure</button>' + (sim ? '<button class="btn" data-act="simOff">Revenir à l\'heure réelle</button>' : '') + '</div>';
@@ -709,7 +720,7 @@ function welcome() {
   $('#panels').style.setProperty('--n', 1);
   $('#panels').innerHTML = '<div class="welcome" style="grid-column:1/-1"><h1>CIS speaker</h1><p>Écran d\'information de compétition pour le speaker : horaire, épreuves en cours côte à côte, saisie des perfs, Q/q et alertes (PB, SB, records, minima).</p>' +
     '<div class="row2"><button class="btn p" data-act="open">Ouvrir le fichier de la réunion</button><button class="btn" data-act="demo">Essayer avec la démo</button></div>' +
-    '<p class="note">Le fichier vient de Media Sheet (dossier <b>store/meetings</b>, un fichier .json par réunion). Il reste sur cet appareil et n\'est jamais publié.</p></div>';
+    '<p class="note">Le fichier vient de Media Sheet (dossier <b>store/meetings</b>, un fichier .json par réunion). Il n\'est jamais publié sur Internet.</p><div id="welcomeShared">' + (relaisOk() ? '<h4>Réunions partagées</h4>' + sharedListHtml() : '') + '</div></div>';
   document.body.classList.add('nomeet');
 }
 
@@ -738,6 +749,7 @@ function loadText(txt) {
   var mt = j.meeting || j;
   if (!mt.epreuves || !mt.epreuves.length) { alert('Ce fichier ne contient pas d\'épreuves : choisis le fichier de réunion Media Sheet (store/meetings/….json).'); return; }
   kvSet('meeting', j); closeSheet(); start(j, true);
+  shareMeeting(j);
 }
 $('#file').addEventListener('change', function () {
   var f = this.files[0]; if (!f) return;
@@ -751,12 +763,93 @@ $('#fileSaisies').addEventListener('change', function () {
   }; rd.readAsText(f); this.value = '';
 });
 
+
+// ---------- partage entre appareils (relais Google Apps Script, voir relais/LISEZMOI.md) ----------
+var RL = lsGet('cis:relais', { url: '', cle: '' }), SHARED = null, SHARE_MSG = '';
+(function () { // lien d'invitation : …/#relais=URL&code=CODE
+  var m = location.hash.match(/relais=([^&]+)&code=([^&]+)/);
+  if (m) { RL = { url: decodeURIComponent(m[1]), cle: decodeURIComponent(m[2]) }; lsSet('cis:relais', RL); history.replaceState(null, '', location.pathname); }
+})();
+function relaisOk() { return !!(RL.url && RL.cle); }
+function relaisGet(params) {
+  var q = 'cle=' + encodeURIComponent(RL.cle); for (var k in params) q += '&' + k + '=' + encodeURIComponent(params[k]);
+  return fetch(RL.url + (RL.url.indexOf('?') < 0 ? '?' : '&') + q, { redirect: 'follow' }).then(function (r) { return r.json(); });
+}
+function relaisPost(body) {
+  body.cle = RL.cle;
+  return fetch(RL.url, { method: 'POST', body: JSON.stringify(body), redirect: 'follow' }).then(function (r) { return r.json(); });
+}
+function shareMeeting(j, silent) {
+  if (!relaisOk() || !navigator.onLine) return Promise.resolve(false);
+  var m = E.loadMeeting(j);
+  if (/^demo/.test(m.id)) return Promise.resolve(false);
+  SHARE_MSG = 'Envoi de la réunion…'; if (!silent) refreshShareUi();
+  return relaisPost({ action: 'deposer', id: m.id, nom: m.nom, date: m.date, reunion: j }).then(function (x) {
+    if (!x.ok) throw new Error(x.erreur === 'code' ? 'code d\'équipe refusé' : x.erreur);
+    lsSet('cis:maj:' + m.id, x.maj); SHARE_MSG = 'Réunion partagée : elle apparaît sur tous les appareils du partage.';
+    if (S) { S.last = { txt: '« ' + m.nom + ' » est partagée avec tous les appareils.', t: Date.now() }; save(); renderBanner(); }
+    refreshShareUi(); pollShared(); return true;
+  }).catch(function (e) { SHARE_MSG = 'Partage impossible : ' + (e.message || 'réseau'); refreshShareUi(); return false; });
+}
+function openShared(id) {
+  SHARE_MSG = 'Téléchargement…'; refreshShareUi();
+  return relaisGet({ action: 'lire', id: id }).then(function (x) {
+    if (!x.ok) throw new Error(x.erreur);
+    lsSet('cis:maj:' + id, x.maj); kvSet('meeting', x.reunion); SHARE_MSG = '';
+    closeSheet(); start(x.reunion, true); return true;
+  }).catch(function (e) { SHARE_MSG = 'Téléchargement impossible : ' + (e.message || 'réseau'); refreshShareUi(); });
+}
+function pollShared() {
+  if (!relaisOk() || !navigator.onLine) return;
+  relaisGet({ action: 'liste' }).then(function (x) {
+    if (!x.ok) { SHARE_MSG = x.erreur === 'code' ? 'Code d\'équipe refusé par le relais.' : 'Relais : ' + x.erreur; SHARED = null; refreshShareUi(); return; }
+    SHARED = x.reunions || [];
+    if (!M && SHARED.length) { openShared(SHARED[0].id); return; } // rien d'ouvert : on prend la plus récente
+    if (M) {
+      var me = SHARED.filter(function (r) { return r.id === M.id; })[0];
+      if (me && me.maj > (lsGet('cis:maj:' + M.id, 0) || 0) && !KP) {
+        relaisGet({ action: 'lire', id: M.id }).then(function (y) {
+          if (!y.ok) return; lsSet('cis:maj:' + M.id, y.maj); kvSet('meeting', y.reunion); start(y.reunion);
+          S.last = { txt: 'Réunion mise à jour depuis le partage (les saisies sont conservées).', t: Date.now() }; save(); renderBanner();
+        });
+      }
+    }
+    refreshShareUi();
+  }).catch(function () { });
+}
+function sharedListHtml() {
+  if (!relaisOk()) return '';
+  if (!SHARED) return '<p class="small">Liste des réunions partagées : en attente du relais…</p>';
+  if (!SHARED.length) return '<p class="small">Aucune réunion partagée pour l\'instant.</p>';
+  return SHARED.map(function (r) {
+    var cur = M && r.id === M.id;
+    return '<div class="hl"><div class="hm"><b>' + esc(r.nom) + '</b><small>' + esc(r.date) + ' · mise à jour ' + new Date(r.maj).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + '</small></div>' +
+      (cur ? '<span class="st fini">Ouverte</span>' : '<button class="btn s p" data-act="openShared" data-id="' + esc(r.id) + '">Ouvrir</button>') + '</div>';
+  }).join('');
+}
+function shareSectionHtml() {
+  var h = '<h4>Partage entre appareils</h4>';
+  if (!relaisOk()) h += '<p class="note">Pour qu\'une réunion ouverte sur un appareil apparaisse chez tous les speakers, installe le relais une fois (voir <a href="https://github.com/Lenurbinho/cis-speaker/blob/main/relais/LISEZMOI.md" target="_blank" rel="noopener">mode d\'emploi</a>), puis colle son adresse et le code d\'équipe ci-dessous. Les autres speakers n\'auront qu\'à ouvrir le lien d\'invitation.</p>';
+  h += '<div class="row2"><input class="txt" id="rlUrl" placeholder="Adresse du relais (…/exec)" value="' + esc(RL.url) + '" style="flex:2;min-width:220px"><input class="txt" id="rlCle" placeholder="Code d\'équipe" value="' + esc(RL.cle) + '" style="flex:1;min-width:120px"><button class="btn p" data-act="rlSave">Enregistrer</button></div>';
+  if (relaisOk()) {
+    h += '<div class="row2">' + (M && !/^demo/.test(M.id) ? '<button class="btn" data-act="share">Partager cette réunion</button>' : '') + '<button class="btn" data-act="invite">Copier le lien d\'invitation</button><button class="btn" data-act="rlOff">Arrêter le partage sur cet appareil</button></div>';
+  }
+  h += '<div id="shareMsg" class="kpvox">' + esc(SHARE_MSG) + '</div><div id="sharedList">' + sharedListHtml() + '</div>';
+  return h;
+}
+function refreshShareUi() {
+  var m = $('#shareMsg'); if (m) m.textContent = SHARE_MSG;
+  var l = $('#sharedList'); if (l) l.innerHTML = sharedListHtml();
+  var w = $('#welcomeShared'); if (w) w.innerHTML = relaisOk() ? '<h4>Réunions partagées</h4>' + sharedListHtml() : '';
+}
+
 // ---------- actions (un seul écouteur pour tout l'écran) ----------
 var CONFIRM = null;
 function confirm2(key, btn, msg) { if (CONFIRM === key) { CONFIRM = null; return true; } CONFIRM = key; btn.textContent = msg; setTimeout(function () { if (CONFIRM === key) CONFIRM = null; }, 4000); return false; }
 function pin(id) { if (S.pins.indexOf(id) < 0) S.pins.push(id); S.ptab = id; save(); }
 function isPhone() { return window.innerWidth <= 700; }
 document.addEventListener('click', function (ev) {
+  if (ev.target.closest('a[href]')) return; // lien vers la fiche FFA / WA : on laisse s'ouvrir
   var el = ev.target.closest('[data-act]'); if (!el) return;
   var act = el.dataset.act, r = el.dataset.r ? ROUNDS[el.dataset.r] : null, h = r && el.dataset.h && el.dataset.h !== 'bilan' ? getH(r, el.dataset.h) : null, a = h && el.dataset.k ? getA(h, el.dataset.k) : null;
   if (act !== 'bannerClose' && act !== 'hist' && el.id === 'banner') { }
@@ -829,6 +922,19 @@ document.addEventListener('click', function (ev) {
     case 'undo': undo(+el.dataset.i); histSheet(); break;
     case 'settings': settingsSheet(); break;
     case 'sheetClose': closeSheet(); break;
+    case 'rlSave':
+      RL = { url: ($('#rlUrl').value || '').trim(), cle: ($('#rlCle').value || '').trim() }; lsSet('cis:relais', RL);
+      if (RL.url && !/^https:\/\/script\.google(usercontent)?\.com\//.test(RL.url)) SHARE_MSG = 'Attention : l\'adresse doit commencer par https://script.google.com/…';
+      else SHARE_MSG = relaisOk() ? 'Réglage enregistré. Recherche des réunions partagées…' : 'Partage désactivé.';
+      SHARED = null; settingsSheet(); pollShared(); break;
+    case 'rlOff': RL = { url: '', cle: '' }; lsSet('cis:relais', RL); SHARED = null; SHARE_MSG = ''; settingsSheet(); break;
+    case 'share': kvGet('meeting').then(function (j) { if (j) shareMeeting(j); }); break;
+    case 'openShared': openShared(el.dataset.id); break;
+    case 'invite':
+      var link = location.origin + location.pathname + '#relais=' + encodeURIComponent(RL.url) + '&code=' + encodeURIComponent(RL.cle);
+      (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(function () { SHARE_MSG = 'Lien copié : envoie-le aux autres speakers (SMS, mail…).'; refreshShareUi(); })
+        .catch(function () { SHARE_MSG = 'Lien à envoyer : ' + link; refreshShareUi(); });
+      break;
     case 'open': $('#file').click(); break;
     case 'demo':
       fetch('data/demo.json').then(function (x) { return x.json(); }).then(function (j) { kvSet('meeting', j); closeSheet(); start(j, true); }).catch(function () { alert('Démo indisponible hors connexion (ouvre le site une fois en ligne).'); });
@@ -873,6 +979,8 @@ setInterval(function () {
 }, 5000);
 if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(function () { });
 renderTop();
-kvGet('meeting').then(function (j) { if (j && (j.meeting || j.epreuves)) start(j); else welcome(); }).catch(function () { welcome(); });
+kvGet('meeting').then(function (j) { if (j && (j.meeting || j.epreuves)) start(j); else welcome(); pollShared(); }).catch(function () { welcome(); pollShared(); });
+setInterval(pollShared, 120000);
+window.addEventListener('online', pollShared);
 window.CIS = { get S() { return S; }, get M() { return M; }, nowMin: nowMin, render: function () { save(); renderAll(); } };
 })();

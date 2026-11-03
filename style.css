@@ -111,6 +111,11 @@ main{flex:1;min-width:0;padding:8px 8px calc(12px + var(--kph))}
 .c-n small{display:block;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:calc(13.5px*var(--fs))}
 .fi{display:inline-flex;align-items:center;justify-content:center;vertical-align:2px;border:1px solid var(--line);background:#fff;color:var(--blue);border-radius:50%;width:28px;height:28px;margin:0 0 0 8px;font:italic 800 16px Georgia,serif;line-height:1;padding:0}
 .kfi{float:right;margin-left:8px}
+.nl{color:inherit;text-decoration:underline;text-decoration-style:dotted;text-decoration-color:#9fb0c8;text-underline-offset:3px}
+.stl{display:flex!important;align-items:center;gap:4px;color:var(--ink)!important;font-weight:600}
+.stt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.s-rec{color:var(--red);font-weight:800}.s-min{color:var(--gold);font-weight:800}.s-int{color:var(--blue)}
+.more{flex:none;border:0;background:var(--navy);color:#fff;border-radius:9px;font-size:12px;font-weight:800;padding:1px 6px;min-height:20px;line-height:1.2}
 .c-n small .ct{font-weight:800;color:var(--blue)}
 .c-r{font-size:calc(14px*var(--fs));line-height:1.25;white-space:nowrap;text-align:right;color:var(--muted)}
 .c-r b{color:var(--ink);font-weight:700}
