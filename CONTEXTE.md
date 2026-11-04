@@ -195,8 +195,15 @@ Limites connues : règles de qualification absentes des fichiers Media Sheet act
 « Qualif ») ; RF et MPF par catégorie partiels tant que l'export CIS (Direct FFA) n'existe pas ; combinés
 réduits au total de points.
 
+## Améliorations pour plus tard (une fois tout le reste en place)
+- **Photos des athlètes** comme sur le fichier final de Media Sheet (champ `photo` du fichier) : petite photo
+  dans la fiche, voire sur la ligne. Demandé le 4/11/2026, accessoire.
+
 ## Prochaines étapes
-1. Retours d'Alexandre sur la V1 en conditions réelles.
+1. Retours d'Alexandre sur la V1 en conditions réelles. (Partage réunion + saisies testé avec succès le 4/11/2026.)
+   Import automatique en cours : relais version 3 (action `brut` : lecture des seuls sites athle.fr et
+   matsport.com, réponse gardée en cache quelques secondes pour tous les speakers) et page
+   `outils/capture.html` qui rassemble les pages sources d'une réunion dans un fichier pour écrire l'import.
 2. Export « CIS » depuis Media Sheet ou import direct (Direct FFA / Matsport) : règles de qualification,
    heures exactes des séries, RF et MPF par catégorie (champ `records_cis` déjà lu par `engine.js`) ;
    corriger le bug de phase des séries dans Media Sheet.

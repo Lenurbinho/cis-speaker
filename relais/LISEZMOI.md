@@ -27,6 +27,10 @@ Gratuit. À faire une seule fois (5 minutes).
 3. **Déployer** → **Gérer les déploiements** → ✏️ (crayon) → Version : **Nouvelle version** → **Déployer**.
    L'adresse `/exec` ne change pas : rien à refaire sur les appareils.
 
+4. Si la nouvelle version demande un nouvel accès (version 3 : lecture d'athle.fr et de Matsport) :
+   choisis la fonction **autoriser** → **▶ Exécuter** → accepte la nouvelle autorisation
+   (« se connecter à un service externe »).
+
 Si le CIS affiche « relais à mettre à jour » à côté de la date, c'est que cette étape manque.
 
 ## Modifier le script plus tard

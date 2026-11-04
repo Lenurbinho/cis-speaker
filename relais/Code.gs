@@ -30,7 +30,8 @@ function doGet(e) {
       .setMimeType(ContentService.MimeType.JSON);
   }
   if (p.action === 'saisies') return rep_(changes_(propre_(p.id), +p.depuis || 0));
-  return rep_({ ok: true, version: 2 });
+  if (p.action === 'brut') return rep_(brut_(p.url, +p.ttl || 5));
+  return rep_({ ok: true, version: 3 });
 }
 
 // ---------- saisies partagées : une case = un temps, un concours, un vent, une règle… ----------
@@ -82,5 +83,24 @@ function doPost(e) {
   return rep_({ ok: false, erreur: 'action' });
 }
 
+// ---------- lecture des sites de données (Direct athle.fr, Matsport) pour le CIS ----------
+// Seuls ces sites sont autorisés. La réponse est gardée quelques secondes en mémoire : si plusieurs
+// speakers demandent la même page, le site n'est interrogé qu'une fois.
+const SITES_OK = ['athle.fr', 'matsport.com'];
+function brut_(url, ttl) {
+  url = String(url || '');
+  const host = (url.match(/^https:\/\/([^\/?#]+)/) || [])[1] || '';
+  if (!SITES_OK.some(function (d) { return host === d || host.slice(-d.length - 1) === '.' + d; })) return { ok: false, erreur: 'site non autorisé' };
+  ttl = Math.max(2, Math.min(600, ttl || 5));
+  const key = 'u:' + Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, url));
+  const cache = CacheService.getScriptCache(), hit = cache.get(key);
+  if (hit) { try { const o = JSON.parse(hit); o.cache = true; return o; } catch (x) { } }
+  const r = UrlFetchApp.fetch(url, { muteHttpExceptions: true, followRedirects: true, headers: { 'User-Agent': 'CIS speaker (relais Google Apps Script)' } });
+  const h = r.getHeaders(), o = { ok: true, code: r.getResponseCode(), type: h['Content-Type'] || h['content-type'] || '', texte: r.getContentText() };
+  const txt = JSON.stringify(o);
+  if (txt.length < 95000) cache.put(key, txt, ttl);
+  return o;
+}
+
 // Pour tester depuis l'éditeur : sélectionne « autoriser » puis ▶ Exécuter (crée le dossier, demande les autorisations).
-function autoriser() { dossier_(); Logger.log('Dossier prêt : ' + DOSSIER); }
+function autoriser() { dossier_(); UrlFetchApp.fetch('https://www.athle.fr/', { muteHttpExceptions: true }); Logger.log('Dossier prêt : ' + DOSSIER + ' — accès aux sites autorisé'); }

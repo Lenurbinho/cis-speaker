@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
+<title>CIS speaker · capture des données sources</title>
+<style>
+body{font-family:Barlow,Arial,sans-serif;max-width:760px;margin:20px auto;padding:0 14px;color:#14213d;background:#eef3f2}
+h1{font-size:26px;color:#001d46;margin:0 0 6px}.card{background:#fff;border:1px solid #d5e0e3;border-radius:12px;padding:14px;margin:10px 0}
+label{display:block;font-weight:700;margin:8px 0 3px}input{font:inherit;width:100%;box-sizing:border-box;padding:10px;border:1px solid #d5e0e3;border-radius:9px}
+button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:12px 18px;background:#001d46;color:#fff;margin-top:12px;min-height:48px}
+button:disabled{opacity:.5}#log{font-family:monospace;font-size:13px;white-space:pre-wrap;max-height:360px;overflow:auto;background:#f6f8f9;border-radius:8px;padding:8px}
+.ok{color:#0a7a3d}.ko{color:#e3001b}small{color:#55607a}
+</style></head><body>
+<h1>Capture des données sources</h1>
+<p>Cette page récupère, <b>par ton relais</b>, les pages du Direct athle.fr et les données Matsport d'une réunion,
+et les rassemble dans <b>un fichier</b> à donner à Claude pour qu'il écrive l'import automatique.
+Le fichier reste sur ton appareil : rien n'est publié.</p>
+<div class="card">
+<div id="rl"></div>
+<label>Numéro du Direct athle.fr <small>(athle.fr/direct/<b>314411</b>)</small></label><input id="dId" value="314411">
+<label>Date de la journée <small>(JJ/MM/AAAA, vide = toutes)</small></label><input id="dDate" value="26/07/2026">
+<label>Identifiant Matsport de la compétition <small>(dans l'adresse du live Matsport, vide = pas de Matsport)</small></label><input id="mId" value="36df6676-37a4-4396-aad0-935a0b262729">
+<button id="go">Lancer la capture</button>
+</div>
+<div class="card"><div id="st">En attente.</div><div id="log"></div><button id="dl" disabled>Enregistrer le fichier de capture</button></div>
+<script>
+var RL = {}; try { RL = JSON.parse(localStorage.getItem('cis:relais')) || {}; } catch (e) {}
+var $ = function (s) { return document.querySelector(s); };
+$('#rl').innerHTML = RL.url && RL.cle ? '<span class="ok">Relais configuré sur cet appareil ✓</span>' : '<span class="ko">Relais non configuré : ouvre d\'abord le CIS sur cet appareil avec ton lien d\'invitation (ou Réglages → Partage).</span>';
+var PAGES = [], SEEN = {}, BUNDLE = null;
+function log(t, c) { var d = document.createElement('div'); d.textContent = t; if (c) d.className = c; $('#log').appendChild(d); $('#log').scrollTop = 1e9; }
+function relais(url) {
+  var q = RL.url + (RL.url.indexOf('?') < 0 ? '?' : '&') + 'cle=' + encodeURIComponent(RL.cle) + '&action=brut&ttl=60&url=' + encodeURIComponent(url);
+  return fetch(q).then(function (r) { return r.json(); });
+}
+function get(url) {
+  if (SEEN[url]) return Promise.resolve(SEEN[url]);
+  return relais(url).then(function (x) {
+    var p = { url: url, ok: !!x.ok, code: x.code, type: x.type, erreur: x.erreur || '', texte: x.texte || '' };
+    PAGES.push(p); SEEN[url] = p;
+    log((p.ok && p.code === 200 ? '✓ ' : '✗ ') + (p.code || p.erreur) + ' · ' + Math.round(p.texte.length / 1024) + ' ko · ' + url, p.ok && p.code === 200 ? 'ok' : 'ko');
+    $('#st').textContent = PAGES.length + ' pages récupérées…';
+    return p;
+  }).catch(function (e) { var p = { url: url, ok: false, erreur: String(e) }; PAGES.push(p); SEEN[url] = p; log('✗ ' + url + ' : ' + e, 'ko'); return p; });
+}
+function pool(urls, n) { // n requêtes en parallèle
+  var i = 0, out = [];
+  function next() { if (i >= urls.length) return Promise.resolve(); var u = urls[i++]; return get(u).then(function (p) { out.push(p); return next(); }); }
+  var ws = []; for (var k = 0; k < n; k++) ws.push(next()); return Promise.all(ws).then(function () { return out; });
+}
+function uuids(o, acc, key) {
+  if (!o || typeof o !== 'object') return acc;
+  if (Array.isArray(o)) { o.forEach(function (x) { uuids(x, acc, key); }); return acc; }
+  Object.keys(o).forEach(function (k) {
+    var v = o[k];
+    if (typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(_\w+)?$/i.test(v)) acc.push({ k: k, parent: key || '', v: v });
+    else if (typeof v === 'object') uuids(v, acc, k);
+  });
+  return acc;
+}
+async function direct() {
+  var id = $('#dId').value.trim(), date = $('#dDate').value.trim(); if (!id) return;
+  log('— Direct athle.fr ' + id);
+  await get('https://www.athle.fr/direct/' + id);
+  var prog = 'https://www.athle.fr/ajax/direct.aspx?mode=0&competition=' + id + '&competition2=&date=' + encodeURIComponent(date) + '&frmepreuve=&frmcategorie=&frmsexe=&tri=0&display=1&reactions=0';
+  var p = await get(prog);
+  var g = {}; (p.texte || '').replace(/frmepreuve=([0-9A-Fa-f-]{36})/g, function (a, x) { g[x.toUpperCase()] = 1; });
+  var ids = Object.keys(g); log(ids.length + ' listes trouvées dans le programme');
+  await pool(ids.slice(0, 60).map(function (x) { return 'https://www.athle.fr/bases/liste.aspx?frmbase=directs&frmmode=1&frmcompetition=' + id + '&frmepreuve=' + x; }), 4);
+  // une page de résultats pour voir sa forme
+  if (ids[0]) await get('https://www.athle.fr/bases/liste.aspx?frmbase=directs&frmmode=2&frmcompetition=' + id + '&frmepreuve=' + ids[0]);
+}
+async function matsport() {
+  var id = $('#mId').value.trim(); if (!id) return;
+  var API = 'https://api-history.athle.matsport.com';
+  log('— Matsport ' + id);
+  var c = await get(API + '/competitions/' + id + '?_withEvents=true');
+  var j = {}; try { j = JSON.parse(c.texte); } catch (e) {}
+  var sch = (j.schedules || []).map(function (s) { return s.id; });
+  for (var i = 0; i < sch.length; i++) {
+    await get(API + '/schedules/' + sch[i] + '?_withEvents=true');
+    await get(API + '/schedules/' + sch[i]);
+  }
+  await get(API + '/competitions/' + id + '/events');
+  var ev = {};
+  PAGES.filter(function (p) { return /matsport/.test(p.url) && p.code === 200; }).forEach(function (p) {
+    try { uuids(JSON.parse(p.texte), []).forEach(function (u) { if (u.v !== id && sch.indexOf(u.v) < 0 && !/competition/i.test(u.k)) ev[u.v] = 1; }); } catch (e) {}
+  });
+  var evs = Object.keys(ev).slice(0, 12); log(Object.keys(ev).length + ' identifiants trouvés, essai de ' + evs.length + ' épreuves');
+  await pool(evs.map(function (x) { return API + '/events/' + x; }), 4);
+  // les séries / bilans liés aux premières épreuves
+  var more = {};
+  PAGES.filter(function (p) { return /\/events\//.test(p.url) && p.code === 200; }).slice(0, 4).forEach(function (p) {
+    try { (JSON.parse(p.texte).phaseLinks || []).forEach(function (l) { uuids(l, []).forEach(function (u) { more[u.v] = 1; }); }); } catch (e) {}
+  });
+  await pool(Object.keys(more).slice(0, 8).map(function (x) { return API + '/events/' + x; }), 4);
+}
+$('#go').onclick = async function () {
+  if (!(RL.url && RL.cle)) { alert('Relais non configuré sur cet appareil.'); return; }
+  this.disabled = true; PAGES = []; SEEN = {}; $('#log').textContent = '';
+  var t = await relais('https://www.athle.fr/').catch(function () { return null; });
+  if (!t || !t.ok) { log('Le relais refuse la lecture des sites (' + (t && t.erreur || 'réseau') + ') : mets à jour le relais (version 3) puis relance « autoriser ».', 'ko'); this.disabled = false; return; }
+  await direct(); await matsport();
+  BUNDLE = { capture: new Date().toISOString(), direct: $('#dId').value, date: $('#dDate').value, matsport: $('#mId').value, pages: PAGES };
+  $('#st').innerHTML = '<b>Terminé : ' + PAGES.length + ' pages.</b> Enregistre le fichier et donne-le à Claude.';
+  $('#dl').disabled = false; this.disabled = false;
+};
+$('#dl').onclick = function () {
+  var b = new Blob([JSON.stringify(BUNDLE)], { type: 'application/json' }), a = document.createElement('a');
+  a.href = URL.createObjectURL(b); a.download = 'capture-' + ($('#dId').value || 'reunion') + '.json'; document.body.appendChild(a); a.click();
+};
+</script></body></html>
