@@ -106,6 +106,9 @@ Constats sur la capture du 4/11/2026 (via le relais) :
   (round_Result, round_Wind, round_Valide, round_Rank_After_Attempt, round_Points) ;
   `verticalResult.heights[]` + `results[].attemptVertical[]` (ht, ht_Att1..3 « O/X/- ») ; `phaseLinks`.
 - Adresses `/schedules/…` et `/competitions/<id>/events` : 404 (inexistantes).
+- Site public des archives Matsport : `https://history.athle-liveresults.fr/competitions/<id>/<id>_SCH_<date>`
+  (donné par Alexandre). Le live est sans doute sur un domaine `athle-liveresults.fr` : l'ajouter à la liste
+  des sites autorisés du relais (`SITES_OK`) au moment de brancher le live Matsport.
 - Direct athle.fr (2e capture, OK) : chaque liste de départ (`frmmode=1`) contient tout : titre
   (`.mainheaders` « 200m TCF », combinés « Heptathlon JSF | Longueur TCF »), records (`td.recordsDatas` :
   RF SEF, RF ESF, RCH…, puis « MPF 2026 » par catégorie), `.headers4` (« 26 JUILLET 14:08 »,
