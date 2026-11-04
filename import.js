@@ -100,7 +100,7 @@ function importDirect(id, date, get, progress) {
     function step() {
       var batch = todo.splice(0, 4); if (!batch.length) return Promise.resolve();
       return Promise.all(batch.map(function (g) {
-        return get(liste(g)).then(function (html) {
+        return get(liste(g)).catch(function () { return get(liste(g)); }).then(function (html) { // un nouvel essai si la page n'arrive pas
           var o = parseListe(html, g); if (!o) return;
           pages[g] = o;
           o.heats.forEach(function (h) { if (!seen[h.guid]) { seen[h.guid] = 1; todo.push(h.guid); } }); // finales, autres tours
@@ -134,7 +134,7 @@ function importDirect(id, date, get, progress) {
       e.records_cis = [];
       e.startlist = Object.keys(c.ath).map(function (d) { var a = c.ath[d]; var s = athlete(a.r); s.sb = a.sb.join(' | '); s.pb = a.pb.join(' | '); return s; })
         .sort(function (a, b) { return (+a.couloir || 99) - (+b.couloir || 99); });
-      e.cis_disc = c.list.map(function (x) { return { disc: x.disc, horaire: x.time }; });
+      e.cis_disc = c.list.map(function (x) { return { disc: x.disc, horaire: x.time, guid: x.guid }; });
       eps.push(e);
     });
     eps.sort(function (a, b) { return (a.horaire < b.horaire ? -1 : a.horaire > b.horaire ? 1 : 0) || (a.nom < b.nom ? -1 : 1); });
@@ -188,5 +188,30 @@ function mergeMediaSheet(file, ms) {
   return n;
 }
 
-root.CISI = { parseListe: parseListe, importDirect: importDirect, mergeMediaSheet: mergeMediaSheet };
+// ---------- résultats du Direct (frmmode=2) ----------
+var ST_MAP = { NP: 'DNS', AB: 'DNF', DQ: 'DQ', NM: 'NM', DNS: 'DNS', DNF: 'DNF' };
+function parseResultats(html) {
+  var doc = new DOMParser().parseFromString(html, 'text/html');
+  var o = { wind: null, officiel: false, rows: [] };
+  doc.querySelectorAll('.headers4 > div').forEach(function (d) { var m = txt(d).match(/Vent\s*:\s*([+\-−]?\d+[.,]\d)/); if (m) o.wind = parseFloat(m[1].replace('−', '-').replace(',', '.')); });
+  doc.querySelectorAll('.headers3 > div').forEach(function (d) { if (/officiel/i.test(txt(d))) o.officiel = true; });
+  doc.querySelectorAll('tr.trlive').forEach(function (tr) {
+    var tds = tr.querySelectorAll(':scope > td'); if (tds.length < 10) return;
+    var a = tr.querySelector('a.ath'), perf = txt(tr.querySelector('td.perf1')) || txt(tds[1]);
+    var r = { place: txt(tds[0]).replace(/ /g, ''), perf: perf, nom: txt(a), url: a ? a.getAttribute('href') : '', qualif: txt(tr.querySelector('td.qualif')),
+      vent: txt(tr.querySelector('td.vent')), info: txt(tr.querySelector('td.infos')), marks: [] };
+    r.st = ST_MAP[perf] || '';
+    var sub = tr.nextElementSibling; // essais ou barres juste en dessous
+    if (sub && sub.classList.contains('mobile-d-none')) {
+      sub.querySelectorAll('td.subdatas > div').forEach(function (d) {
+        var c = d.querySelectorAll(':scope > div'); if (c.length < 2) return;
+        r.marks.push({ k: txt(c[0]), m: txt(c[1]), w: c[2] ? txt(c[2]) : '' });
+      });
+    }
+    o.rows.push(r);
+  });
+  return o;
+}
+
+root.CISI = { parseResultats: parseResultats, parseListe: parseListe, importDirect: importDirect, mergeMediaSheet: mergeMediaSheet };
 })(window);

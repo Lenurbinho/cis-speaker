@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 var E = window.CISE;
-var VERSION = 'V1.5 · 4 nov. 2026';
+var VERSION = 'V1.6 · 4 nov. 2026';
 var $ = function (s) { return document.querySelector(s); };
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
@@ -24,7 +24,7 @@ function kvSet(k, v) { return idb().then(function (db) { return new Promise(func
 
 // ---------- état ----------
 var RAW = null, M = null, S = null, ROUNDS = {}, KP = null;
-function blank() { return { res: {}, cmb: {}, dtime: {}, wind: {}, ess: {}, vert: {}, rules: {}, qov: {}, off: {}, done: {}, finals: [], lanes: {}, pins: null, ptab: null, heatSel: {}, sortRank: {}, hide: {}, hist: [], clock: null, last: null }; }
+function blank() { return { res: {}, cmb: {}, dtime: {}, man: {}, live: {}, wind: {}, ess: {}, vert: {}, rules: {}, qov: {}, off: {}, done: {}, finals: [], lanes: {}, pins: null, ptab: null, heatSel: {}, sortRank: {}, hide: {}, hist: [], clock: null, last: null }; }
 function skey() { return 'cis:s:' + M.id; }
 function save() { lsSet(skey(), S); if (SY && syncOn()) syDiff(); }
 function build() {
@@ -83,8 +83,10 @@ function setPath(p, v) {
   if (v == null) delete o[p[p.length - 1]]; else o[p[p.length - 1]] = v;
 }
 function clone(x) { return x == null ? null : JSON.parse(JSON.stringify(x)); }
+var LIVE_PATHS = { res: 1, ess: 1, vert: 1, cmb: 1, wind: 1 };
 function commit(path, val, txt, al, rid) {
   var prev = clone(getPath(path));
+  if (LIVE_PATHS[path[0]]) { S.man = S.man || {}; S.man[path.join('~')] = 1; } // saisie à la main : le live ne l'écrasera pas
   setPath(path, clone(val));
   if (txt) {
     S.hist.unshift({ t: Date.now(), clk: nowMin(), path: path, prev: prev, val: clone(val), txt: txt, al: al || '', rid: rid || '' });
@@ -178,7 +180,7 @@ var lastMinute = -1;
 function renderTop() {
   if (!M) { $('#mName').textContent = 'CIS speaker'; $('#mDate').textContent = ''; $('#clockT').textContent = fh(realMin()); $('#clockSim').textContent = ''; return; }
   $('#mName').textContent = M.nom;
-  $('#mDate').textContent = (M.date || '') + (M.salle ? ' · salle' : '') + syStatus();
+  $('#mDate').textContent = (M.date || '') + (M.salle ? ' · salle' : '') + syStatus() + (liveOn() && LIVE_STATE ? ' · ' + LIVE_STATE : '');
   $('#clockT').textContent = fh(Math.floor(nowMin()));
   $('#clockSim').textContent = S.clock && S.clock.sim ? 'heure simulée' : '';
 }
@@ -346,6 +348,7 @@ function qualifiedList(r) {
   out.sort(function (x, y) { return (x.q === y.q ? 0 : x.q === 'Q' ? -1 : 1) || E.cmp(x.v == null ? 1e9 : x.v, y.v == null ? 1e9 : y.v, r.unit); });
   return { list: out, complete: qm._complete };
 }
+function finOf(r) { return M.rounds.filter(function (x) { return x !== r && x.title === r.title && x.phase === 'Finale' && !x.fromRound; })[0]; } // finale déjà dans le programme importé
 function bilanHtml(r) {
   var qm = E.qualify(r, S.res, ruleOf(r)), all = [];
   r.heats.forEach(function (h) { var R = S.res[h.id] || {}; h.ath.forEach(function (a) { var x = R[a.key] || {}; all.push({ h: h, a: a, v: x.v, st: x.st, w: S.wind[h.id] }); }); });
@@ -354,7 +357,7 @@ function bilanHtml(r) {
   var ql = qualifiedList(r), nQ = ql.list.filter(function (x) { return x.q === 'Q'; }).length, nq = ql.list.length - nQ;
   var fin = (S.finals || []).filter(function (f) { return f.from === r.id; })[0];
   var h = '<div class="pinfo"><span class="up">Bilan des ' + esc(r.phase.toLowerCase()) + '</span><span class="nx">' + nQ + ' Q + ' + nq + ' q' + (ql.complete ? '' : ' (provisoire)') + '</span><span class="sp"></span>' +
-    (fin ? '<button class="btn s p" data-act="pin" data-r="f' + r.id + '">Voir la finale</button>' : ruleOf(r) && ql.list.length ? '<button class="btn s p" data-act="mkfinal" data-r="' + r.id + '">Créer la finale</button>' : '') + '</div>';
+    (fin ? '<button class="btn s p" data-act="pin" data-r="f' + r.id + '">Voir la finale</button>' : finOf(r) ? '<button class="btn s p" data-act="pin" data-r="' + finOf(r).id + '">Voir la finale</button>' : ruleOf(r) && ql.list.length ? '<button class="btn s p" data-act="mkfinal" data-r="' + r.id + '">Créer la finale</button>' : '') + '</div>';
   var body = '<div class="rw hd"><span>Pl</span><span>Athlète</span><span class="c-r">SB / PB</span><span style="text-align:right">Temps</span><span style="text-align:center">Q</span></div>';
   var place = 0;
   ok.forEach(function (x, i) {
@@ -424,7 +427,8 @@ function vertHtml(r) {
   var body = '<div class="rw hd"><span>Pl</span><span>Athlète</span>' + cols.map(function (b) { return '<span class="ess bar' + (b === st.bar ? ' on' : '') + '">' + fp(b, 'm') + '</span>'; }).join('') + '<span style="text-align:right">Meilleure</span><span class="c-f" style="text-align:center">Éch.</span></div>';
   rk.forEach(function (x) {
     var a = x.a, m = V.m[a.key] || {};
-    if (x.out && hide) return;
+    if (x.out && hide && st.inLice > 0) return;
+    if (st.inLice === 0) x = Object.assign({}, x, { out: false }); // concours fini : plus de « éliminé »
     body += '<div class="rw' + (st.next === a ? ' cur' : st.after === a ? ' nxt' : '') + (x.out ? ' out' : '') + (isEdit(ht, a) ? ' edit' : '') + '" data-act="vt" data-r="' + r.id + '" data-h="' + ht.id + '" data-k="' + esc(a.key) + '">' +
       '<span class="c-pl">' + (x.place || '') + '</span>' + nameHtml(r, ht, a, '<small>SB ' + (a.sb ? fp(a.sb.v, 'm') : '–') + ' · PB ' + (a.pb ? fp(a.pb.v, 'm') : '–') + (x.out ? ' · <b style="color:var(--red)">éliminé</b>' : '') + '</small>' + pillsHtml(r, a, x.best, null)) +
       cols.map(function (b) { var s = m[b] || ''; return '<span class="ess' + (b === st.bar ? ' on' : '') + (/XXX/.test(s) ? ' x' : /O/.test(s) ? ' b' : '') + '">' + marksTxt(s) + '</span>'; }).join('') +
@@ -805,7 +809,7 @@ function menuSheet(r) {
     '<button class="btn" data-act="shift" data-r="' + r.id + '" data-d="5">+5 min</button><button class="btn" data-act="shift" data-r="' + r.id + '" data-d="-5">−5 min</button>' +
     '<button class="btn" data-act="setTime" data-r="' + r.id + '">Changer l\'heure</button></div><div class="row2">' +
     (hasQ(r) ? '<button class="btn" data-act="rule" data-r="' + r.id + '">Règle de qualification</button>' : '') +
-    (hasQ(r) && !fin ? '<button class="btn" data-act="mkfinal" data-r="' + r.id + '">Créer la finale avec les qualifiés</button>' : '') +
+    (hasQ(r) && !fin && !finOf(r) ? '<button class="btn" data-act="mkfinal" data-r="' + r.id + '">Créer la finale avec les qualifiés</button>' : '') +
     (r.fromRound ? '<button class="btn r" data-act="rmfinal" data-r="' + r.id + '">Supprimer cette finale</button>' : '') +
     '<button class="btn' + (S.done[r.id] ? '' : ' p') + '" data-act="done" data-r="' + r.id + '">' + (S.done[r.id] ? 'Rouvrir l\'épreuve' : 'Marquer terminée') + '</button>' +
     '<button class="btn" data-act="recs" data-r="' + r.id + '">Records et bilans</button></div>' +
@@ -1081,6 +1085,8 @@ var IMP_MSG = '';
 function importSectionHtml() {
   var d = lsGet('cis:lastDirect', { id: '', date: '' });
   var h = '<h4>Importer depuis le Direct athle.fr</h4>';
+  if (RAW && RAW.source === 'direct') h += '<div class="row2"><button class="btn' + (lsGet('cis:live', true) ? ' p' : '') + '" data-act="liveTog">' + (lsGet('cis:live', true) ? '✓ Résultats du Direct en direct (toutes les 10 s)' : 'Résultats du Direct : arrêtés') + '</button><button class="btn" data-act="liveNow">Mettre à jour maintenant</button></div>' +
+    '<p class="small">Les cases saisies à la main ne sont jamais écrasées par le Direct. Avec l\'heure simulée, une réunion passée se rejoue : chaque épreuve se remplit une fois son heure passée.</p>';
   if (!relaisOk()) return h + '<p class="small">Nécessite le relais (partage entre appareils, ci-dessous).</p>';
   return h + '<div class="row2"><input class="txt" id="impId" inputmode="numeric" placeholder="N° du Direct (ex. 314411)" value="' + esc(d.id) + '" style="flex:1;min-width:150px">' +
     '<input class="txt" id="impDate" placeholder="Date JJ/MM/AAAA" value="' + esc(d.date) + '" style="flex:1;min-width:140px"><button class="btn p" data-act="impDirect">Importer</button></div>' +
@@ -1104,6 +1110,144 @@ function doImportDirect() {
     S.last = { txt: 'Réunion importée du Direct : ' + file.meeting.epreuves.length + ' listes. Ouvre le fichier Media Sheet pour ajouter les stats.', t: Date.now() }; save(); renderBanner();
     IMP_MSG = ''; shareMeeting(file, true);
   }).catch(function (e) { impMsg('Import impossible : ' + (e.message || e)); });
+}
+
+
+// ---------- résultats en direct depuis le Direct athle.fr (par le relais) ----------
+// Pour une réunion importée du Direct : toutes les 10 s, le CIS lit les résultats des séries et concours
+// commencés (ou qui commencent dans les 5 min) et remplit les cases qui n'ont pas été saisies à la main.
+// Avec l'heure simulée, une réunion passée se « rejoue » : chaque épreuve se remplit une fois son heure passée.
+var LIVE_BUSY = false, LIVE_STATE = '';
+function liveOn() { return lsGet('cis:live', true) && relaisOk() && RAW && RAW.source === 'direct' && RAW.direct && navigator.onLine; }
+function liveUrl(guid) { return 'https://www.athle.fr/bases/liste.aspx?frmbase=directs&frmmode=2&frmcompetition=' + RAW.direct.id + '&frmepreuve=' + guid; }
+function liveTargets() {
+  var n = nowMin(), out = [];
+  M.rounds.forEach(function (r) {
+    if (r.cmb) { r.cmb.forEach(function (d, i) { var t = dTime(r, i); if (d.guid && t != null && t <= n + 5 && !(S.live[r.id + '_' + i] || {}).off) out.push({ r: r, h: r.heats[0], d: i, guid: d.guid, t: t }); }); return; }
+    r.heats.forEach(function (h) { var t = hStart(r, h); if (h.guid && t != null && t <= n + 5 && !(S.live[h.id] || {}).off) out.push({ r: r, h: h, guid: h.guid, t: t }); });
+  });
+  out.sort(function (a, b) { return b.t - a.t; }); // les plus récentes d'abord
+  return out.slice(0, 24);
+}
+function athId(u) { var m = String(u || '').match(/athletes\/(\d+)/); return m ? m[1] : ''; }
+function nn(s) { return String(s || '').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Z]/g, ''); }
+function findAth(h, row) {
+  var id = athId(row.url), nm = nn(row.nom);
+  return h.ath.filter(function (a) { return (id && athId(a.src && a.src.url) === id); })[0] || h.ath.filter(function (a) { return nn(a.nom) === nm; })[0];
+}
+function isMan(path) { return S.man && S.man[path.join('~')]; }
+function liveSet(path, val, txt, out) {
+  if (isMan(path)) return false;
+  var cur = getPath(path);
+  if (JSON.stringify(cur == null ? null : cur) === JSON.stringify(val == null ? null : val)) return false;
+  var prev = clone(cur); setPath(path, clone(val));
+  out.push({ path: path, prev: prev, val: clone(val), txt: txt });
+  return true;
+}
+function parseMark(m, unit) { var v = E.parsePerf(m, unit); return v; }
+function liveApply(tg, res) {
+  var r = tg.r, h = tg.h, ch = [], al = [], w0 = res.wind;
+  if (tg.d != null) { // épreuve d'un combiné
+    var d = r.cmb[tg.d];
+    res.rows.forEach(function (row) {
+      var a = findAth(h, row); if (!a) return;
+      var c = clone(cmbOf(h, a)), x = null;
+      if (row.st) x = { st: row.st }; else { var v = E.parsePerf(row.perf, d.unit); if (v == null) return; x = { v: v }; var wv = E.parseWind(row.vent || (d.unit === 't' ? w0 : '')); if (wv != null && d.wind) x.w = wv; }
+      if (JSON.stringify(c[tg.d]) === JSON.stringify(x)) return;
+      c[tg.d] = x;
+      if (liveSet(['cmb', h.id, a.key], c, heatText(r, h) + ' · ' + d.lab + ' · ' + a.name + ' · ' + (x.st || fp(x.v, d.unit) + ' (' + E.combPoints(d, x.v) + ' pts)'), ch) && x.v != null) {
+        var ref = (a.cref || [])[tg.d] || {}, z = E.alertsFor({ unit: d.unit, records: [], type: 'x' }, { pb: ref.pb, sb: ref.sb }, x.v, x.w).filter(function (q) { return !q.weak; });
+        if (z.length) al.push({ txt: fp(x.v, d.unit) + ' : ' + z[0].txt + ' sur ' + d.lab + ' pour ' + a.name + ' (' + E.combPoints(d, x.v) + ' pts)', list: z, rank: z[0].rank });
+      }
+    });
+  } else if (r.type === 'course') {
+    if (w0 != null) liveSet(['wind', h.id], w0, heatText(r, h) + ' · vent ' + E.fmtWind(w0), ch);
+    res.rows.forEach(function (row) {
+      var a = findAth(h, row); if (!a) return;
+      var x = row.st ? { st: row.st } : (function () { var v = E.parsePerf(row.perf, 't'); return v == null ? null : { v: v }; })();
+      if (!x) return;
+      if (liveSet(['res', h.id, a.key], x, heatText(r, h) + ' · ' + a.name + ' · ' + (x.st || fp(x.v, 't')), ch) && x.v != null) {
+        var z = alertsAt(r, h, a, x.v, S.wind[h.id], 0); if (z.txt) al.push({ txt: z.txt, list: z.list, rank: (z.list[0] || {}).rank || 99 });
+      }
+    });
+  } else if (r.type === 'horiz') {
+    res.rows.forEach(function (row) {
+      var a = findAth(h, row); if (!a) return;
+      var arr = [];
+      row.marks.forEach(function (mk) {
+        var i = (+mk.k || arr.length + 1) - 1, m = mk.m.replace(/r$/i, '');
+        if (!m) return;
+        var e = m === 'X' ? { r: 'X' } : m === '-' ? { r: '-' } : (function () { var v = E.parsePerf(m, 'm'); if (v == null) return null; var o = { r: String(v), v: v }; var wv = E.parseWind(mk.w); if (wv != null && r.wind) o.w = wv; return o; })();
+        if (e) { while (arr.length < i) arr.push(null); arr[i] = e; }
+      });
+      if (!arr.length) return;
+      var prev = ((S.ess[h.id] || {})[a.key] || []);
+      if (liveSet(['ess', h.id, a.key], arr, heatText(r, h) + ' · ' + a.name + ' · ' + arr.map(function (e) { return e ? essTxt(e, r) : '·'; }).join(' '), ch)) {
+        arr.forEach(function (e, i) {
+          if (!e || e.v == null || (prev[i] && prev[i].v === e.v)) return;
+          var z = alertsAt(r, h, a, e.v, e.w, i); if (z.txt) al.push({ txt: z.txt, list: z.list, rank: (z.list[0] || {}).rank || 99 });
+        });
+      }
+    });
+  } else if (r.type === 'vert') {
+    var V = clone(vObj(h.id)), before = JSON.stringify(V), best = {};
+    res.rows.forEach(function (row) {
+      var a = findAth(h, row); if (!a) return;
+      row.marks.forEach(function (mk) {
+        var b = E.parsePerf(mk.k, 'm'), m = mk.m.toUpperCase();
+        if (/R/.test(m)) m = (m.replace(/R/g, '') + 'XXX').slice(0, 3); // « r » = abandon : on termine la barre
+        m = m.replace(/[^OX-]/g, '');
+        if (b == null || !m) return;
+        if (V.bars.indexOf(b) < 0) V.bars.push(b);
+        V.m[a.key] = V.m[a.key] || {}; V.m[a.key][b] = m;
+        if (/O/.test(m)) best[a.key] = Math.max(best[a.key] || 0, b);
+      });
+    });
+    V.bars.sort(function (x, y) { return x - y; });
+    var used = V.bars.filter(function (b) { return Object.keys(V.m).some(function (k) { return V.m[k][b]; }); });
+    V.cur = Math.max(0, V.bars.indexOf(used[used.length - 1]));
+    if (JSON.stringify(V) !== before && liveSet(['vert', h.id], V, heatText(r, h) + ' · barres mises à jour', ch)) {
+      var old = JSON.parse(before);
+      Object.keys(best).forEach(function (k) {
+        var a = getA(h, k), ob = E.vertAthlete(old, k).best;
+        if (a && best[k] && best[k] !== ob) { var z = alertsAt(r, h, a, best[k], null, best[k]); if (z.txt) al.push({ txt: z.txt, list: z.list, rank: (z.list[0] || {}).rank || 99 }); }
+      });
+    }
+  }
+  if (res.officiel && tg.d == null && (r.type === 'horiz' || r.type === 'vert')) liveSet(['done', r.id], true, heatText(r, h) + ' · résultats officiels', ch);
+  if (res.officiel && r.type === 'course' && hasQ(r) && ruleOf(r)) { // Q/q officiels : on ne corrige que là où le calcul diffère
+    var qm = E.qualify(r, S.res, ruleOf(r));
+    res.rows.forEach(function (row) {
+      var a = findAth(h, row); if (!a) return;
+      var off = row.qualif === 'Q' || row.qualif === 'q' ? row.qualif : '', auto = ((qm[h.id] || {})[a.key] || {}).auto || '';
+      var path = ['qov', h.id, a.key], want = off === auto ? null : (off || '-');
+      if (!isMan(path)) liveSet(path, want, heatText(r, h) + ' · ' + a.name + ' · qualification officielle ' + (off || 'non qualifié'), ch);
+    });
+  }
+  if (res.officiel) S.live[tg.d != null ? r.id + '_' + tg.d : h.id] = { off: true, t: Date.now() };
+  if (ch.length) {
+    ch.forEach(function (c) { S.hist.unshift({ t: Date.now(), clk: nowMin(), path: c.path, prev: c.prev, val: c.val, txt: c.txt + ' (Direct)', al: '', rid: r.id }); });
+    if (al.length) { al.sort(function (x, y) { return x.rank - y.rank; }); S.hist[0].al = al[0].txt; announce(al[0].txt, al[0].list, Date.now()); }
+  }
+  return ch.length;
+}
+function liveTick() {
+  if (!M || !liveOn() || LIVE_BUSY) return;
+  var tg = liveTargets(); if (!tg.length) { LIVE_STATE = 'live ✓'; return; }
+  LIVE_BUSY = true;
+  var n = 0, chg = 0;
+  var next = function () {
+    if (n >= tg.length) {
+      LIVE_BUSY = false; LIVE_STATE = 'live ✓';
+      if (chg) { save(); if (tg.some(function (x) { return x.r.fromRound; })) build(); renderAll(); } else renderTop();
+      return;
+    }
+    var t = tg[n++];
+    relaisGet({ action: 'brut', url: liveUrl(t.guid), ttl: 8 }).then(function (x) {
+      if (x.ok && x.code === 200 && x.texte) { var res = CISI.parseResultats(x.texte); if (res.rows.length) chg += liveApply(t, res); }
+    }).catch(function () { LIVE_STATE = 'live en attente'; }).then(next);
+  };
+  next();
 }
 
 // ---------- actions (un seul écouteur pour tout l'écran) ----------
@@ -1185,6 +1329,8 @@ document.addEventListener('click', function (ev) {
     case 'rmfinal': if (!confirm2('rm' + r.id, el, 'Toucher encore pour supprimer')) break; S.finals = S.finals.filter(function (f) { return 'f' + f.from !== r.id; }); S.pins = S.pins.filter(function (x) { return x !== r.id; }); save(); build(); closeSheet(); renderAll(); break;
     case 'wipe':
       if (!confirm2('w' + r.id, el, syncOn() ? 'Toucher encore : efface aussi chez les autres' : 'Toucher encore pour tout effacer')) break;
+      Object.keys(S.man || {}).forEach(function (k) { if (r.heats.some(function (x) { return k.indexOf('~' + x.id) >= 0; })) delete S.man[k]; });
+      Object.keys(S.live || {}).forEach(function (k) { if (k.indexOf(r.id) === 0 || r.heats.some(function (x) { return k === x.id; })) delete S.live[k]; });
       r.heats.forEach(function (x) { delete S.res[x.id]; if (S.cmb) delete S.cmb[x.id]; delete S.ess[x.id]; delete S.vert[x.id]; delete S.wind[x.id]; delete S.qov[x.id]; });
       delete S.done[r.id]; save(); closeSheet(); renderAll(); break;
     case 'hist': if (el.id === 'banner' || el.closest('#banner')) { histSheet(); } else histSheet(); break;
@@ -1201,6 +1347,8 @@ document.addEventListener('click', function (ev) {
     case 'share': kvGet('meeting').then(function (j) { if (j) shareMeeting(j); }); break;
     case 'openShared': openShared(el.dataset.id); break;
     case 'impDirect': doImportDirect(); break;
+    case 'liveTog': lsSet('cis:live', !lsGet('cis:live', true)); settingsSheet(); renderTop(); break;
+    case 'liveNow': S.live = {}; save(); closeSheet(); liveTick(); break;
     case 'invite':
       var link = location.origin + location.pathname + '#relais=' + encodeURIComponent(RL.url) + '&code=' + encodeURIComponent(RL.cle);
       (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(function () { SHARE_MSG = 'Lien copié : envoie-le aux autres speakers (SMS, mail…).'; refreshShareUi(); })
@@ -1253,6 +1401,7 @@ renderTop();
 kvGet('meeting').then(function (j) { if (j && (j.meeting || j.epreuves)) start(j); else welcome(); pollShared(); }).catch(function () { welcome(); pollShared(); });
 setInterval(pollShared, 5000);
 setInterval(syTick, 3000);
+setInterval(liveTick, 10000);
 window.addEventListener('online', syTick);
 window.addEventListener('online', pollShared);
 window.CIS = { get S() { return S; }, get M() { return M; }, nowMin: nowMin, render: function () { save(); renderAll(); } };

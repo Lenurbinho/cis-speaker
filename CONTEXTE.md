@@ -121,6 +121,16 @@ si on réimporte après l'ajout des finales). Ensuite, ouvrir le fichier Media S
 dossard + nom. La réunion importée est partagée avec tous les appareils.
 Testé sur la J3 : 16 tours dont les finales du 200 m F/H et du 110 m H, heures exactes, règles 2Q+2q / 3Q+2q,
 RF par catégorie, MPF par catégorie.
+- **Résultats en direct depuis le Direct (V1.6)** : pour une réunion importée du Direct, toutes les 10 s le
+  CIS lit par le relais (cache 8 s partagé) les pages de résultats (`frmmode=2`) des séries / concours
+  commencés (ou qui commencent dans les 5 min) et remplit : temps, statuts (NP → DNS, AB → DNF, DQ, NM), vent
+  de la série, essais avec vent, barres O/X/– (« r » = abandon), épreuves des combinés ; Q/q officiels
+  (corrigés seulement s'ils diffèrent du calcul) ; concours marqués terminés quand le résultat est officiel.
+  Alertes et historique « (Direct) ». **Une case saisie à la main n'est jamais écrasée.** Avec l'heure
+  simulée, une réunion passée se rejoue (testé sur la J3 à 15h50). Bouton marche/arrêt et « Mettre à jour
+  maintenant » dans Réglages. Athlètes reconnus par leur n° de fiche FFA, sinon par le nom.
+  À faire : réimporter automatiquement les listes de départ des finales publiées en cours de réunion
+  (aujourd'hui : relancer « Importer », les saisies sont gardées) ; live Matsport.
 - **Horaire des combinés (V1.5)** : dans la colonne Horaire, une ligne par épreuve du combiné avec son heure
   (« 14h05 Javelot · Heptathlon ») ; la toucher ouvre le panneau du combiné **directement sur l'onglet de
   cette épreuve** (les autres épreuves et le classement restent à un onglet). Heures tirées du Direct ; sinon
