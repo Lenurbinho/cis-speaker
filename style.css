@@ -108,9 +108,10 @@ main{flex:1;min-width:0;padding:8px 8px calc(12px + var(--kph))}
 .c-l{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:calc(24px*var(--fs));text-align:center;background:var(--pale);border-radius:6px;line-height:1.5}
 .c-b{font-weight:700;color:var(--muted);font-size:calc(15px*var(--fs));text-align:center}
 .c-n{min-width:0}
-.c-n b{display:block;font-family:'Barlow Condensed',sans-serif;font-size:calc(23px*var(--fs));font-weight:700;line-height:1.08;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.c-n small{display:block;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:calc(13.5px*var(--fs))}
-.fi{display:inline-flex;align-items:center;justify-content:center;vertical-align:2px;border:1px solid var(--line);background:#fff;color:var(--blue);border-radius:50%;width:28px;height:28px;margin:0 0 0 8px;font:italic 800 16px Georgia,serif;line-height:1;padding:0}
+.c-n b{display:block;font-family:'Barlow Condensed',sans-serif;font-size:calc(23px*var(--fs));font-weight:700;line-height:1.08;white-space:nowrap;overflow:hidden}
+.c-n b.wrap{white-space:normal}  /* nom jamais tronqué : taille réduite pour tenir (fitNames), 2 lignes en dernier recours */
+.c-n small{display:block;color:var(--muted);white-space:normal;overflow-wrap:anywhere;font-size:calc(13.5px*var(--fs))}  /* club jamais tronqué : à la ligne si besoin */
+.fi{display:inline-flex;align-items:center;justify-content:center;vertical-align:-1px;border:1px solid var(--line);background:#fff;color:var(--blue);border-radius:50%;width:calc(22px*var(--fs));height:calc(22px*var(--fs));margin:0 6px 0 0;font-size:calc(13px*var(--fs))!important;font:italic 800 16px Georgia,serif;line-height:1;padding:0}
 .kfi{float:right;margin-left:8px}
 .nl{color:inherit;text-decoration:underline;text-decoration-style:dotted;text-decoration-color:#9fb0c8;text-underline-offset:3px}
 .stl{display:flex!important;align-items:center;gap:4px;color:var(--ink)!important;font-weight:600}
@@ -221,7 +222,6 @@ textarea.txt{font:inherit;border:1px solid var(--line);border-radius:10px;paddin
   .horiz.win1 .ess.e1,.horiz.win1 .ess.e2,.horiz.win1 .ess.e3{display:block}
   .horiz.win2 .ess.e2,.horiz.win2 .ess.e3,.horiz.win2 .ess.e4{display:block}
   .horiz.win3 .ess.e3,.horiz.win3 .ess.e4,.horiz.win3 .ess.e5{display:block}
-  .c-n b{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
   .ess{font-size:calc(16px*var(--fs))}
   .c-n b{font-size:calc(20px*var(--fs))}
   .c-p{font-size:calc(24px*var(--fs))}
@@ -249,11 +249,7 @@ textarea.txt{font:inherit;border:1px solid var(--line);border-radius:10px;paddin
   .phead .pt b{font-size:calc(21px*var(--fs));white-space:normal}
   .pbtn{height:36px;min-width:36px}
   .rw{padding:5px 6px;gap:0 5px;min-height:54px}
-  .c-n b{font-size:calc(18px*var(--fs));-webkit-line-clamp:2}
-  .c-n .pn{display:none}.c-n .pi{display:inline}
-  .c-n small{white-space:nowrap!important}
-  .c-n small .ct~*{display:none}
-  .fi{display:none}  /* fiche accessible par le bouton « Fiche » du pavé */
+  .c-n b{font-size:calc(19px*var(--fs))}
 
   .course .rw,.course.fin .rw{grid-template-columns:1.65em minmax(0,1fr) 4.12em 1.76em}
   .course.fin .rw{grid-template-columns:1.65em minmax(0,1fr) 4.35em}

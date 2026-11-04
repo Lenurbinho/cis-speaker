@@ -138,6 +138,10 @@ RF par catégorie, MPF par catégorie.
   **Combinés sur deux jours** : l'import va chercher dans le programme des autres journées les épreuves du
   combiné (ex. J2 de l'heptathlon quand on importe la J3) : leurs résultats remontent, sans les mettre dans
   l'horaire du jour. Il faut **réimporter** une réunion importée avant la V1.7 pour en profiter.
+- **Règle (4/11/2026, Alexandre) : le nom de l'athlète et son club ne sont JAMAIS tronqués.** V1.13 : le nom est
+  réduit automatiquement jusqu'à tenir sur sa ligne (`fitNames`, jusqu'à −40 %), puis passe sur 2 lignes en
+  dernier recours ; le club va à la ligne ; plus d'initiale à la place du prénom ; le bouton « i » est passé
+  au début de la ligne du club. (La ligne de stats, elle, peut finir par « … » : la pastille +N renvoie à la fiche.)
 - **Mise en page adaptée (V1.12)** : sur tablette / ordinateur, chaque panneau réduit la taille de ses caractères
   et de ses colonnes selon sa largeur (de 100 % à 68 %, colonnes en « em » qui suivent le texte), pour garder
   noms, perfs et colonnes complets à 3 ou 4 épreuves ; les colonnes ne sont masquées qu'en dernier recours.

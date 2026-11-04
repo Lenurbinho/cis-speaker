@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 var E = window.CISE;
-var VERSION = 'V1.12 · 4 nov. 2026';
+var VERSION = 'V1.13 · 4 nov. 2026';
 var $ = function (s) { return document.querySelector(s); };
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
@@ -181,7 +181,7 @@ function nameHtml(r, h, a, extra) {
   var pre = parts.slice(0, parts.length - up.length).join(' '), nmH = up.length && pre ? '<span class="pn">' + esc(pre) + '</span><span class="pi">' + esc(pre.charAt(0)) + '.</span> ' + esc(up.join(' ')) : esc(a.name);
   var u = ficheUrl(a), nm = u ? '<a class="nl" href="' + esc(u) + '" target="_blank" rel="noopener">' + nmH + '</a>' : nmH;
   var ph = photosOn() && M && M.rounds.some(function (x) { return x.heats.some(function (y) { return y.ath.some(function (z) { return z.src && z.src.photo; }); }); });
-  return '<span class="c-n' + (ph ? ' hasav' : '') + '">' + (ph ? avatar(a, 'avr') : '') + '<b>' + nm + '<button class="fi" data-act="fiche" data-r="' + r.id + '" data-h="' + h.id + '" data-k="' + esc(a.key) + '" aria-label="Fiche de l\'athlète">i</button></b><small><span class="ct">' + esc(a.cat) + '</span> · ' + esc(a.club || a.nat) + '</small>' + statsHtml(r, h, a) + (noteOf(a) ? '<small class="note1">📝 ' + esc(noteOf(a)) + '</small>' : '') + (extra || '') + '</span>';
+  return '<span class="c-n' + (ph ? ' hasav' : '') + '">' + (ph ? avatar(a, 'avr') : '') + '<b>' + nm + '</b><small><button class="fi" data-act="fiche" data-r="' + r.id + '" data-h="' + h.id + '" data-k="' + esc(a.key) + '" aria-label="Fiche de l\'athlète">i</button><span class="ct">' + esc(a.cat) + '</span> · ' + esc(a.club || a.nat) + '</small>' + statsHtml(r, h, a) + (noteOf(a) ? '<small class="note1">📝 ' + esc(noteOf(a)) + '</small>' : '') + (extra || '') + '</span>';
 }
 function isEdit(h, a) { return KP && KP.h === h.id && KP.k === a.key; }
 function ruleOf(r) { return S.rules[r.id] != null ? S.rules[r.id] : r.qualif; }
@@ -274,12 +274,32 @@ function renderPanels() {
       var b = p.querySelector('.pbody'); if (b && sc[p.dataset.r]) b.scrollTop = sc[p.dataset.r];
     });
   }
+  fitSoon();
   $('#ptabs').innerHTML = pins.map(function (id) {
     var r = ROUNDS[id];
     return '<button class="' + (id === S.ptab ? 'on' : '') + '" data-act="ptab" data-r="' + id + '">' + esc(r.title) + '<small>' + esc(r.phase) + ' · ' + fh(rStart(r)) + '</small></button>';
   }).join('');
 }
 
+
+// noms jamais tronqués : on réduit la taille du nom jusqu'à ce qu'il tienne (au plus −40 %), sinon 2 lignes
+function fitNames() {
+  var els = document.querySelectorAll('.panel .c-n > b, .pres .pm > b');
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i]; el.style.fontSize = ''; el.classList.remove('wrap');
+    if (el.scrollWidth <= el.clientWidth + 1) continue;
+    var fs = parseFloat(getComputedStyle(el).fontSize), min = fs * 0.6;
+    for (var k = 0; k < 4 && el.scrollWidth > el.clientWidth + 1; k++) {
+      fs = Math.max(min, Math.floor(fs * (el.clientWidth / el.scrollWidth) * 10) / 10 - 0.3);
+      el.style.fontSize = fs + 'px';
+      if (fs <= min) break;
+    }
+    if (el.scrollWidth > el.clientWidth + 1) el.classList.add('wrap');
+  }
+}
+var FIT_T = null; function fitSoon() { clearTimeout(FIT_T); FIT_T = setTimeout(fitNames, 0); }
+window.addEventListener('resize', fitSoon);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitSoon);
 function recChips(r) {
   var pick = [], seen = {};
   r.records.forEach(function (x) {
@@ -860,7 +880,7 @@ function podiumSheet(r) {
 }
 
 // ---------- fenêtres (fiche, records, historique, réglages…) ----------
-function openSheet(title, html) { $('#sTitle').textContent = title; $('#sBody').innerHTML = html; $('#sheet').classList.remove('off'); $('#sBody').scrollTop = 0; pushLayer('sheet'); }
+function openSheet(title, html) { $('#sTitle').textContent = title; $('#sBody').innerHTML = html; $('#sheet').classList.remove('off'); $('#sBody').scrollTop = 0; pushLayer('sheet'); fitSoon(); }
 function closeSheet(fromPop) { if ($('#sheet').classList.contains('off')) return; $('#sheet').classList.add('off'); if (!fromPop) popLayer('sheet'); }
 // bouton Retour du téléphone : ferme la fenêtre ou le pavé ouvert
 var LAYERS = [];
