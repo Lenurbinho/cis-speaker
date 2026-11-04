@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 var E = window.CISE;
-var VERSION = 'V1.6 · 4 nov. 2026';
+var VERSION = 'V1.7 · 4 nov. 2026';
 var $ = function (s) { return document.querySelector(s); };
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
@@ -1094,13 +1094,32 @@ function importSectionHtml() {
     'Ouvre ensuite le fichier <b>Media Sheet</b> de la réunion pour ajouter palmarès et bilans. La réunion importée est partagée avec tous les appareils.</p>' +
     '<div id="impMsg" class="kpvox">' + esc(IMP_MSG) + '</div>';
 }
+function pageGet(url) { return relaisGet({ action: 'brut', url: url, ttl: 30 }).then(function (x) { if (!x.ok) throw new Error(x.erreur || 'relais'); if (x.code !== 200) throw new Error('page ' + x.code); return x.texte; }); }
+// listes de départ publiées pendant la réunion (finales…) : réimport discret toutes les 3 min, en gardant
+// les stats Media Sheet déjà fusionnées et toutes les saisies (identifiants stables)
+var REIMP_BUSY = false, REIMP_T = Date.now();
+function sigOf(f) { return (f.meeting || f).epreuves.map(function (e) { return (e.cis_id || e.nom) + ':' + (e.startlist || []).length; }).sort().join(','); }
+function autoReimport(force) {
+  if (!M || !liveOn() || REIMP_BUSY || KP || (!force && Date.now() - REIMP_T < 180000)) return;
+  if (!force && M.dateISO !== todayISO()) return; // réunion du jour seulement (une réunion passée a déjà ses finales)
+  REIMP_T = Date.now(); REIMP_BUSY = true;
+  var old = RAW, oldIds = {}; (old.meeting || old).epreuves.forEach(function (e) { oldIds[e.cis_id] = (e.startlist || []).length; });
+  CISI.importDirect(old.direct.id, old.direct.date, pageGet, function () { }).then(function (file) {
+    if (RAW !== old || file.id !== old.id || sigOf(file) === sigOf(old)) return;
+    CISI.mergeMediaSheet(file, old, true);
+    var news = file.meeting.epreuves.filter(function (e) { return !oldIds[e.cis_id]; }).map(function (e) { return e.nom + ' ' + (e.sexe === 'F' ? 'F' : 'H') + ' ' + e.phase; });
+    kvSet('meeting', file); start(file);
+    S.last = { txt: news.length ? 'Nouvelle liste publiée : ' + news.slice(0, 3).join(', ') + ' (stats reprises)' : 'Listes de départ mises à jour depuis le Direct (stats reprises)', t: Date.now() }; save(); renderBanner();
+    shareMeeting(file, true);
+  }).catch(function () { }).then(function () { REIMP_BUSY = false; });
+}
 function impMsg(t) { IMP_MSG = t; var m = $('#impMsg'); if (m) m.textContent = t; }
 function doImportDirect() {
   var id = ($('#impId').value || '').replace(/\D/g, ''), date = ($('#impDate').value || '').trim();
   if (!id) { impMsg('Indique le numéro du Direct (dans l\'adresse athle.fr/direct/…).'); return; }
   if (date && !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(date)) { impMsg('Date au format JJ/MM/AAAA (ou vide pour toute la réunion).'); return; }
   lsSet('cis:lastDirect', { id: id, date: date });
-  var get = function (url) { return relaisGet({ action: 'brut', url: url, ttl: 30 }).then(function (x) { if (!x.ok) throw new Error(x.erreur || 'relais'); if (x.code !== 200) throw new Error('page ' + x.code); return x.texte; }); };
+  var get = pageGet;
   impMsg('Import en cours…');
   CISI.importDirect(id, date, get, impMsg).then(function (file) {
     if (!file.meeting.epreuves.length) throw new Error('aucune épreuve pour cette date');
@@ -1123,7 +1142,7 @@ function liveUrl(guid) { return 'https://www.athle.fr/bases/liste.aspx?frmbase=d
 function liveTargets() {
   var n = nowMin(), out = [];
   M.rounds.forEach(function (r) {
-    if (r.cmb) { r.cmb.forEach(function (d, i) { var t = dTime(r, i); if (d.guid && t != null && t <= n + 5 && !(S.live[r.id + '_' + i] || {}).off) out.push({ r: r, h: r.heats[0], d: i, guid: d.guid, t: t }); }); return; }
+    if (r.cmb) { r.cmb.forEach(function (d, i) { var t = d.autre ? -1 : dTime(r, i); if (d.guid && t != null && t <= n + 5 && !(S.live[r.id + '_' + i] || {}).off) out.push({ r: r, h: r.heats[0], d: i, guid: d.guid, t: t }); }); return; }
     r.heats.forEach(function (h) { var t = hStart(r, h); if (h.guid && t != null && t <= n + 5 && !(S.live[h.id] || {}).off) out.push({ r: r, h: h, guid: h.guid, t: t }); });
   });
   out.sort(function (a, b) { return b.t - a.t; }); // les plus récentes d'abord
@@ -1348,7 +1367,7 @@ document.addEventListener('click', function (ev) {
     case 'openShared': openShared(el.dataset.id); break;
     case 'impDirect': doImportDirect(); break;
     case 'liveTog': lsSet('cis:live', !lsGet('cis:live', true)); settingsSheet(); renderTop(); break;
-    case 'liveNow': S.live = {}; save(); closeSheet(); liveTick(); break;
+    case 'liveNow': S.live = {}; save(); closeSheet(); liveTick(); autoReimport(true); break;
     case 'invite':
       var link = location.origin + location.pathname + '#relais=' + encodeURIComponent(RL.url) + '&code=' + encodeURIComponent(RL.cle);
       (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(function () { SHARE_MSG = 'Lien copié : envoie-le aux autres speakers (SMS, mail…).'; refreshShareUi(); })
@@ -1402,7 +1421,8 @@ kvGet('meeting').then(function (j) { if (j && (j.meeting || j.epreuves)) start(j
 setInterval(pollShared, 5000);
 setInterval(syTick, 3000);
 setInterval(liveTick, 10000);
+setInterval(autoReimport, 60000);
 window.addEventListener('online', syTick);
 window.addEventListener('online', pollShared);
-window.CIS = { get S() { return S; }, get M() { return M; }, nowMin: nowMin, render: function () { save(); renderAll(); } };
+window.CIS = { get S() { return S; }, get M() { return M; }, nowMin: nowMin, reimp: function (f) { autoReimport(f); }, render: function () { save(); renderAll(); } };
 })();

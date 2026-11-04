@@ -132,8 +132,12 @@ RF par catégorie, MPF par catégorie.
   Alertes et historique « (Direct) ». **Une case saisie à la main n'est jamais écrasée.** Avec l'heure
   simulée, une réunion passée se rejoue (testé sur la J3 à 15h50). Bouton marche/arrêt et « Mettre à jour
   maintenant » dans Réglages. Athlètes reconnus par leur n° de fiche FFA, sinon par le nom.
-  À faire : réimporter automatiquement les listes de départ des finales publiées en cours de réunion
-  (aujourd'hui : relancer « Importer », les saisies sont gardées) ; live Matsport.
+- **V1.7** : réimport discret toutes les 3 min (réunion du jour, live activé) : une liste publiée en cours de
+  réunion (finale…) apparaît seule, avec reprise des **stats Media Sheet** déjà fusionnées et des références
+  (SB/PB, records, MPF) ; bandeau « Nouvelle liste publiée : … ». Saisies gardées (identifiants stables).
+  **Combinés sur deux jours** : l'import va chercher dans le programme des autres journées les épreuves du
+  combiné (ex. J2 de l'heptathlon quand on importe la J3) : leurs résultats remontent, sans les mettre dans
+  l'horaire du jour. Il faut **réimporter** une réunion importée avant la V1.7 pour en profiter.
 - **Horaire des combinés (V1.5)** : dans la colonne Horaire, une ligne par épreuve du combiné avec son heure
   (« 14h05 Javelot · Heptathlon ») ; la toucher ouvre le panneau du combiné **directement sur l'onglet de
   cette épreuve** (les autres épreuves et le classement restent à un onglet). Heures tirées du Direct ; sinon

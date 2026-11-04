@@ -107,10 +107,23 @@ function importDirect(id, date, get, progress) {
         }).catch(function () { });
       })).then(function () { progress(Object.keys(pages).length + ' listes lues…'); return step(); });
     }
-    return step();
+    return step().then(function () {
+      // épreuves combinées sur plusieurs jours : on va chercher les épreuves des autres journées du combiné
+      var hasComb = Object.keys(pages).some(function (g) { return pages[g].comb; });
+      if (!hasComb || !dd) return;
+      var other = {}; r[1].replace(/btn_date\('(\d{2}\/\d{2}\/\d{4})'\)/g, function (a, x) { if (x !== date) other[x] = 1; });
+      return Promise.all(Object.keys(other).map(function (od) {
+        var pu = prog.replace('&date=' + encodeURIComponent(date), '&date=' + encodeURIComponent(od));
+        return get(pu).then(function (html) {
+          var re = /<tr[^>]*>((?:(?!<\/tr>)[\s\S])*?-\s*(?:Hepta|D[ée]ca|Penta|Hexa|Octa|T[ée]tra)thlon(?:(?!<\/tr>)[\s\S])*)<\/tr>/gi, m;
+          while ((m = re.exec(html))) { var g = guidOf(m[1]); if (g && !seen[g]) { seen[g] = 1; todo.push(g); } }
+        }).catch(function () { });
+      })).then(step);
+    });
   }).then(function () {
     var L = Object.keys(pages).map(function (g) { return pages[g]; });
-    if (dd) L = L.filter(function (o) { return !o.day || (o.day === +dd[1] && (!o.month || o.month === +dd[2])); });
+    var isDay = function (o) { return !o.day || (o.day === +dd[1] && (!o.month || o.month === +dd[2])); };
+    if (dd) { L.forEach(function (o) { if (o.comb && !isDay(o)) o.autre = true; }); L = L.filter(function (o) { return isDay(o) || o.comb; }); }
     L = L.filter(function (o) { return o.rows.length; });
     var eps = [], combs = {};
     L.forEach(function (o) {
@@ -128,13 +141,13 @@ function importDirect(id, date, get, progress) {
       eps.push(toEpreuve(o));
     });
     Object.keys(combs).forEach(function (k) {
-      var c = combs[k]; c.list.sort(function (a, b) { return a.time < b.time ? -1 : 1; });
-      var first = c.list[0], e = toEpreuve(first);
+      var c = combs[k]; c.list.sort(function (a, b) { return ((a.month * 40 + a.day) - (b.month * 40 + b.day)) || (a.time < b.time ? -1 : 1); });
+      var first = c.list.filter(function (x) { return !x.autre; })[0] || c.list[0], e = toEpreuve(first);
       e.nom = c.o.comb.replace(/\s+[A-Z]{2,3}$/, ''); e.phase = ''; e.qualification = ''; e.cis_round = 'comb|' + k; e.cis_id = shortId(first.guid);
       e.records_cis = [];
       e.startlist = Object.keys(c.ath).map(function (d) { var a = c.ath[d]; var s = athlete(a.r); s.sb = a.sb.join(' | '); s.pb = a.pb.join(' | '); return s; })
         .sort(function (a, b) { return (+a.couloir || 99) - (+b.couloir || 99); });
-      e.cis_disc = c.list.map(function (x) { return { disc: x.disc, horaire: x.time, guid: x.guid }; });
+      e.cis_disc = c.list.map(function (x) { return { disc: x.disc, horaire: x.time, guid: x.guid, autre: !!x.autre }; });
       eps.push(e);
     });
     eps.sort(function (a, b) { return (a.horaire < b.horaire ? -1 : a.horaire > b.horaire ? 1 : 0) || (a.nom < b.nom ? -1 : 1); });
@@ -164,7 +177,7 @@ function importDirect(id, date, get, progress) {
 
 // ---------- fusion avec Media Sheet (palmarès, records détenus, bilans, minima…) ----------
 function normName(s) { return String(s || '').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Z]/g, ''); }
-function mergeMediaSheet(file, ms) {
+function mergeMediaSheet(file, ms, carry) { // carry = reprise des stats d'une version précédente de la réunion
   var E = root.CISE, msm = ms.meeting || ms, eps = (file.meeting || file).epreuves, n = 0;
   var byKey = {};
   (msm.epreuves || []).forEach(function (e) { var k = E.eventInfo(e.nom, e.sexe, false).base + '|' + e.sexe; (byKey[k] = byKey[k] || []).push(e); });
@@ -179,12 +192,13 @@ function mergeMediaSheet(file, ms) {
       m = m || athByName[normName(a.nom)]; if (!m) return;
       n++;
       ['nat', 'pays', 'licence', 'entraineur', 'palmares_national', 'palmares_international', 'records', 'minima_status', 'bio', 'photo', 'tags'].forEach(function (f) { if (m[f]) a[f] = m[f]; });
-      if (m.sb) a.sb = m.sb + (a.sb ? ' | ' + a.sb : '');
-      if (m.pb) a.pb = m.pb + (a.pb ? ' | ' + a.pb : '');
+      if (carry) { if (m.sb) a.sb = m.sb; if (m.pb) a.pb = m.pb; }
+      else { if (m.sb) a.sb = m.sb + (a.sb ? ' | ' + a.sb : ''); if (m.pb) a.pb = m.pb + (a.pb ? ' | ' + a.pb : ''); }
       if (m.url && !a.url) a.url = m.url;
     });
   });
-  file.mediasheet = { id: ms.id || '', fusion: new Date().toISOString(), athletes: n };
+  if (!carry) file.mediasheet = { id: ms.id || '', fusion: new Date().toISOString(), athletes: n };
+  else if (ms.mediasheet) file.mediasheet = ms.mediasheet;
   return n;
 }
 
