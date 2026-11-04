@@ -121,6 +121,11 @@ si on réimporte après l'ajout des finales). Ensuite, ouvrir le fichier Media S
 dossard + nom. La réunion importée est partagée avec tous les appareils.
 Testé sur la J3 : 16 tours dont les finales du 200 m F/H et du 110 m H, heures exactes, règles 2Q+2q / 3Q+2q,
 RF par catégorie, MPF par catégorie.
+- **Horaire des combinés (V1.5)** : dans la colonne Horaire, une ligne par épreuve du combiné avec son heure
+  (« 14h05 Javelot · Heptathlon ») ; la toucher ouvre le panneau du combiné **directement sur l'onglet de
+  cette épreuve** (les autres épreuves et le classement restent à un onglet). Heures tirées du Direct ; sinon
+  bouton « Heure ? ✎ » dans l'onglet de l'épreuve (heure partagée entre appareils). Les suggestions
+  « Maintenant » proposent aussi l'épreuve du combiné en cours.
 - Combinés en catégorie jeunes (CA, MI…) : tables FFA jeunes **pas encore intégrées** ; message d'avertissement
   et points indicatifs (tables adultes). À faire si le cas se présente (remarque d'Alexandre, 4/11/2026).
 

@@ -271,6 +271,9 @@ function loadMeeting(file) {
     };
     if (r.type === 'comb') {
       r.cmb = combProgram(e0.nom, e0.sexe, salle);
+      if (r.cmb && e0.cis_disc) r.cmb.forEach(function (d) { // heure de chaque épreuve (import du Direct)
+        e0.cis_disc.forEach(function (x) { if (eventInfo(x.disc, e0.sexe, salle).base === d.info.base && x.horaire) d.time = parseHour(x.horaire); });
+      });
       // catégories jeunes : tables et épreuves propres (FFA), pas encore intégrées
       r.cmbJeunes = /^(CA|MI|BE|PO)/.test(e0.categorie || '') || /\b(U1[268]|CF|CM|MF|MM|cadet|minime)\b/i.test(e0.nom || '');
       if (r.cmb) heats.forEach(function (h) { h.ath.forEach(function (a) { a.cref = r.cmb.map(function (d) { return { sb: bestFromList(a.src.sb, d.info), pb: bestFromList(a.src.pb, d.info) }; }); }); });

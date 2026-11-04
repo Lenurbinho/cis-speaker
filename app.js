@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 var E = window.CISE;
-var VERSION = 'V1.4 · 4 nov. 2026';
+var VERSION = 'V1.5 · 4 nov. 2026';
 var $ = function (s) { return document.querySelector(s); };
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
@@ -24,7 +24,7 @@ function kvSet(k, v) { return idb().then(function (db) { return new Promise(func
 
 // ---------- état ----------
 var RAW = null, M = null, S = null, ROUNDS = {}, KP = null;
-function blank() { return { res: {}, cmb: {}, wind: {}, ess: {}, vert: {}, rules: {}, qov: {}, off: {}, done: {}, finals: [], lanes: {}, pins: null, ptab: null, heatSel: {}, sortRank: {}, hide: {}, hist: [], clock: null, last: null }; }
+function blank() { return { res: {}, cmb: {}, dtime: {}, wind: {}, ess: {}, vert: {}, rules: {}, qov: {}, off: {}, done: {}, finals: [], lanes: {}, pins: null, ptab: null, heatSel: {}, sortRank: {}, hide: {}, hist: [], clock: null, last: null }; }
 function skey() { return 'cis:s:' + M.id; }
 function save() { lsSet(skey(), S); if (SY && syncOn()) syDiff(); }
 function build() {
@@ -182,37 +182,55 @@ function renderTop() {
   $('#clockT').textContent = fh(Math.floor(nowMin()));
   $('#clockSim').textContent = S.clock && S.clock.sim ? 'heure simulée' : '';
 }
+// horaire : une ligne par tour, et une ligne par épreuve pour les combinés (quand l'heure est connue)
+function dTime(r, i) { var x = (S.dtime || {})[r.id + '_' + i]; var t = x != null ? x : r.cmb[i].time; return t == null ? null : t + (S.off[r.id] || 0); }
+function dStatus(r, i) {
+  var h = r.heats[0], done = h.ath.length && h.ath.every(function (a) { return cmbDone(r, h, a, i); }), any = h.ath.some(function (a) { return cmbDone(r, h, a, i); });
+  if (done || S.done[r.id]) return 'fini'; if (any) return 'encours';
+  var t = dTime(r, i), n = nowMin(), du = r.cmb[i].unit === 't' ? 15 : r.cmb[i].jump && r.cmb[i].nom !== 'Longueur' ? 90 : 50;
+  if (t == null || n < t) return 'avenir'; return n < t + du ? 'encours' : 'passe';
+}
+function horEntries() {
+  var out = [];
+  M.rounds.forEach(function (r) {
+    var dd = r.cmb ? r.cmb.map(function (d, i) { return i; }).filter(function (i) { return dTime(r, i) != null; }) : [];
+    if (dd.length) dd.forEach(function (i) { out.push({ r: r, d: i, t: dTime(r, i), st: dStatus(r, i) }); });
+    else out.push({ r: r, d: null, t: rStart(r), st: status(r) });
+  });
+  out.sort(function (a, b) { return (a.t == null ? 9999 : a.t) - (b.t == null ? 9999 : b.t); });
+  return out;
+}
+function entryLabel(x) { return x.d == null ? { t: x.r.title, s: x.r.phase } : { t: x.r.cmb[x.d].lab + ' · ' + x.r.title.replace(/ [FH]$/, ''), s: x.r.title + ' · jour ' + x.r.cmb[x.d].day }; }
 function renderHor() {
   var el = $('#hor');
   if (!M) { el.innerHTML = ''; return; }
   var n = nowMin(), placed = false, h = '';
   h += '<div class="hctl"><b>Retard</b><button class="btn s" data-act="delay" data-d="-5">−5 min</button><button class="btn s p" data-act="delay" data-d="5">+5 min</button></div>';
-  M.rounds.forEach(function (r) {
-    var t = rStart(r), st = status(r), pin = (S.pins || []).indexOf(r.id) >= 0;
+  horEntries().forEach(function (x) {
+    var r = x.r, t = x.t, st = x.st, pin = (S.pins || []).indexOf(r.id) >= 0 && (x.d == null || String(S.heatSel[r.id]) === String(x.d)), lb = entryLabel(x);
     if (!placed && t != null && t > n) { h += '<div class="nowline">Maintenant ' + fh(n) + '</div>'; placed = true; }
     var off = S.off[r.id] || 0;
-    h += '<button class="hi ' + st + (pin ? ' pin' : '') + '" data-act="pick" data-r="' + r.id + '"><span class="ht">' + fh(t) + '</span><span class="hn">' + esc(r.title) +
-      '<small>' + esc(r.phase) + (r.heats.length > 1 ? ' · ' + r.heats.length + ' ' + (r.heats[0].label.split(' ')[0].toLowerCase()) + 's' : '') + (off ? ' <span class="off5">' + (off > 0 ? '+' : '') + off + ' min</span>' : '') + '</small></span>' +
+    h += '<button class="hi ' + st + (pin ? ' pin' : '') + (x.d != null ? ' sub' : '') + '" data-act="pick" data-r="' + r.id + '"' + (x.d != null ? ' data-d="' + x.d + '"' : '') + '><span class="ht">' + fh(t) + '</span><span class="hn">' + esc(lb.t) +
+      '<small>' + esc(lb.s) + (x.d == null && r.heats.length > 1 ? ' · ' + r.heats.length + ' ' + (r.heats[0].label.split(' ')[0].toLowerCase()) + 's' : '') + (off ? ' <span class="off5">' + (off > 0 ? '+' : '') + off + ' min</span>' : '') + '</small></span>' +
       '<span class="st ' + st + '">' + (pin ? '📌 ' : '') + STL[st] + '</span></button>';
   });
   if (!placed) h += '<div class="nowline">Maintenant ' + fh(n) + '</div>';
   el.innerHTML = h;
 }
-function suggestions() {
-  var n = nowMin();
-  return M.rounds.filter(function (r) {
-    var st = status(r), t = rStart(r);
-    return st === 'encours' || (st === 'avenir' && t != null && t - n <= 30);
-  });
+function suggestions() { // tours (ou épreuves de combinés) en cours ou qui commencent dans les 30 min
+  var n = nowMin(), seen = {};
+  return horEntries().filter(function (x) {
+    return x.st === 'encours' || (x.st === 'avenir' && x.t != null && x.t - n <= 30);
+  }).filter(function (x) { var k = x.r.id + '|' + x.d; if (seen[k]) return false; seen[k] = 1; return true; });
 }
 function renderSuggest() {
   var el = $('#suggest');
   if (!M) { el.innerHTML = ''; return; }
   var pins = S.pins || [];
-  var sg = suggestions().filter(function (r) { return pins.indexOf(r.id) < 0; });
-  el.innerHTML = sg.length ? '<b>Maintenant :</b>' + sg.map(function (r) {
-    var st = status(r);
-    return '<button class="chip' + (st === 'encours' ? ' hot' : '') + '" data-act="pin" data-r="' + r.id + '">+ ' + esc(r.title) + ' · ' + esc(r.phase) + ' · ' + fh(rStart(r)) + '</button>';
+  var sg = suggestions().filter(function (x) { return pins.indexOf(x.r.id) < 0 || (x.d != null && String(S.heatSel[x.r.id]) !== String(x.d)); });
+  el.innerHTML = sg.length ? '<b>Maintenant :</b>' + sg.map(function (x) {
+    var lb = entryLabel(x);
+    return '<button class="chip' + (x.st === 'encours' ? ' hot' : '') + '" data-act="pin" data-r="' + x.r.id + '"' + (x.d != null ? ' data-d="' + x.d + '"' : '') + '>+ ' + esc(lb.t) + (x.d == null ? ' · ' + esc(lb.s) : '') + ' · ' + fh(x.t) + '</button>';
   }).join('') : '';
 }
 function renderBanner() {
@@ -426,7 +444,10 @@ function cmbPerfTxt(d, x) { return !x ? '' : x.st ? x.st : fp(x.v, d.unit); }
 function combHtml(r) {
   if (!r.cmb) return combTotalHtml(r);
   var ht = r.heats[0], sel = S.heatSel[r.id];
-  if (sel == null || sel === '' || (sel !== 'cl' && !r.cmb[+sel])) sel = 'cl';
+  if (sel == null || sel === '' || (sel !== 'cl' && !r.cmb[+sel])) {
+    var curD = r.cmb.map(function (d, i) { return i; }).filter(function (i) { return dStatus(r, i) === 'encours'; })[0];
+    sel = curD != null ? String(curD) : 'cl';
+  }
   var tabs = '<div class="htabs">' + r.cmb.map(function (d, i) {
     var ok = ht.ath.every(function (a) { return cmbDone(r, ht, a, i); });
     return '<button class="htab' + (String(sel) === String(i) ? ' on' : '') + (ok ? ' ok' : '') + '" data-act="heat" data-r="' + r.id + '" data-h="' + i + '">' + esc(d.short) + (ok ? ' ✓' : '') + '<small>J' + d.day + '</small></button>';
@@ -453,6 +474,7 @@ function combHtml(r) {
   var byRank = S.sortRank['c' + r.id + di] === true;
   if (byRank) rows = ord.concat(rows.filter(function (a) { return ord.indexOf(a) < 0; })); else rows.sort(function (a, b) { return a.order - b.order; });
   var h2 = '<div class="pinfo"><span class="up">' + esc(d.lab) + '</span><span class="nx">jour ' + d.day + ' · ' + ord.length + '/' + ht.ath.length + ' saisis</span><span class="sp"></span>' +
+    '<button class="btn s" data-act="dtime" data-r="' + r.id + '" data-d="' + di + '">' + (dTime(r, di) != null ? fh(dTime(r, di)) : 'Heure ?') + ' ✎</button>' +
     '<button class="btn s" data-act="sortc" data-r="' + r.id + '" data-d="' + di + '">' + (byRank ? 'Ordre : classement' : 'Ordre : liste') + '</button></div>';
   var body2 = '<div class="rw hd"><span>Pl</span><span>Athlète</span><span class="c-r">SB / PB</span><span style="text-align:right">Perf</span><span style="text-align:right">Pts</span></div>';
   rows.forEach(function (a) {
@@ -645,6 +667,7 @@ function kpOk() {
   } else if (m === 'time') {
     if (KP.raw.length < 3) return;
     var nt = +KP.raw.slice(0, -2) * 60 + +KP.raw.slice(-2);
+    if (KP.d != null && r.cmb) { commit(['dtime', r.id + '_' + KP.d], nt - (S.off[r.id] || 0), r.title + ' · ' + r.cmb[KP.d].lab + ' · heure ' + fh(nt), '', r.id); closeKp(); renderAll(); return; }
     commit(['off', r.id], nt - r.time || null, r.title + ' ' + r.phase + ' · heure ' + fh(nt), '', r.id); closeKp();
   }
   renderAll();
@@ -828,7 +851,8 @@ function start(raw, isNew) {
   }
   if (S.pins == null) {
     var sg = suggestions();
-    S.pins = (sg.length ? sg : M.rounds).slice(0, window.innerWidth > 700 ? 2 : 3).map(function (r) { return r.id; });
+    var ids = []; (sg.length ? sg.map(function (x) { return x.r; }) : M.rounds).forEach(function (r) { if (ids.indexOf(r.id) < 0) ids.push(r.id); });
+    S.pins = ids.slice(0, window.innerWidth > 700 ? 2 : 3);
   }
   if (syncOn()) syLoad(); else SY = null;
   save(); renderAll(); syTick();
@@ -1098,10 +1122,11 @@ document.addEventListener('click', function (ev) {
       else { document.body.classList.toggle('nohor'); lsSet('cis:nohor', document.body.classList.contains('nohor')); }
       break;
     case 'pick':
+      if (el.dataset.d != null) S.heatSel[r.id] = el.dataset.d;
       if (S.pins.indexOf(r.id) < 0) pin(r.id); else { S.ptab = r.id; save(); var p = document.querySelector('.panel[data-r="' + r.id + '"]'); if (p && !isPhone()) p.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' }); }
       if (window.innerWidth <= 900) document.body.classList.remove('showhor');
       renderAll(); break;
-    case 'pin': pin(r.id); closeSheet(); renderAll(); break;
+    case 'pin': if (el.dataset.d != null) S.heatSel[r.id] = el.dataset.d; pin(r.id); closeSheet(); renderAll(); break;
     case 'unpin': S.pins = S.pins.filter(function (x) { return x !== r.id; }); save(); renderAll(); break;
     case 'ptab': S.ptab = r.id; save(); renderPanels(); window.scrollTo(0, 0); break;
     case 'heat': S.heatSel[r.id] = el.dataset.h; save(); renderPanels(); break;
@@ -1113,6 +1138,7 @@ document.addEventListener('click', function (ev) {
       var dd = +el.dataset.d, xc = cmbOf(h, a)[dd], du = r.cmb[dd].unit;
       openKp({ mode: 'cmb', r: r.id, h: h.id, k: a.key, d: dd, raw: xc && xc.v != null ? E.valueToRaw(xc.v, du) : '', st: xc && xc.st, w: xc && xc.w != null ? String(Math.round(Math.abs(xc.w) * 10)) : '', sign: xc && xc.w < 0 ? -1 : 1 });
       break;
+    case 'dtime': openKp({ mode: 'time', r: r.id, h: r.heats[0].id, d: +el.dataset.d }); break;
     case 'sortc': var sk = 'c' + r.id + el.dataset.d; S.sortRank[sk] = !S.sortRank[sk]; save(); renderPanels(); break;
     case 'lane': if (r.fromRound) openKp({ mode: 'lane', r: r.id, h: h.id, k: a.key, raw: (S.lanes[h.id] || {})[a.key] || '' }); else { var x2 = (S.res[h.id] || {})[a.key] || {}; openKp({ mode: 'perf', r: r.id, h: h.id, k: a.key, raw: x2.v != null ? E.valueToRaw(x2.v, r.unit) : '', st: x2.st }); } break;
     case 'ess':
