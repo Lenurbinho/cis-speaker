@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 var E = window.CISE;
-var VERSION = 'V1.9 · 4 nov. 2026';
+var VERSION = 'V1.10 · 4 nov. 2026';
 var $ = function (s) { return document.querySelector(s); };
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
@@ -167,7 +167,9 @@ function statsHtml(r, h, a) {
     (more > 0 ? '<button class="more" data-act="fiche" data-r="' + r.id + '" data-h="' + h.id + '" data-k="' + esc(a.key) + '" aria-label="Voir toutes les stats">+' + more + '</button>' : '') + '</small>';
 }
 function nameHtml(r, h, a, extra) {
-  var u = ficheUrl(a), nm = u ? '<a class="nl" href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(a.name) + '</a>' : esc(a.name);
+  var parts = String(a.name).split(' '), up = parts.filter(function (w) { return w === w.toUpperCase() && /[A-Z]/.test(w); });
+  var pre = parts.slice(0, parts.length - up.length).join(' '), nmH = up.length && pre ? '<span class="pn">' + esc(pre) + '</span><span class="pi">' + esc(pre.charAt(0)) + '.</span> ' + esc(up.join(' ')) : esc(a.name);
+  var u = ficheUrl(a), nm = u ? '<a class="nl" href="' + esc(u) + '" target="_blank" rel="noopener">' + nmH + '</a>' : nmH;
   return '<span class="c-n"><b>' + nm + '<button class="fi" data-act="fiche" data-r="' + r.id + '" data-h="' + h.id + '" data-k="' + esc(a.key) + '" aria-label="Fiche de l\'athlète">i</button></b><small><span class="ct">' + esc(a.cat) + '</span> · ' + esc(a.club || a.nat) + '</small>' + statsHtml(r, h, a) + (noteOf(a) ? '<small class="note1">📝 ' + esc(noteOf(a)) + '</small>' : '') + (extra || '') + '</span>';
 }
 function isEdit(h, a) { return KP && KP.h === h.id && KP.k === a.key; }
@@ -1383,6 +1385,15 @@ function liveApply(tg, res) {
     }
   }
   if (res.officiel && tg.d == null && (r.type === 'horiz' || r.type === 'vert')) liveSet(['done', r.id], true, heatText(r, h) + ' · résultats officiels', ch);
+  if (r.type === 'course' && hasQ(r) && (!S.rules[r.id] || S.live['rule_' + r.id])) { // règle absente : on la déduit des Q/q officiels
+    var nQ = 0, nq = 0; res.rows.forEach(function (row) { if (row.qualif === 'Q') nQ++; else if (row.qualif === 'q') nq++; });
+    if (nQ || nq) {
+      S.live[h.id + '_q'] = { Q: nQ, q: nq };
+      var mQ = 0, sq = 0; r.heats.forEach(function (x) { var c = S.live[x.id + '_q']; if (c) { mQ = Math.max(mQ, c.Q); sq += c.q; } });
+      var rule = mQ + 'Q' + (sq ? '+' + sq + 'q' : '');
+      if (!r.qualif && ruleOf(r) !== rule) { S.live['rule_' + r.id] = 1; liveSet(['rules', r.id], rule, r.title + ' · qualification ' + rule + ' (déduite des résultats)', ch); }
+    }
+  }
   if (res.officiel && r.type === 'course' && hasQ(r) && ruleOf(r)) { // Q/q officiels : on ne corrige que là où le calcul diffère
     var qm = E.qualify(r, S.res, ruleOf(r));
     res.rows.forEach(function (row) {

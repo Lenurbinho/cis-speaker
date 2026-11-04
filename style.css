@@ -210,6 +210,7 @@ textarea.txt{font:inherit;border:1px solid var(--line);border-radius:10px;paddin
 
 /* très étroit (4 épreuves côte à côte avec l'horaire) : l'essentiel seulement */
 .esl{display:none!important}
+.pi{display:none}
 @container (max-width:330px){
   .phead{flex-wrap:wrap;gap:6px}
   .phead .pt{flex-basis:100%}
@@ -217,9 +218,10 @@ textarea.txt{font:inherit;border:1px solid var(--line);border-radius:10px;paddin
   .pbtn{height:36px;min-width:36px}
   .rw{padding:5px 6px;gap:0 5px;min-height:54px}
   .c-n b{font-size:calc(18px*var(--fs));-webkit-line-clamp:2}
+  .c-n .pn{display:none}.c-n .pi{display:inline}
   .c-n small{white-space:nowrap!important}
   .c-n small .ct~*{display:none}
-  .fi{width:24px;height:24px;font-size:13px;margin-left:4px}
+  .fi{display:none}  /* fiche accessible par le bouton « Fiche » du pavé */
   .course .rw,.course.fin .rw{grid-template-columns:28px minmax(0,1fr) 70px 30px}
   .course.fin .rw{grid-template-columns:28px minmax(0,1fr) 74px}
   .course .c-pl,.course.fin .c-pl{display:none}

@@ -91,6 +91,7 @@ var SPECS = {
 };
 function eventInfo(nom, sexe, salle) {
   var n = nk(nom).replace(/\(.*\)/, '');
+  var relay = /^\d+x\d+/.test(n);
   var type = /perche|hauteur/.test(n) ? 'vert' : /longueur|triple|poids|disque|marteau|javelot/.test(n) ? 'horiz' : /thlon/.test(n) ? 'comb' : 'course';
   var unit = type === 'course' ? 't' : type === 'comb' ? 'pts' : 'm';
   var dm = n.match(/^(\d+)m/), dist = dm ? +dm[1] : 0;
@@ -98,7 +99,8 @@ function eventInfo(nom, sexe, salle) {
   var base = n.replace(/^(\d+)m(haies|steeple)?.*$/, function (a, d, h) { return d + 'm' + (h || ''); });
   if (type !== 'course') base = n.replace(/[^a-z]/g, '');
   if (/triple/.test(base)) base = 'triplesaut';
-  return { type: type, unit: unit, dist: dist, wind: wind, base: base, specs: SPECS[base + '|' + sexe] || [], salle: !!salle };
+  if (relay) { var rm = n.match(/^(\d+)x(\d+)/); dist = +rm[1] * +rm[2]; wind = false; base = rm[1] + 'x' + rm[2] + 'm'; }
+  return { type: type, unit: unit, dist: dist, wind: wind, base: base, specs: SPECS[base + '|' + sexe] || [], salle: !!salle, relay: relay };
 }
 // "Poids (4 kg) - Salle" / "Marteau 4 kg" / "Heptathlon JSF" correspond-il à l'épreuve ?
 function matchesEvent(label, ev) {
@@ -217,7 +219,7 @@ function roundDuration(r) {
   return 240;
 }
 function eventTitle(nom, sexe) {
-  var n = String(nom).replace(/\s*\([^)]*\)/g, '').replace(/^(\d)\s(\d{3})/, '$1$2').replace(/^(\d+)\s*m\b/i, '$1 m').replace(/Haies/i, 'haies').replace(/Saut/, 'saut');
+  var n = String(nom).replace(/\s*\([^)]*\)/g, '').replace(/^(\d+)\s*x\s*(\d+)\s*m?/i, '$1x$2 m').replace(/^(\d)\s(\d{3})/, '$1$2').replace(/^(\d+)\s*m\b/i, '$1 m').replace(/Haies/i, 'haies').replace(/Saut/, 'saut');
   return n + ' ' + (sexe === 'F' ? 'F' : 'H');
 }
 
@@ -275,7 +277,8 @@ function loadMeeting(file) {
         e0.cis_disc.forEach(function (x) { if (eventInfo(x.disc, e0.sexe, salle).base === d.info.base) { if (x.horaire && !x.autre) d.time = parseHour(x.horaire); d.guid = x.guid || ''; d.mats = x.mats || ''; d.autre = !!x.autre; } });
       });
       // catégories jeunes : tables et épreuves propres (FFA), pas encore intégrées
-      r.cmbJeunes = /^(CA|MI|BE|PO)/.test(e0.categorie || '') || /\b(U1[268]|CF|CM|MF|MM|cadet|minime)\b/i.test(e0.nom || '');
+      // tables World Athletics (2012) valables pour tous ; seules les catégories U16 et moins ont des tables FFA à part
+      r.cmbJeunes = /^(MI|BE|PO)/.test(e0.categorie || '') || /\b(U1[0-6]|MF|MM|minime|benjamin)\b/i.test(e0.nom || '');
       if (r.cmb) heats.forEach(function (h) { h.ath.forEach(function (a) { a.cref = r.cmb.map(function (d) { return { sb: bestFromList(a.src.sb, d.info), pb: bestFromList(a.src.pb, d.info) }; }); }); });
     }
     r.dur = roundDuration(r);

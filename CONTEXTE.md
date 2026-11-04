@@ -138,6 +138,18 @@ RF par catégorie, MPF par catégorie.
   **Combinés sur deux jours** : l'import va chercher dans le programme des autres journées les épreuves du
   combiné (ex. J2 de l'heptathlon quand on importe la J3) : leurs résultats remontent, sans les mettre dans
   l'horaire du jour. Il faut **réimporter** une réunion importée avant la V1.7 pour en profiter.
+- **V1.10** :
+  - **Règle de qualification déduite** des Q/q officiels (Matsport ou Direct) quand aucune règle n'est connue
+    (ex. Matsport seul : 2Q+2q, 3Q+2q retrouvées sur la J3) ; une règle choisie à la main n'est jamais remplacée.
+  - **Noms en panneaux très étroits** (4 épreuves + horaire) : initiale du prénom + NOM, bouton « i » masqué
+    (fiche par le bouton « Fiche » du pavé).
+  - **Catégories** reprises de Media Sheet quand la réunion vient de Matsport seul.
+  - **Salle** : réunion importée du Direct reconnue « en salle » si 60 m / 60 m haies / piste courte au programme
+    (Matsport : `isIndoor`) → SB/PB et références de salle, pas de vent. **À valider sur une vraie réunion en salle.**
+  - **Relais** (4x100, 4x400…) : reconnus comme courses sans vent, l'équipe tient lieu d'athlète. **À valider sur
+    une vraie réunion avec relais** (structure des listes Direct / Matsport des relais pas encore vue).
+  - Combinés : tables World Athletics (2012) pour toutes les catégories ; avertissement seulement pour U16 et moins
+    (minimes, benjamins…), qui ont des tables FFA à part. WA ne publie pas de tables jeunes.
 - **Live Matsport (V1.9, testé sur les archives de la J3)** : Réglages → « Live Matsport » : coller l'adresse
   d'une page de la journée (`https://athle-liveresults.fr/competitions/<id>/<id>_SCH_<aaaammjj>`, ou
   `history.…` pour les archives). Le CIS cherche l'interface de données (archives : api-history.athle.matsport.com ;
@@ -289,6 +301,5 @@ réduits au total de points.
 Fait et vérifié par Alexandre : relais version 4 installé ; heptathlon complet (7 épreuves, jours 1 et 2) sur la J3.
 En attente d'une vraie compétition : test du live Matsport (adresse de l'interface live), accord de Matsport
 sur le rythme (≈ 10 s, une seule interrogation pour tous via le cache du relais), retours terrain.
-Ensuite, au choix : relais 4x100 / 4x400 ; réunions en salle ; Q/q Matsport quand aucune règle de qualif ;
-finitions (noms coupés à 4 épreuves côte à côte, catégories absentes en Matsport seul) ; plus tard tables des
-combinées jeunes et photos.
+Faits en V1.10 : Q/q Matsport sans règle, finitions, bases salle et relais. À valider avec une capture d'une
+réunion en salle et d'une réunion avec relais. Plus tard : tables FFA des combinés U16 et moins, photos.

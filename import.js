@@ -155,10 +155,16 @@ function importDirect(id, date, get, progress) {
       eps.push(e);
     });
     eps.sort(function (a, b) { return (a.horaire < b.horaire ? -1 : a.horaire > b.horaire ? 1 : 0) || (a.nom < b.nom ? -1 : 1); });
+    // réunion en salle : 60 m / 60 m haies ou « piste courte » au programme → SB/PB et références de salle
+    var salle = eps.some(function (e) { return /^60\s?m|piste courte|salle/i.test(e.nom); });
+    if (salle) eps.forEach(function (e) { (e.startlist || []).forEach(function (a) {
+      a.sb = String(a.sb || '').split(' | ').filter(Boolean).map(function (x) { return x.replace(/^(.*?) : /, '$1 - Salle : '); }).join(' | ');
+      a.pb = String(a.pb || '').split(' | ').filter(Boolean).map(function (x) { return x.replace(/^(.*?) : /, '$1 - Salle : '); }).join(' | ');
+    }); });
     var d0 = dd ? +dd[1] + ' ' + MOIS_FR[+dd[2]] + ' ' + dd[3] : (L[0] && L[0].day ? L[0].day + ' ' + MOIS_FR[L[0].month] : '');
     return {
       id: 'direct-' + id + (dd ? '-' + dd[3] + dd[2].padStart(2, '0') + dd[1].padStart(2, '0') : ''), source: 'direct', direct: { id: id, date: date || '' }, date_maj: new Date().toISOString(),
-      meeting: { nom: nom + (dd ? ' — ' + d0 : ''), sous_titre: '', date: d0, epreuves: eps, options: { salle: false, type_competition: 'championnat' } }
+      meeting: { nom: nom + (dd ? ' — ' + d0 : ''), sous_titre: '', date: d0, epreuves: eps, options: { salle: salle, type_competition: 'championnat' } }
     };
   });
   function athlete(r) {
@@ -195,6 +201,7 @@ function mergeMediaSheet(file, ms, carry) { // carry = reprise des stats d'une v
       var m = athByDos[a.dossard]; if (m && normName(m.nom) !== normName(a.nom)) m = null;
       m = m || athByName[normName(a.nom)]; if (!m) return;
       n++;
+      if (!a.cat && m.cat) { a.cat = m.cat; a.annee = a.annee || m.annee || ''; }
       ['nat', 'pays', 'licence', 'entraineur', 'palmares_national', 'palmares_international', 'records', 'minima_status', 'bio', 'photo', 'tags'].forEach(function (f) { if (m[f]) a[f] = m[f]; });
       if (carry) { if (m.sb) a.sb = m.sb; if (m.pb) a.pb = m.pb; }
       else { if (m.sb) a.sb = m.sb + (a.sb ? ' | ' + a.sb : ''); if (m.pb) a.pb = m.pb + (a.pb ? ' | ' + a.pb : ''); }
@@ -341,7 +348,7 @@ function matsToFile(mt) { // réunion complète à partir de Matsport seul
     var fmt = function (v) { return /^\d+[.,]\d+$/.test(v) && ev.type !== 'A' && ev.type !== 'B' ? matsMark(v) : matsTime(v); };
     eps.push({ nom: nom, sexe: sexe, categorie: 'SE', horaire: t, jour: '', phase: matsPhase(e.phase), qualification: '', record_meeting: '', minima_baremes: [], series: [],
       records_cis: matsRecords(e.records || ev.records), cis_id: 'm' + String(e.id).split('_').pop(), cis_round: sexe + '|' + nom + '|' + matsKind(e.phase), cis_mats: e.id,
-      startlist: sl.map(function (a) { a.sb = a._sb ? nom + ' : ' + fmt(a._sb) : ''; a.pb = a._pb ? nom + ' : ' + fmt(a._pb) : ''; delete a._sb; delete a._pb; return a; }) });
+      startlist: sl.map(function (a) { var k = nom + (mt.comp.isIndoor ? ' - Salle' : ''); a.sb = a._sb ? k + ' : ' + fmt(a._sb) : ''; a.pb = a._pb ? k + ' : ' + fmt(a._pb) : ''; delete a._sb; delete a._pb; return a; }) });
   });
   Object.keys(combs).forEach(function (k) {
     var c = combs[k];
