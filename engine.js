@@ -258,7 +258,7 @@ function loadMeeting(file) {
         return o;
       });
       return {
-        id: e.cis_id ? 'g' + e.cis_id : 'e' + x.i, guid: e.cis_guid || '', label: n > 1 ? heatWord + ' ' + (k + 1) : (info.type === 'course' ? phase : ''),
+        id: e.cis_id ? 'g' + e.cis_id : 'e' + x.i, guid: e.cis_guid || '', mats: e.cis_mats || '', label: n > 1 ? heatWord + ' ' + (k + 1) : (info.type === 'course' ? phase : ''),
         time: t0 == null ? null : (sameTime ? t0 + k * heatInterval(info) : parseHour(e.horaire)), est: sameTime && k > 0,
         ath: ath
       };
@@ -272,7 +272,7 @@ function loadMeeting(file) {
     if (r.type === 'comb') {
       r.cmb = combProgram(e0.nom, e0.sexe, salle);
       if (r.cmb && e0.cis_disc) r.cmb.forEach(function (d) { // heure de chaque épreuve (import du Direct)
-        e0.cis_disc.forEach(function (x) { if (eventInfo(x.disc, e0.sexe, salle).base === d.info.base) { if (x.horaire && !x.autre) d.time = parseHour(x.horaire); d.guid = x.guid || ''; d.autre = !!x.autre; } });
+        e0.cis_disc.forEach(function (x) { if (eventInfo(x.disc, e0.sexe, salle).base === d.info.base) { if (x.horaire && !x.autre) d.time = parseHour(x.horaire); d.guid = x.guid || ''; d.mats = x.mats || ''; d.autre = !!x.autre; } });
       });
       // catégories jeunes : tables et épreuves propres (FFA), pas encore intégrées
       r.cmbJeunes = /^(CA|MI|BE|PO)/.test(e0.categorie || '') || /\b(U1[268]|CF|CM|MF|MM|cadet|minime)\b/i.test(e0.nom || '');

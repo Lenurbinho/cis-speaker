@@ -231,5 +231,155 @@ function parseResultats(html) {
   return o;
 }
 
-root.CISI = { parseResultats: parseResultats, parseListe: parseListe, importDirect: importDirect, mergeMediaSheet: mergeMediaSheet };
+// ---------- Matsport (live ou archives) ----------
+// Adresse collée par le speaker : https://athle-liveresults.fr/competitions/<id>/<id>_SCH_<aaaammjj>
+// (archives : https://history.athle-liveresults.fr/…). Les données viennent de l'interface JSON de Matsport.
+var MATS_API_LIVE = ['https://api.athle.matsport.com', 'https://api-live.athle.matsport.com', 'https://api.athle-liveresults.fr', 'https://api-history.athle.matsport.com'];
+function parseMatsUrl(u) {
+  var m = String(u || '').match(/competitions\/([0-9a-f-]{36})(?:\/[0-9a-f-]{36}_SCH_(\d{8}))?/i);
+  if (!m) return null;
+  return { cid: m[1].toLowerCase(), day: m[2] || '', history: /\/\/history\./i.test(u) };
+}
+function matsTime(t) { // « 1:58.70 » → 1'58"70 ; « 23.39 » → 23"39
+  t = String(t || '').trim(); var m;
+  if ((m = t.match(/^(\d+):(\d{2})[.,](\d{1,3})$/))) return m[1] + "'" + m[2] + '"' + (m[3] + '0').slice(0, 2);
+  if ((m = t.match(/^(\d+):(\d{2})$/))) return m[1] + "'" + m[2] + '"';
+  if ((m = t.match(/^(\d+)[.,](\d{1,3})$/))) return m[1] + '"' + (m[2] + '0').slice(0, 2);
+  return t;
+}
+function matsMark(t) { var m = String(t || '').match(/^(\d+)[.,](\d{1,2})$/); return m ? m[1] + 'm' + (m[2] + '0').slice(0, 2) : String(t || ''); }
+function matsEventName(e) { return String(e.event || '').replace(/\s+(Hommes|Femmes|Mixte)$/i, '').trim(); }
+function matsSexe(e) { return /^W|F/i.test(e.gender || '') ? 'F' : 'H'; }
+function matsPhase(p) {
+  p = String(p || '');
+  var m;
+  if ((m = p.match(/Demi\s*Finale\s*(\d+)/i))) return '1/2 finale ' + m[1];
+  if ((m = p.match(/Quart\s*de\s*Finale\s*(\d+)/i))) return '1/4 finale ' + m[1];
+  if ((m = p.match(/S[ée]rie\s*(\d+)/i))) return 'Série ' + m[1];
+  if (/finale/i.test(p)) return 'Finale';
+  return p;
+}
+function matsKind(p) { return /demi/i.test(p) ? 'demi' : /quart/i.test(p) ? 'quart' : /s[ée]rie/i.test(p) ? 'series' : 'finale'; }
+var ST_MATS = { NP: 'DNS', AB: 'DNF', DQ: 'DQ', NM: 'NM', DNS: 'DNS', DNF: 'DNF' };
+function matsResults(ev) { // JSON d'une épreuve Matsport → même forme que parseResultats (Direct)
+  var o = { wind: null, officiel: ev.status === 'OFFICIAL', rows: [] };
+  var tr = ev.trackResult, hr = ev.horizontalResult, vr = ev.verticalResult;
+  var base = tr || hr || vr; if (!base) return o;
+  if (tr && tr.wind) o.wind = parseFloat(String(tr.wind).replace(',', '.'));
+  (base.results || []).forEach(function (x) {
+    var a = x.athlete || {}, st = ST_MATS[x.status] || '';
+    var r = { place: x.rank || '', bib: String(x.bib || ''), nom: ((a.name || '') + ' ' + (a.forename || '')).trim(), url: '', qualif: x.qualif || '', vent: '', st: st, marks: [], points: x.points || '' };
+    if (tr) r.perf = st ? x.status : matsTime(x.time);
+    if (hr) {
+      r.perf = st ? x.status : matsMark(x.result);
+      (x.attemptHorizontal || []).forEach(function (t) { if (t.round_Attempt) r.marks.push({ k: String(t.numRound), m: /^\d/.test(t.round_Attempt) ? matsMark(t.round_Attempt) : t.round_Attempt, w: t.round_Wind || '' }); });
+      var best = (x.attemptHorizontal || []).filter(function (t) { return t.round_Attempt === x.result; })[0];
+      if (best) r.vent = best.round_Wind || '';
+    }
+    if (vr) {
+      r.perf = st ? x.status : matsMark(x.result);
+      (x.attemptVertical || []).forEach(function (t) { var m = (t.ht_Att1 || '') + (t.ht_Att2 || '') + (t.ht_Att3 || ''); if (m) r.marks.push({ k: matsMark(t.ht), m: m }); });
+    }
+    o.rows.push(r);
+  });
+  return o;
+}
+function matsStart(ev) { // liste des athlètes (résultats, ou engagés avant la course)
+  var base = ev.trackResult || ev.horizontalResult || ev.verticalResult, out = [];
+  var list = (base && base.results && base.results.length ? base.results : null) || ev.engaged || [];
+  list.forEach(function (x, i) {
+    var a = x.athlete || x || {};
+    out.push({ nom: ((a.name || '') + ' ' + (a.forename || '')).trim() || a.longName || '', nat: a.country || '', pays: '', cat: '', annee: '', couloir: String(x.lane || x.order || i + 1), dossard: String(x.bib || ''),
+      club: a.club || x.club || '', url: a.palmares || '', sb: '', pb: '', palmares_national: '', palmares_international: '', records: '', minima_status: '', tags: '', photo: a.photo || '',
+      _sb: x.seasonBest || '', _pb: x.personalBest || '' });
+  });
+  return out;
+}
+function matsRecords(recs) {
+  var out = [];
+  (recs || []).forEach(function (r) {
+    var l = String(r.libelle || '').replace(/^=/, ''), code = { RF: 'RF', RC: 'RCH', MPF: 'MPF', WR: 'RM', ER: 'RE', RE: 'RE', WL: 'MPM', EL: 'MPE' }[l]; if (!code) return;
+    var lab = { RF: 'record de France', RCH: 'record des championnats', MPF: 'meilleure perf française ' + (r.year || ''), RM: 'record du monde', RE: "record d'Europe", MPM: 'meilleure perf mondiale ' + (r.year || ''), MPE: 'meilleure perf européenne ' + (r.year || '') }[code];
+    out.push({ code: code, label: lab, perf: r.result, detail: (r.athlete || '') + (r.year ? ' (' + r.year + ')' : ''), rank: { RM: 1, RE: 2, RF: 3, RCH: 5, MPM: 6, MPE: 7, MPF: 8 }[code] });
+  });
+  return out;
+}
+function importMatsport(url, get, progress) {
+  progress = progress || function () { };
+  var u = parseMatsUrl(url); if (!u) return Promise.reject(new Error('adresse Matsport non reconnue (il faut …/competitions/<numéro>/…)'));
+  var apis = u.history ? ['https://api-history.athle.matsport.com'] : MATS_API_LIVE, api = '', comp = null;
+  progress('Recherche de la compétition chez Matsport…');
+  function probe(i) {
+    if (i >= apis.length) return Promise.reject(new Error('compétition introuvable chez Matsport (le relais a-t-il accès au site ?)'));
+    return get(apis[i] + '/competitions/' + u.cid + '?_withEvents=true').then(function (t) { comp = JSON.parse(t); api = apis[i]; }).catch(function () { return probe(i + 1); });
+  }
+  return probe(0).then(function () {
+    var day = u.day ? u.day.slice(0, 4) + '-' + u.day.slice(4, 6) + '-' + u.day.slice(6, 8) : '';
+    var evs = [];
+    (comp.schedules || []).forEach(function (s) { if (!day || String(s.date).slice(0, 10) === day) (s.events || []).forEach(function (e) { evs.push(e); }); });
+    if (!evs.length) throw new Error('aucune épreuve pour cette journée chez Matsport');
+    var full = {}, todo = evs.slice(), n = 0;
+    function step() {
+      var b = todo.splice(0, 4); if (!b.length) return Promise.resolve();
+      return Promise.all(b.map(function (e) { return get(api + '/events/' + e.id).then(function (t) { full[e.id] = JSON.parse(t); }).catch(function () { }); }))
+        .then(function () { n += b.length; progress(n + ' / ' + evs.length + ' épreuves Matsport lues…'); return step(); });
+    }
+    return step().then(function () { return { u: u, api: api, comp: comp, evs: evs, full: full, day: day }; });
+  });
+}
+function matsToFile(mt) { // réunion complète à partir de Matsport seul
+  var eps = [], combs = {};
+  mt.evs.forEach(function (e) {
+    var ev = mt.full[e.id] || {}, nom = matsEventName(e), sexe = matsSexe(e), t = String(e.date || '').slice(11, 16).replace(':', 'h');
+    var sl = matsStart(ev);
+    if (ev.idCombined || /thlon/i.test(nom)) {
+      var k = nom + '|' + sexe, c = combs[k] = combs[k] || { nom: nom.replace(/\s+(U\d{2}|JSF|SF|CF|MF)$/i, ''), sexe: sexe, disc: [], ath: {}, t: t, id: e.id };
+      c.disc.push({ disc: e.phase, horaire: t, mats: e.id });
+      sl.forEach(function (a) { var x = c.ath[a.dossard] = c.ath[a.dossard] || { a: a, sb: [], pb: [] }; if (a._sb) x.sb.push(e.phase + ' : ' + a._sb); if (a._pb) x.pb.push(e.phase + ' : ' + a._pb); });
+      return;
+    }
+    var fmt = function (v) { return /^\d+[.,]\d+$/.test(v) && ev.type !== 'A' && ev.type !== 'B' ? matsMark(v) : matsTime(v); };
+    eps.push({ nom: nom, sexe: sexe, categorie: 'SE', horaire: t, jour: '', phase: matsPhase(e.phase), qualification: '', record_meeting: '', minima_baremes: [], series: [],
+      records_cis: matsRecords(e.records || ev.records), cis_id: 'm' + String(e.id).split('_').pop(), cis_round: sexe + '|' + nom + '|' + matsKind(e.phase), cis_mats: e.id,
+      startlist: sl.map(function (a) { a.sb = a._sb ? nom + ' : ' + fmt(a._sb) : ''; a.pb = a._pb ? nom + ' : ' + fmt(a._pb) : ''; delete a._sb; delete a._pb; return a; }) });
+  });
+  Object.keys(combs).forEach(function (k) {
+    var c = combs[k];
+    eps.push({ nom: c.nom, sexe: c.sexe, categorie: 'SE', horaire: c.disc[0].horaire, phase: '', qualification: '', records_cis: [], cis_id: 'm' + String(c.id).split('_').pop(), cis_round: 'comb|' + k, cis_disc: c.disc,
+      startlist: Object.keys(c.ath).map(function (d) { var x = c.ath[d], a = x.a; a.sb = x.sb.join(' | '); a.pb = x.pb.join(' | '); delete a._sb; delete a._pb; return a; }) });
+  });
+  eps.sort(function (a, b) { return a.horaire < b.horaire ? -1 : a.horaire > b.horaire ? 1 : 0; });
+  var d = mt.day ? +mt.day.slice(8, 10) + ' ' + MOIS_FR[+mt.day.slice(5, 7)] + ' ' + mt.day.slice(0, 4) : '';
+  return { id: 'mats-' + mt.u.cid.slice(0, 8) + (mt.u.day ? '-' + mt.u.day : ''), source: 'matsport', mats: { api: mt.api, cid: mt.u.cid, day: mt.u.day },
+    date_maj: new Date().toISOString(), meeting: { nom: (mt.comp.name || 'Matsport') + (d ? ' — ' + d : ''), sous_titre: '', date: d, epreuves: eps, options: { salle: !!mt.comp.isIndoor, type_competition: 'championnat' } } };
+}
+// associe les épreuves Matsport aux séries d'une réunion déjà importée (Direct / Media Sheet)
+function attachMatsport(file, mt) {
+  var E = root.CISE, eps = (file.meeting || file).epreuves, n = 0;
+  var mins = function (t) { var m = String(t || '').match(/(\d{1,2})[h:](\d{2})/); return m ? +m[1] * 60 + +m[2] : null; };
+  mt.evs.forEach(function (e) {
+    var ev = mt.full[e.id] || {}, sexe = matsSexe(e), nom = matsEventName(e), t = mins(String(e.date).slice(11, 16));
+    if (ev.idCombined || /thlon/i.test(nom)) {
+      var c = eps.filter(function (x) { return x.sexe === sexe && x.cis_disc && E.nk(x.nom).indexOf(E.nk(nom).replace(/[^a-z]/g, '').slice(0, 6)) === 0; })[0];
+      if (!c) return;
+      var b = E.eventInfo(e.phase, sexe, false).base;
+      c.cis_disc.forEach(function (d) { if (E.eventInfo(d.disc, sexe, false).base === b) { d.mats = e.id; n++; } });
+      return;
+    }
+    var base = E.eventInfo(nom, sexe, false).base, kind = matsKind(e.phase), best = null, bd = 99;
+    eps.forEach(function (x) {
+      if (x.sexe !== sexe || x.cis_disc || E.eventInfo(x.nom, x.sexe, false).base !== base) return;
+      var xk = /1\/2|demi/i.test(x.phase) ? 'demi' : /1\/4|quart/i.test(x.phase) ? 'quart' : /s[ée]rie/i.test(x.phase) ? 'series' : 'finale';
+      if (xk !== kind) return;
+      var dd = Math.abs((mins(x.horaire) || 0) - t), num = (e.phase.match(/(\d+)\s*$/) || [])[1], xn = (String(x.phase).match(/(\d+)\s*$/) || [])[1];
+      if (num && xn && num === xn) dd -= 0.5;
+      if (dd < bd && dd <= 10) { bd = dd; best = x; }
+    });
+    if (best) { best.cis_mats = e.id; n++; }
+  });
+  file.mats = { api: mt.api, cid: mt.u.cid, day: mt.u.day };
+  return n;
+}
+
+root.CISI = { parseResultats: parseResultats, parseMatsUrl: parseMatsUrl, importMatsport: importMatsport, matsToFile: matsToFile, attachMatsport: attachMatsport, matsResults: matsResults, parseListe: parseListe, importDirect: importDirect, mergeMediaSheet: mergeMediaSheet };
 })(window);

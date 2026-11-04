@@ -166,7 +166,7 @@ textarea.txt{font:inherit;border:1px solid var(--line);border-radius:10px;paddin
 
 /* épreuves combinées */
 .cmbcl .rw{grid-template-columns:34px minmax(0,1fr) 92px}
-.cmbd .rw{grid-template-columns:34px 40px minmax(0,1fr) 92px 100px 60px}
+.cmbd .rw{grid-template-columns:34px 40px minmax(0,1fr) 92px 100px 84px}
 .c-pts{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:calc(20px*var(--fs));text-align:right;color:var(--blue)}
 .cn{display:block;font-family:Barlow,sans-serif;font-size:12px;color:var(--muted);font-weight:600}
 .cchips{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}
@@ -200,7 +200,7 @@ textarea.txt{font:inherit;border:1px solid var(--line);border-radius:10px;paddin
   .course .c-r,.comb .c-r,.bilan .c-r{display:none}
   .bilan .rw{grid-template-columns:28px minmax(0,1fr) 86px 38px}
   .comb .rw{grid-template-columns:28px minmax(0,1fr) 100px}
-  .cmbd .rw{grid-template-columns:26px 30px minmax(0,1fr) 80px 46px}.cmbd .c-r{display:none}
+  .cmbd .rw{grid-template-columns:26px 30px minmax(0,1fr) 80px 64px}.cmbd .c-r{display:none}
   .horiz .rw{grid-template-columns:24px minmax(0,1fr) repeat(3,42px) 74px;gap:0 4px}
   .best{font-size:calc(22px*var(--fs))}
   .vert .rw{grid-template-columns:26px minmax(0,1fr) repeat(var(--nb,3),46px) 58px}

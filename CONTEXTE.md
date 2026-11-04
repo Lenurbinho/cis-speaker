@@ -138,6 +138,18 @@ RF par catégorie, MPF par catégorie.
   **Combinés sur deux jours** : l'import va chercher dans le programme des autres journées les épreuves du
   combiné (ex. J2 de l'heptathlon quand on importe la J3) : leurs résultats remontent, sans les mettre dans
   l'horaire du jour. Il faut **réimporter** une réunion importée avant la V1.7 pour en profiter.
+- **Live Matsport (V1.9, testé sur les archives de la J3)** : Réglages → « Live Matsport » : coller l'adresse
+  d'une page de la journée (`https://athle-liveresults.fr/competitions/<id>/<id>_SCH_<aaaammjj>`, ou
+  `history.…` pour les archives). Le CIS cherche l'interface de données (archives : api-history.athle.matsport.com ;
+  live : essaie api.athle.matsport.com, api-live.athle.matsport.com, api.athle-liveresults.fr — **à confirmer
+  le jour J**). Si une réunion est ouverte (Direct / Media Sheet), il **relie** chaque épreuve Matsport à la
+  série correspondante (sexe, épreuve, tour, heure ±10 min ; combinés par discipline) et les résultats viennent
+  de Matsport (toutes les 10 s, cache 5 s), le Direct en secours ; sinon il **crée la réunion** depuis Matsport
+  (horaire, séries, couloirs, dossards, SB/PB, records RF/RCH/MPF/RM ; pas de catégories → compléter avec
+  Media Sheet). Athlètes reconnus par le dossard. Le lien Matsport est gardé lors des réimports du Direct.
+  Relais version 4 : ajoute `athle-liveresults.fr` aux sites autorisés.
+- **Combinés, onglet d'une épreuve (V1.9)** : gros chiffre = **place dans l'épreuve**, sous les points
+  « 3e au général » ; tri par défaut : classement de l'épreuve (Ordre → général → passage).
 - **Outils de micro (V1.8)** :
   - **Présenter** (bouton sur chaque série / concours) : en jeu (records, MPF, minima), favoris (3 meilleurs SB),
     puis couloir par couloir ou ordre de passage : nom, catégorie, année, club, SB/PB, minima, 5 meilleures stats, note.

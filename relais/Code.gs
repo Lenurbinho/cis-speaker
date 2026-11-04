@@ -31,7 +31,7 @@ function doGet(e) {
   }
   if (p.action === 'saisies') return rep_(changes_(propre_(p.id), +p.depuis || 0));
   if (p.action === 'brut') return rep_(brut_(p.url, +p.ttl || 5));
-  return rep_({ ok: true, version: 3 });
+  return rep_({ ok: true, version: 4 });
 }
 
 // ---------- saisies partagées : une case = un temps, un concours, un vent, une règle… ----------
@@ -86,7 +86,7 @@ function doPost(e) {
 // ---------- lecture des sites de données (Direct athle.fr, Matsport) pour le CIS ----------
 // Seuls ces sites sont autorisés. La réponse est gardée quelques secondes en mémoire : si plusieurs
 // speakers demandent la même page, le site n'est interrogé qu'une fois.
-const SITES_OK = ['athle.fr', 'matsport.com'];
+const SITES_OK = ['athle.fr', 'matsport.com', 'athle-liveresults.fr'];
 function brut_(url, ttl) {
   url = String(url || '');
   const host = (url.match(/^https:\/\/([^\/?#]+)/) || [])[1] || '';

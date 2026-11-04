@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 var E = window.CISE;
-var VERSION = 'V1.8.2 · 4 nov. 2026';
+var VERSION = 'V1.9 · 4 nov. 2026';
 var $ = function (s) { return document.querySelector(s); };
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
@@ -482,7 +482,7 @@ function combHtml(r) {
   var ord = rows.filter(function (a) { return pts[a.key] != null; }).sort(function (a, b) { return pts[b.key] - pts[a.key]; }), place = {};
   ord.forEach(function (a, i) { place[a.key] = i && pts[ord[i - 1].key] === pts[a.key] ? place[ord[i - 1].key] : i + 1; });
   // ordre d'affichage : général (total), épreuve (points de l'épreuve) ou passage (liste de départ)
-  var mode = S.sortRank['c' + r.id + di]; if (mode !== 'epr' && mode !== 'ord') mode = 'gen';
+  var mode = S.sortRank['c' + r.id + di]; if (mode !== 'gen' && mode !== 'ord') mode = 'epr';
   var gen = combRanking(r, ht), gpl = {}, gpos = {}; gen.forEach(function (x, i) { gpl[x.a.key] = x.place; gpos[x.a.key] = i; });
   var startOrd = ht.ath.slice().sort(function (a, b) { return (+a.couloir || 99) - (+b.couloir || 99) || a.order - b.order; });
   var todo = startOrd.filter(function (a) { return !cmbDone(r, ht, a, di); }), nxt = todo[0], aft = todo[1];
@@ -494,13 +494,13 @@ function combHtml(r) {
     '<span class="nx">jour ' + d.day + ' · ' + ord.length + '/' + ht.ath.length + ' saisis</span><span class="sp"></span>' +
     '<button class="btn s" data-act="dtime" data-r="' + r.id + '" data-d="' + di + '">' + (dTime(r, di) != null ? fh(dTime(r, di)) : 'Heure ?') + ' ✎</button>' +
     '<button class="btn s" data-act="sortc" data-r="' + r.id + '" data-d="' + di + '">' + LAB[mode] + '</button></div>';
-  var body2 = '<div class="rw hd"><span title="classement général">Cl.</span><span title="ordre de passage">Ord.</span><span>Athlète</span><span class="c-r">SB / PB</span><span style="text-align:right">Perf</span><span style="text-align:right">Pts</span></div>';
+  var body2 = '<div class="rw hd"><span title="classement de l\'épreuve">Pl.</span><span title="ordre de passage">Ord.</span><span>Athlète</span><span class="c-r">SB / PB</span><span style="text-align:right">Perf</span><span style="text-align:right">Pts</span></div>';
   rows.forEach(function (a) {
     var x = cmbOf(ht, a)[di], ref = a.cref ? a.cref[di] : {}, aa = { pb: ref.pb, sb: ref.sb };
     var pl = '';
     if (x && x.v != null) { var al = E.alertsFor({ unit: d.unit, records: [], type: 'x' }, aa, x.v, x.w).filter(function (z) { return !z.weak && (z.code === 'PB' || z.code === 'SB'); }); pl = al.length ? '<span class="pills">' + al.map(function (z) { return '<span class="pill ' + z.code + (z.eq ? ' eq' : '') + '">' + (z.eq ? '= ' : '') + z.code + '</span>'; }).join('') + '</span>' : ''; }
-    var ep = place[a.key] ? '<small class="cn">' + place[a.key] + (place[a.key] === 1 ? 're' : 'e') + ' épr.</small>' : '';
-    body2 += '<div class="rw' + (KP && KP.mode === 'cmb' && KP.k === a.key && KP.d === di ? ' edit' : nxt === a ? ' cur' : aft === a ? ' nxt' : '') + '" data-act="cperf" data-r="' + r.id + '" data-h="' + ht.id + '" data-k="' + esc(a.key) + '" data-d="' + di + '"><span class="c-pl">' + (gpl[a.key] || '') + '</span>' +
+    var ep = gpl[a.key] ? '<small class="cn">' + gpl[a.key] + (gpl[a.key] === 1 ? 'er' : 'e') + ' au général</small>' : '';
+    body2 += '<div class="rw' + (KP && KP.mode === 'cmb' && KP.k === a.key && KP.d === di ? ' edit' : nxt === a ? ' cur' : aft === a ? ' nxt' : '') + '" data-act="cperf" data-r="' + r.id + '" data-h="' + ht.id + '" data-k="' + esc(a.key) + '" data-d="' + di + '"><span class="c-pl">' + (place[a.key] || '') + '</span>' +
       '<span class="c-l">' + esc(a.couloir || (a.order + 1)) + '</span>' +
       nameHtml(r, ht, a, pl) + '<span class="c-r">SB <b>' + (ref.sb ? fp(ref.sb.v, d.unit) : '–') + '</b><br>PB <b>' + (ref.pb ? fp(ref.pb.v, d.unit) : '–') + '</b></span>' +
       '<span class="c-p' + (x ? (x.st ? ' st0' : '') : ' vide') + '">' + (x ? esc(cmbPerfTxt(d, x)) + (x.w != null ? '<small class="cn">' + E.fmtWind(x.w) + '</small>' : '') : '—') + '</span>' +
@@ -1192,14 +1192,50 @@ var IMP_MSG = '';
 function importSectionHtml() {
   var d = lsGet('cis:lastDirect', { id: '', date: '' });
   var h = '<h4>Importer depuis le Direct athle.fr</h4>';
-  if (RAW && RAW.source === 'direct') h += '<div class="row2"><button class="btn' + (lsGet('cis:live', true) ? ' p' : '') + '" data-act="liveTog">' + (lsGet('cis:live', true) ? '✓ Résultats du Direct en direct (toutes les 10 s)' : 'Résultats du Direct : arrêtés') + '</button><button class="btn" data-act="liveNow">Mettre à jour maintenant</button></div>' +
+  if (RAW && ((RAW.source === 'direct' && RAW.direct) || RAW.mats)) h += '<div class="row2"><button class="btn' + (lsGet('cis:live', true) ? ' p' : '') + '" data-act="liveTog">' + (lsGet('cis:live', true) ? '✓ Résultats du Direct en direct (toutes les 10 s)' : 'Résultats du Direct : arrêtés') + '</button><button class="btn" data-act="liveNow">Mettre à jour maintenant</button></div>' +
     '<p class="small">Les cases saisies à la main ne sont jamais écrasées par le Direct. Avec l\'heure simulée, une réunion passée se rejoue : chaque épreuve se remplit une fois son heure passée.</p>';
   if (!relaisOk()) return h + '<p class="small">Nécessite le relais (partage entre appareils, ci-dessous).</p>';
   return h + '<div class="row2"><input class="txt" id="impId" inputmode="numeric" placeholder="N° du Direct (ex. 314411)" value="' + esc(d.id) + '" style="flex:1;min-width:150px">' +
     '<input class="txt" id="impDate" placeholder="Date JJ/MM/AAAA" value="' + esc(d.date) + '" style="flex:1;min-width:140px"><button class="btn p" data-act="impDirect">Importer</button></div>' +
     '<p class="small">Programme, séries et couloirs, heures exactes, règles de qualification, records et meilleures perfs françaises par catégorie. ' +
     'Ouvre ensuite le fichier <b>Media Sheet</b> de la réunion pour ajouter palmarès et bilans. La réunion importée est partagée avec tous les appareils.</p>' +
-    '<div id="impMsg" class="kpvox">' + esc(IMP_MSG) + '</div>';
+    '<div id="impMsg" class="kpvox">' + esc(IMP_MSG) + '</div>' +
+    '<h4>Live Matsport</h4><div class="row2"><input class="txt" id="matsUrl" placeholder="Adresse de la page live Matsport de la journée" value="' + esc(lsGet('cis:lastMats', '')) + '" style="flex:3;min-width:220px">' +
+    '<button class="btn p" data-act="impMats">' + (RAW && RAW.source !== 'matsport' ? 'Associer à cette réunion' : 'Importer') + '</button></div>' +
+    '<p class="small">Colle l\'adresse d\'une page de la compétition sur le site live de Matsport (…/competitions/…/…_SCH_aaaammjj). ' +
+    (RAW && RAW.source !== 'matsport' ? 'Les épreuves Matsport sont reliées aux séries de la réunion ouverte : les résultats viennent alors de Matsport, le reste (listes, records par catégorie, stats) est gardé.' : 'Sans réunion ouverte, le CIS crée la réunion à partir de Matsport.') + '</p>';
+}
+function doImportMats() {
+  var url = ($('#matsUrl').value || '').trim(), u = CISI.parseMatsUrl(url);
+  if (!u) { impMsg('Adresse Matsport non reconnue : elle doit contenir /competitions/<numéro>/…'); return; }
+  lsSet('cis:lastMats', url);
+  impMsg('Lecture de Matsport…');
+  CISI.importMatsport(url, pageGet, impMsg).then(function (mt) {
+    if (RAW && RAW.source !== 'matsport') {
+      var n = CISI.attachMatsport(RAW, mt);
+      kvSet('meeting', RAW); closeSheet(); start(RAW);
+      S.live = {}; S.last = { txt: n + ' épreuves reliées à Matsport : les résultats arriveront de Matsport.', t: Date.now() }; save(); renderBanner();
+      shareMeeting(RAW, true);
+    } else {
+      var f = CISI.matsToFile(mt);
+      kvSet('meeting', f); closeSheet(); start(f, true);
+      S.last = { txt: 'Réunion créée depuis Matsport : ' + f.meeting.epreuves.length + ' épreuves. Ouvre le fichier Media Sheet pour ajouter les stats.', t: Date.now() }; save(); renderBanner();
+      shareMeeting(f, true);
+    }
+    IMP_MSG = '';
+  }).catch(function (e) { impMsg('Matsport : ' + (e.message || e)); });
+}
+
+// garde le lien avec Matsport quand la réunion est réimportée du Direct (et relie les nouvelles listes, ex. finales)
+function relinkMats(file, old) {
+  if (!old || !old.mats) return Promise.resolve();
+  file.mats = old.mats;
+  var m = old.mats, day = m.day ? m.day.slice(0, 4) + '-' + m.day.slice(4, 6) + '-' + m.day.slice(6, 8) : '';
+  return pageGet(m.api + '/competitions/' + m.cid + '?_withEvents=true').then(function (t) {
+    var comp = JSON.parse(t), evs = [];
+    (comp.schedules || []).forEach(function (sc) { if (!day || String(sc.date).slice(0, 10) === day) (sc.events || []).forEach(function (e) { evs.push(e); }); });
+    CISI.attachMatsport(file, { u: { cid: m.cid, day: m.day }, api: m.api, comp: comp, evs: evs, full: {} });
+  }).catch(function () { });
 }
 function pageGet(url) { return relaisGet({ action: 'brut', url: url, ttl: 30 }).then(function (x) { if (!x.ok) throw new Error(x.erreur || 'relais'); if (x.code !== 200) throw new Error('page ' + x.code); return x.texte; }); }
 // listes de départ publiées pendant la réunion (finales…) : réimport discret toutes les 3 min, en gardant
@@ -1207,17 +1243,19 @@ function pageGet(url) { return relaisGet({ action: 'brut', url: url, ttl: 30 }).
 var REIMP_BUSY = false, REIMP_T = Date.now();
 function sigOf(f) { return (f.meeting || f).epreuves.map(function (e) { return (e.cis_id || e.nom) + ':' + (e.startlist || []).length; }).sort().join(','); }
 function autoReimport(force) {
-  if (!M || !liveOn() || REIMP_BUSY || KP || (!force && Date.now() - REIMP_T < 180000)) return;
+  if (!M || !liveOn() || !RAW.direct || REIMP_BUSY || KP || (!force && Date.now() - REIMP_T < 180000)) return;
   if (!force && M.dateISO !== todayISO()) return; // réunion du jour seulement (une réunion passée a déjà ses finales)
   REIMP_T = Date.now(); REIMP_BUSY = true;
   var old = RAW, oldIds = {}; (old.meeting || old).epreuves.forEach(function (e) { oldIds[e.cis_id] = (e.startlist || []).length; });
   CISI.importDirect(old.direct.id, old.direct.date, pageGet, function () { }).then(function (file) {
     if (RAW !== old || file.id !== old.id || sigOf(file) === sigOf(old)) return;
     CISI.mergeMediaSheet(file, old, true);
+    return relinkMats(file, old).then(function () {
     var news = file.meeting.epreuves.filter(function (e) { return !oldIds[e.cis_id]; }).map(function (e) { return e.nom + ' ' + (e.sexe === 'F' ? 'F' : 'H') + ' ' + e.phase; });
     kvSet('meeting', file); start(file);
     S.last = { txt: news.length ? 'Nouvelle liste publiée : ' + news.slice(0, 3).join(', ') + ' (stats reprises)' : 'Listes de départ mises à jour depuis le Direct (stats reprises)', t: Date.now() }; save(); renderBanner();
     shareMeeting(file, true);
+    });
   }).catch(function () { }).then(function () { REIMP_BUSY = false; });
 }
 function impMsg(t) { IMP_MSG = t; var m = $('#impMsg'); if (m) m.textContent = t; }
@@ -1232,6 +1270,8 @@ function doImportDirect() {
     if (!file.meeting.epreuves.length) throw new Error('aucune épreuve pour cette date');
     var old = RAW && RAW.source === 'direct' && RAW.id === file.id ? RAW : null;
     if (old) CISI.mergeMediaSheet(file, old, true); // réimport : on garde les stats Media Sheet déjà ajoutées
+    return relinkMats(file, old).then(function () { return file; });
+  }).then(function (file) {
     kvSet('meeting', file); closeSheet(); start(file, true);
     S.last = { txt: 'Réunion importée du Direct : ' + file.meeting.epreuves.length + ' listes. ' + (file.mediasheet ? 'Stats Media Sheet conservées.' : 'Ouvre le fichier Media Sheet pour ajouter les stats.'), t: Date.now() }; save(); renderBanner();
     IMP_MSG = ''; shareMeeting(file, true);
@@ -1244,13 +1284,14 @@ function doImportDirect() {
 // commencés (ou qui commencent dans les 5 min) et remplit les cases qui n'ont pas été saisies à la main.
 // Avec l'heure simulée, une réunion passée se « rejoue » : chaque épreuve se remplit une fois son heure passée.
 var LIVE_BUSY = false, LIVE_STATE = '';
-function liveOn() { return lsGet('cis:live', true) && relaisOk() && RAW && RAW.source === 'direct' && RAW.direct && navigator.onLine; }
+function liveOn() { return lsGet('cis:live', true) && relaisOk() && RAW && ((RAW.source === 'direct' && RAW.direct) || RAW.mats) && navigator.onLine; }
 function liveUrl(guid) { return 'https://www.athle.fr/bases/liste.aspx?frmbase=directs&frmmode=2&frmcompetition=' + RAW.direct.id + '&frmepreuve=' + guid; }
 function liveTargets() {
   var n = nowMin(), out = [];
   M.rounds.forEach(function (r) {
-    if (r.cmb) { r.cmb.forEach(function (d, i) { var t = d.autre ? -1 : dTime(r, i); if (d.guid && t != null && t <= n + 5 && !(S.live[r.id + '_' + i] || {}).off) out.push({ r: r, h: r.heats[0], d: i, guid: d.guid, t: t }); }); return; }
-    r.heats.forEach(function (h) { var t = hStart(r, h); if (h.guid && t != null && t <= n + 5 && !(S.live[h.id] || {}).off) out.push({ r: r, h: h, guid: h.guid, t: t }); });
+    var src = function (o) { return o.mats && RAW.mats ? { mats: o.mats } : o.guid && RAW.direct ? { guid: o.guid } : null; }; // Matsport d'abord, sinon le Direct
+    if (r.cmb) { r.cmb.forEach(function (d, i) { var t = d.autre ? -1 : dTime(r, i), sr = src(d); if (sr && t != null && t <= n + 5 && !(S.live[r.id + '_' + i] || {}).off) out.push({ r: r, h: r.heats[0], d: i, guid: sr.guid, mats: sr.mats, t: t }); }); return; }
+    r.heats.forEach(function (h) { var t = hStart(r, h), sr = src(h); if (sr && t != null && t <= n + 5 && !(S.live[h.id] || {}).off) out.push({ r: r, h: h, guid: sr.guid, mats: sr.mats, t: t }); });
   });
   out.sort(function (a, b) { return b.t - a.t; }); // les plus récentes d'abord
   return out.slice(0, 24);
@@ -1258,6 +1299,7 @@ function liveTargets() {
 function athId(u) { var m = String(u || '').match(/athletes\/(\d+)/); return m ? m[1] : ''; }
 function nn(s) { return String(s || '').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Z]/g, ''); }
 function findAth(h, row) {
+  if (row.bib) { var byBib = h.ath.filter(function (a) { return a.dossard && String(a.dossard) === row.bib; })[0]; if (byBib && nn(byBib.nom).slice(0, 4) === nn(row.nom).slice(0, 4)) return byBib; }
   var id = athId(row.url), nm = nn(row.nom);
   return h.ath.filter(function (a) { return (id && athId(a.src && a.src.url) === id); })[0] || h.ath.filter(function (a) { return nn(a.nom) === nm; })[0];
 }
@@ -1352,7 +1394,7 @@ function liveApply(tg, res) {
   }
   if (res.officiel) S.live[tg.d != null ? r.id + '_' + tg.d : h.id] = { off: true, t: Date.now() };
   if (ch.length) {
-    ch.forEach(function (c) { S.hist.unshift({ t: Date.now(), clk: nowMin(), path: c.path, prev: c.prev, val: c.val, txt: c.txt + ' (Direct)', al: '', rid: r.id }); });
+    ch.forEach(function (c) { S.hist.unshift({ t: Date.now(), clk: nowMin(), path: c.path, prev: c.prev, val: c.val, txt: c.txt + (tg.mats ? ' (Matsport)' : ' (Direct)'), al: '', rid: r.id }); });
     if (al.length) { al.sort(function (x, y) { return x.rank - y.rank; }); S.hist[0].al = al[0].txt; announce(al[0].txt, al[0].list, Date.now()); }
   }
   return ch.length;
@@ -1369,8 +1411,12 @@ function liveTick() {
       return;
     }
     var t = tg[n++];
-    relaisGet({ action: 'brut', url: liveUrl(t.guid), ttl: 8 }).then(function (x) {
-      if (x.ok && x.code === 200 && x.texte) { var res = CISI.parseResultats(x.texte); if (res.rows.length) chg += liveApply(t, res); }
+    var url = t.mats ? RAW.mats.api + '/events/' + t.mats : liveUrl(t.guid);
+    relaisGet({ action: 'brut', url: url, ttl: t.mats ? 5 : 8 }).then(function (x) {
+      if (x.ok && x.code === 200 && x.texte) {
+        var res = t.mats ? CISI.matsResults(JSON.parse(x.texte)) : CISI.parseResultats(x.texte);
+        if (res.rows.length) chg += liveApply(t, res);
+      }
     }).catch(function () { LIVE_STATE = 'live en attente'; }).then(next);
   };
   next();
@@ -1409,7 +1455,7 @@ document.addEventListener('click', function (ev) {
       openKp({ mode: 'cmb', r: r.id, h: h.id, k: a.key, d: dd, raw: xc && xc.v != null ? E.valueToRaw(xc.v, du) : '', st: xc && xc.st, w: xc && xc.w != null ? String(Math.round(Math.abs(xc.w) * 10)) : '', sign: xc && xc.w < 0 ? -1 : 1 });
       break;
     case 'dtime': openKp({ mode: 'time', r: r.id, h: r.heats[0].id, d: +el.dataset.d }); break;
-    case 'sortc': var sk = 'c' + r.id + el.dataset.d, cyc = { gen: 'epr', epr: 'ord', ord: 'gen' }; S.sortRank[sk] = cyc[S.sortRank[sk] === 'epr' || S.sortRank[sk] === 'ord' ? S.sortRank[sk] : 'gen']; save(); renderPanels(); break;
+    case 'sortc': var sk = 'c' + r.id + el.dataset.d, cyc = { epr: 'gen', gen: 'ord', ord: 'epr' }; S.sortRank[sk] = cyc[S.sortRank[sk] === 'gen' || S.sortRank[sk] === 'ord' ? S.sortRank[sk] : 'epr']; save(); renderPanels(); break;
     case 'lane': if (r.fromRound) openKp({ mode: 'lane', r: r.id, h: h.id, k: a.key, raw: (S.lanes[h.id] || {})[a.key] || '' }); else { var x2 = (S.res[h.id] || {})[a.key] || {}; openKp({ mode: 'perf', r: r.id, h: h.id, k: a.key, raw: x2.v != null ? E.valueToRaw(x2.v, r.unit) : '', st: x2.st }); } break;
     case 'ess':
       var ess = (S.ess[h.id] || {})[a.key] || [], i = el.dataset.i != null ? +el.dataset.i : nextIdx(ess);
@@ -1476,6 +1522,7 @@ document.addEventListener('click', function (ev) {
     case 'share': kvGet('meeting').then(function (j) { if (j) shareMeeting(j); }); break;
     case 'openShared': openShared(el.dataset.id); break;
     case 'impDirect': doImportDirect(); break;
+    case 'impMats': doImportMats(); break;
     case 'liveTog': lsSet('cis:live', !lsGet('cis:live', true)); settingsSheet(); renderTop(); break;
     case 'liveNow': S.live = {}; save(); closeSheet(); liveTick(); autoReimport(true); break;
     case 'invite':
