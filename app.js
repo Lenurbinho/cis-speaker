@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 var E = window.CISE;
-var VERSION = 'V1.11 · 4 nov. 2026';
+var VERSION = 'V1.12 · 4 nov. 2026';
 var $ = function (s) { return document.querySelector(s); };
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
@@ -263,7 +263,7 @@ function renderPanels() {
   var pins = (S.pins || []).filter(function (id) { return ROUNDS[id]; });
   var sc = {};
   el.querySelectorAll('.panel').forEach(function (p) { var b = p.querySelector('.pbody'); if (b) sc[p.dataset.r] = b.scrollTop; });
-  el.style.setProperty('--n', Math.min(Math.max(pins.length, 1), 4));
+  el.style.setProperty('--n', Math.min(Math.max(pins.length, 1), 4)); el.classList.toggle('n4', pins.length >= 4);
   if (!S.ptab || pins.indexOf(S.ptab) < 0) S.ptab = pins[0] || null;
   if (!pins.length) {
     el.innerHTML = '<div class="empty" style="grid-column:1/-1"><p class="big">Aucune épreuve affichée</p><p>Touche une épreuve dans l\'<b>horaire</b> ou une suggestion « Maintenant » pour l\'afficher ici (jusqu\'à 4 côte à côte sur tablette).</p><button class="btn p" data-act="toggleHor">Ouvrir l\'horaire</button></div>';
@@ -404,7 +404,7 @@ function horizHtml(r) {
   var rows;
   if (byPass) { rows = st.order.map(function (a) { return rk.filter(function (x) { return x.a === a; })[0]; }); rk.forEach(function (x) { if (rows.indexOf(x) < 0) rows.push(x); }); }
   else rows = rk;
-  var body = '<div class="rw hd"><span>Pl</span><span>Athlète</span>' + [1, 2, 3, 4, 5, 6].map(function (i) { return '<span class="ess' + (i > 3 ? ' r46' : ' r13') + ' e' + (i - 1) + '">' + i + '</span>'; }).join('') + '<span style="text-align:right">Meilleur</span></div>';
+  var body = '<div class="rw hd"><span>Pl</span><span>Athlète</span>' + [1, 2, 3, 4, 5, 6].map(function (i) { return '<span class="ess' + (i > 3 ? ' r46' : ' r13') + ' e' + (i - 1) + '">' + i + '</span>'; }).join('') + '<span style="text-align:right">Meill.</span></div>';
   rows.forEach(function (x) {
     var a = x.a, ess = X[a.key] || [], out = fin && st.round > 3 && fin.indexOf(a.key) < 0;
     if (out && hide) return;
@@ -442,7 +442,7 @@ function vertHtml(r) {
     (st.next ? '<span class="need">' + needVert(r, ht, V, st.next, st.bar) + '</span>' : '');
   h += '</div>';
   if (rk.tieFirst && (st.inLice === 0 || S.done[r.id])) h += '<div class="sec" style="color:var(--red)">Égalité pour la 1re place : barrage à prévoir</div>';
-  var body = '<div class="rw hd"><span>Pl</span><span>Athlète</span>' + cols.map(function (b) { return '<span class="ess bar' + (b === st.bar ? ' on' : '') + '">' + fp(b, 'm') + '</span>'; }).join('') + '<span style="text-align:right">Meilleure</span><span class="c-f" style="text-align:center">Éch.</span></div>';
+  var body = '<div class="rw hd"><span>Pl</span><span>Athlète</span>' + cols.map(function (b) { return '<span class="ess bar' + (b === st.bar ? ' on' : '') + '">' + fp(b, 'm') + '</span>'; }).join('') + '<span style="text-align:right">Meill.</span><span class="c-f" style="text-align:center">Éch.</span></div>';
   rk.forEach(function (x) {
     var a = x.a, m = V.m[a.key] || {};
     if (x.out && hide && st.inLice > 0) return;
@@ -1565,7 +1565,7 @@ document.addEventListener('click', function (ev) {
       break;
     case 'imp': $('#fileSaisies').click(); break;
     case 'wipeAll': if (!confirm2('all', el, syncOn() ? 'Toucher encore : efface aussi sur les autres appareils' : 'Toucher encore : tout effacer')) break; var keep = { pins: S.pins, clock: S.clock }; S = blank(); S.pins = keep.pins; S.clock = keep.clock; save(); build(); closeSheet(); renderAll(); break;
-    case 'fs': var fs = act && +el.dataset.d ? Math.max(0.8, Math.min(1.5, (lsGet('cis:fs', 1) + +el.dataset.d))) : 1; lsSet('cis:fs', fs); document.documentElement.style.setProperty('--fs', fs); renderAll(); break;
+    case 'fs': var fs = act && +el.dataset.d ? Math.max(0.8, Math.min(1.5, (lsGet('cis:fs', 1) + +el.dataset.d))) : 1; lsSet('cis:fs', fs); document.documentElement.style.setProperty('--fsu', fs); renderAll(); break;
   }
 });
 // clavier physique (tablette avec clavier, ordinateur)
@@ -1584,7 +1584,7 @@ document.addEventListener('keydown', function (e) {
 });
 
 // ---------- démarrage ----------
-document.documentElement.style.setProperty('--fs', lsGet('cis:fs', 1));
+document.documentElement.style.setProperty('--fsu', lsGet('cis:fs', 1));
 if (lsGet('cis:nohor', false)) document.body.classList.add('nohor');
 function net() { document.body.classList.toggle('off', !navigator.onLine); }
 window.addEventListener('online', net); window.addEventListener('offline', net); net();

@@ -138,6 +138,11 @@ RF par catégorie, MPF par catégorie.
   **Combinés sur deux jours** : l'import va chercher dans le programme des autres journées les épreuves du
   combiné (ex. J2 de l'heptathlon quand on importe la J3) : leurs résultats remontent, sans les mettre dans
   l'horaire du jour. Il faut **réimporter** une réunion importée avant la V1.7 pour en profiter.
+- **Mise en page adaptée (V1.12)** : sur tablette / ordinateur, chaque panneau réduit la taille de ses caractères
+  et de ses colonnes selon sa largeur (de 100 % à 68 %, colonnes en « em » qui suivent le texte), pour garder
+  noms, perfs et colonnes complets à 3 ou 4 épreuves ; les colonnes ne sont masquées qu'en dernier recours.
+  **4 épreuves = écran en 4 carrés (2 × 2).** Bandeau des records sur une ligne (défilant). Le réglage A−/A+
+  reste la taille de base. Téléphone inchangé.
 - **Photos (V1.11)** : portraits intégrés au fichier Media Sheet (champ `photo`, JPEG 160×160 en base64, ~4 Ko,
   hors connexion ; 119 athlètes sur 168 pour la J3). Affichées dans la fiche (grande), la présentation et le
   podium, et sur les lignes **seulement quand le panneau est large** (≥ 640 px : 1 épreuve, ou 2 sur grand écran) ;
