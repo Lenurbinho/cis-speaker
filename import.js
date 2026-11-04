@@ -123,7 +123,11 @@ function importDirect(id, date, get, progress) {
   }).then(function () {
     var L = Object.keys(pages).map(function (g) { return pages[g]; });
     var isDay = function (o) { return !o.day || (o.day === +dd[1] && (!o.month || o.month === +dd[2])); };
-    if (dd) { L.forEach(function (o) { if (o.comb && !isDay(o)) o.autre = true; }); L = L.filter(function (o) { return isDay(o) || o.comb; }); }
+    if (dd) { // un combiné des autres jours n'est gardé que s'il a au moins une épreuve le jour importé
+      var today = {}; L.forEach(function (o) { if (o.comb && isDay(o)) today[o.comb + '|' + o.sexe] = 1; });
+      L.forEach(function (o) { if (o.comb && !isDay(o)) o.autre = true; });
+      L = L.filter(function (o) { return isDay(o) || (o.comb && today[o.comb + '|' + o.sexe]); });
+    }
     L = L.filter(function (o) { return o.rows.length; });
     var eps = [], combs = {};
     L.forEach(function (o) {

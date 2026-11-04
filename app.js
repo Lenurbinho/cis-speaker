@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 var E = window.CISE;
-var VERSION = 'V1.7 · 4 nov. 2026';
+var VERSION = 'V1.8 · 4 nov. 2026';
 var $ = function (s) { return document.querySelector(s); };
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
@@ -24,7 +24,7 @@ function kvSet(k, v) { return idb().then(function (db) { return new Promise(func
 
 // ---------- état ----------
 var RAW = null, M = null, S = null, ROUNDS = {}, KP = null;
-function blank() { return { res: {}, cmb: {}, dtime: {}, man: {}, live: {}, wind: {}, ess: {}, vert: {}, rules: {}, qov: {}, off: {}, done: {}, finals: [], lanes: {}, pins: null, ptab: null, heatSel: {}, sortRank: {}, hide: {}, hist: [], clock: null, last: null }; }
+function blank() { return { res: {}, cmb: {}, dtime: {}, man: {}, live: {}, notes: {}, wind: {}, ess: {}, vert: {}, rules: {}, qov: {}, off: {}, done: {}, finals: [], lanes: {}, pins: null, ptab: null, heatSel: {}, sortRank: {}, hide: {}, hist: [], clock: null, last: null }; }
 function skey() { return 'cis:s:' + M.id; }
 function save() { lsSet(skey(), S); if (SY && syncOn()) syDiff(); }
 function build() {
@@ -168,7 +168,7 @@ function statsHtml(r, h, a) {
 }
 function nameHtml(r, h, a, extra) {
   var u = ficheUrl(a), nm = u ? '<a class="nl" href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(a.name) + '</a>' : esc(a.name);
-  return '<span class="c-n"><b>' + nm + '<button class="fi" data-act="fiche" data-r="' + r.id + '" data-h="' + h.id + '" data-k="' + esc(a.key) + '" aria-label="Fiche de l\'athlète">i</button></b><small><span class="ct">' + esc(a.cat) + '</span> · ' + esc(a.club || a.nat) + '</small>' + statsHtml(r, h, a) + (extra || '') + '</span>';
+  return '<span class="c-n"><b>' + nm + '<button class="fi" data-act="fiche" data-r="' + r.id + '" data-h="' + h.id + '" data-k="' + esc(a.key) + '" aria-label="Fiche de l\'athlète">i</button></b><small><span class="ct">' + esc(a.cat) + '</span> · ' + esc(a.club || a.nat) + '</small>' + statsHtml(r, h, a) + (noteOf(a) ? '<small class="note1">📝 ' + esc(noteOf(a)) + '</small>' : '') + (extra || '') + '</span>';
 }
 function isEdit(h, a) { return KP && KP.h === h.id && KP.k === a.key; }
 function ruleOf(r) { return S.rules[r.id] != null ? S.rules[r.id] : r.qualif; }
@@ -318,7 +318,8 @@ function courseHtml(r) {
   var done = heatCount(r, ht);
   h += '<div class="pinfo"><span class="up">' + esc(ht.label || r.phase) + '</span><span class="nx">' + (ht.est ? '~' : '') + fh(hStart(r, ht)) + ' · ' + done + '/' + ht.ath.length + ' saisis</span><span class="sp"></span>' +
     (r.wind ? '<button class="btn s" data-act="wind" data-r="' + r.id + '" data-h="' + ht.id + '">Vent ' + (w != null ? E.fmtWind(w) : '?') + '</button>' : '') +
-    '<button class="btn s" data-act="sort" data-r="' + r.id + '" data-h="' + ht.id + '">' + (rk ? 'Ordre : classement' : 'Ordre : couloirs') + '</button></div>';
+    '<button class="btn s" data-act="sort" data-r="' + r.id + '" data-h="' + ht.id + '">' + (rk ? 'Ordre : classement' : 'Ordre : couloirs') + '</button>' +
+    '<button class="btn s" data-act="present" data-r="' + r.id + '" data-h="' + ht.id + '">Présenter</button>' + (heatComplete(r, ht) && (r.phase === 'Finale' || r.heats.length === 1) ? '<button class="btn s p" data-act="podium" data-r="' + r.id + '">🏅 Podium</button>' : '') + '</div>';
   var rows = ht.ath.slice();
   var ranking = E.heatRanking(ht, R, r.unit), place = {};
   ranking.forEach(function (x) { place[x.a.key] = x.place; });
@@ -384,7 +385,9 @@ function horizHtml(r) {
     (st.next ? '<span class="up"><i>À l\'essai :</i> ' + esc(st.next.name) + '</span>' : '') + (st.after ? '<span class="nx">Suivant : ' + esc(st.after.name) + '</span>' : '') +
     (fin && ht.ath.length > 8 ? '<span class="nx">' + fin.length + ' en finale</span>' : '') + '<span class="sp"></span>' +
     '<button class="btn s" data-act="sort" data-r="' + r.id + '" data-h="' + ht.id + '">' + (byPass ? 'Ordre : passage' : 'Ordre : classement') + '</button>' +
-    (fin && ht.ath.length > 8 ? '<button class="btn s" data-act="hide" data-r="' + r.id + '">' + (hide ? 'Afficher éliminés' : 'Masquer éliminés') + '</button>' : '') + '</div>';
+    (fin && ht.ath.length > 8 ? '<button class="btn s" data-act="hide" data-r="' + r.id + '">' + (hide ? 'Afficher éliminés' : 'Masquer éliminés') + '</button>' : '') +
+    '<button class="btn s" data-act="present" data-r="' + r.id + '" data-h="' + ht.id + '">Présenter</button>' + (X && Object.keys(X).length ? '<button class="btn s' + (st.round > 6 ? ' p' : '') + '" data-act="podium" data-r="' + r.id + '">🏅 Podium</button>' : '') +
+    (st.next ? '<span class="need">' + needHoriz(r, ht, X, st.next) + '</span>' : '') + '</div>';
   var rows;
   if (byPass) { rows = st.order.map(function (a) { return rk.filter(function (x) { return x.a === a; })[0]; }); rk.forEach(function (x) { if (rows.indexOf(x) < 0) rows.push(x); }); }
   else rows = rk;
@@ -421,7 +424,9 @@ function vertHtml(r) {
   else h += '<button class="btn s" data-act="barNav" data-d="-1" data-r="' + r.id + '" data-h="' + ht.id + '"' + (cur > 0 ? '' : ' disabled') + '>◀</button><span class="up">Barre ' + fp(st.bar, 'm') + '</span><button class="btn s" data-act="barNav" data-d="1" data-r="' + r.id + '" data-h="' + ht.id + '"' + (cur < bars.length - 1 ? '' : ' disabled') + '>▶</button>' +
     '<button class="btn s" data-act="bar" data-r="' + r.id + '" data-h="' + ht.id + '">+ barre</button>' +
     (st.next ? '<span class="up"><i>Au saut :</i> ' + esc(st.next.name) + '</span>' : '<span class="nx">Barre terminée</span>') + (st.after ? '<span class="nx">Suivant : ' + esc(st.after.name) + '</span>' : '') +
-    '<span class="nx">' + st.inLice + ' en lice</span><span class="sp"></span><button class="btn s" data-act="hide" data-r="' + r.id + '">' + (hide ? 'Afficher éliminés' : 'Masquer éliminés') + '</button>';
+    '<span class="nx">' + st.inLice + ' en lice</span><span class="sp"></span><button class="btn s" data-act="hide" data-r="' + r.id + '">' + (hide ? 'Afficher éliminés' : 'Masquer éliminés') + '</button>' +
+    '<button class="btn s" data-act="present" data-r="' + r.id + '" data-h="' + ht.id + '">Présenter</button><button class="btn s' + (st.inLice === 0 ? ' p' : '') + '" data-act="podium" data-r="' + r.id + '">🏅 Podium</button>' +
+    (st.next ? '<span class="need">' + needVert(r, ht, V, st.next, st.bar) + '</span>' : '');
   h += '</div>';
   if (rk.tieFirst && (st.inLice === 0 || S.done[r.id])) h += '<div class="sec" style="color:var(--red)">Égalité pour la 1re place : barrage à prévoir</div>';
   var body = '<div class="rw hd"><span>Pl</span><span>Athlète</span>' + cols.map(function (b) { return '<span class="ess bar' + (b === st.bar ? ' on' : '') + '">' + fp(b, 'm') + '</span>'; }).join('') + '<span style="text-align:right">Meilleure</span><span class="c-f" style="text-align:center">Éch.</span></div>';
@@ -459,7 +464,8 @@ function combHtml(r) {
   if (sel === 'cl') {
     var rk = combRanking(r, ht), nMax = Math.max.apply(null, rk.map(function (x) { return x.n; }).concat([0]));
     var warn = r.cmbJeunes ? '<div class="sec" style="color:var(--red);text-transform:none">Catégorie jeunes : les tables de cotation jeunes ne sont pas encore intégrées, points calculés avec les tables adultes (indicatifs).</div>' : '';
-    var h = warn + '<div class="pinfo"><span class="up">Classement ' + (nMax ? 'après ' + nMax + ' épreuve' + (nMax > 1 ? 's' : '') : '') + '</span><span class="nx">' + r.cmb.length + ' épreuves · touche une épreuve pour saisir</span></div>';
+    var h = warn + '<div class="pinfo"><span class="up">Classement ' + (nMax ? 'après ' + nMax + ' épreuve' + (nMax > 1 ? 's' : '') : '') + '</span><span class="nx">' + r.cmb.length + ' épreuves · touche une épreuve pour saisir</span><span class="sp"></span>' +
+      '<button class="btn s" data-act="present" data-r="' + r.id + '" data-h="' + ht.id + '">Présenter</button>' + (nMax ? '<button class="btn s' + (nMax === r.cmb.length ? ' p' : '') + '" data-act="podium" data-r="' + r.id + '">🏅 Podium</button>' : '') + '</div>';
     var body = '<div class="rw hd"><span>Pl</span><span>Athlète · perfs</span><span style="text-align:right">Points</span></div>';
     rk.forEach(function (x) {
       var a = x.a, c = cmbOf(ht, a);
@@ -475,20 +481,30 @@ function combHtml(r) {
   rows.forEach(function (a) { var x = cmbOf(ht, a)[di]; pts[a.key] = x && x.v != null ? E.combPoints(d, x.v) : null; });
   var ord = rows.filter(function (a) { return pts[a.key] != null; }).sort(function (a, b) { return pts[b.key] - pts[a.key]; }), place = {};
   ord.forEach(function (a, i) { place[a.key] = i && pts[ord[i - 1].key] === pts[a.key] ? place[ord[i - 1].key] : i + 1; });
-  var byRank = S.sortRank['c' + r.id + di] === true;
-  if (byRank) rows = ord.concat(rows.filter(function (a) { return ord.indexOf(a) < 0; })); else rows.sort(function (a, b) { return a.order - b.order; });
-  var h2 = '<div class="pinfo"><span class="up">' + esc(d.lab) + '</span><span class="nx">jour ' + d.day + ' · ' + ord.length + '/' + ht.ath.length + ' saisis</span><span class="sp"></span>' +
+  // ordre d'affichage : général (total), épreuve (points de l'épreuve) ou passage (liste de départ)
+  var mode = S.sortRank['c' + r.id + di]; if (mode !== 'epr' && mode !== 'ord') mode = 'gen';
+  var gen = combRanking(r, ht), gpl = {}, gpos = {}; gen.forEach(function (x, i) { gpl[x.a.key] = x.place; gpos[x.a.key] = i; });
+  var startOrd = ht.ath.slice().sort(function (a, b) { return (+a.couloir || 99) - (+b.couloir || 99) || a.order - b.order; });
+  var todo = startOrd.filter(function (a) { return !cmbDone(r, ht, a, di); }), nxt = todo[0], aft = todo[1];
+  if (mode === 'epr') rows = ord.concat(rows.filter(function (a) { return ord.indexOf(a) < 0; }));
+  else if (mode === 'ord') rows = startOrd;
+  else rows = gen.map(function (x) { return x.a; });
+  var LAB = { gen: 'Ordre : classement général', epr: 'Ordre : classement de l\'épreuve', ord: 'Ordre : passage' };
+  var h2 = '<div class="pinfo"><span class="up">' + esc(d.lab) + '</span>' + (nxt ? '<span class="up"><i>À suivre :</i> ' + esc(nxt.name) + '</span>' + (aft ? '<span class="nx">Ensuite : ' + esc(aft.name) + '</span>' : '') : '<span class="nx">épreuve terminée</span>') +
+    '<span class="nx">jour ' + d.day + ' · ' + ord.length + '/' + ht.ath.length + ' saisis</span><span class="sp"></span>' +
     '<button class="btn s" data-act="dtime" data-r="' + r.id + '" data-d="' + di + '">' + (dTime(r, di) != null ? fh(dTime(r, di)) : 'Heure ?') + ' ✎</button>' +
-    '<button class="btn s" data-act="sortc" data-r="' + r.id + '" data-d="' + di + '">' + (byRank ? 'Ordre : classement' : 'Ordre : liste') + '</button></div>';
-  var body2 = '<div class="rw hd"><span>Pl</span><span>Athlète</span><span class="c-r">SB / PB</span><span style="text-align:right">Perf</span><span style="text-align:right">Pts</span></div>';
+    '<button class="btn s" data-act="sortc" data-r="' + r.id + '" data-d="' + di + '">' + LAB[mode] + '</button></div>';
+  var body2 = '<div class="rw hd"><span title="classement général">Cl.</span><span title="ordre de passage">Ord.</span><span>Athlète</span><span class="c-r">SB / PB</span><span style="text-align:right">Perf</span><span style="text-align:right">Pts</span></div>';
   rows.forEach(function (a) {
     var x = cmbOf(ht, a)[di], ref = a.cref ? a.cref[di] : {}, aa = { pb: ref.pb, sb: ref.sb };
     var pl = '';
     if (x && x.v != null) { var al = E.alertsFor({ unit: d.unit, records: [], type: 'x' }, aa, x.v, x.w).filter(function (z) { return !z.weak && (z.code === 'PB' || z.code === 'SB'); }); pl = al.length ? '<span class="pills">' + al.map(function (z) { return '<span class="pill ' + z.code + (z.eq ? ' eq' : '') + '">' + (z.eq ? '= ' : '') + z.code + '</span>'; }).join('') + '</span>' : ''; }
-    body2 += '<div class="rw' + (KP && KP.mode === 'cmb' && KP.k === a.key && KP.d === di ? ' edit' : '') + '" data-act="cperf" data-r="' + r.id + '" data-h="' + ht.id + '" data-k="' + esc(a.key) + '" data-d="' + di + '"><span class="c-pl">' + (place[a.key] || '') + '</span>' +
+    var ep = place[a.key] ? '<small class="cn">' + place[a.key] + (place[a.key] === 1 ? 're' : 'e') + ' épr.</small>' : '';
+    body2 += '<div class="rw' + (KP && KP.mode === 'cmb' && KP.k === a.key && KP.d === di ? ' edit' : nxt === a ? ' cur' : aft === a ? ' nxt' : '') + '" data-act="cperf" data-r="' + r.id + '" data-h="' + ht.id + '" data-k="' + esc(a.key) + '" data-d="' + di + '"><span class="c-pl">' + (gpl[a.key] || '') + '</span>' +
+      '<span class="c-l">' + esc(a.couloir || (a.order + 1)) + '</span>' +
       nameHtml(r, ht, a, pl) + '<span class="c-r">SB <b>' + (ref.sb ? fp(ref.sb.v, d.unit) : '–') + '</b><br>PB <b>' + (ref.pb ? fp(ref.pb.v, d.unit) : '–') + '</b></span>' +
       '<span class="c-p' + (x ? (x.st ? ' st0' : '') : ' vide') + '">' + (x ? esc(cmbPerfTxt(d, x)) + (x.w != null ? '<small class="cn">' + E.fmtWind(x.w) + '</small>' : '') : '—') + '</span>' +
-      '<span class="c-pts">' + (pts[a.key] != null ? pts[a.key] : '') + '</span></div>';
+      '<span class="c-pts">' + (pts[a.key] != null ? pts[a.key] : '') + ep + '</span></div>';
   });
   return tabs + h2 + '<div class="pbody cmbd">' + body2 + '</div>';
 }
@@ -741,6 +757,94 @@ function dicter() {
   try { REC.start(); } catch (x) { REC = null; }
 }
 
+
+// ---------- notes perso du speaker (partagées entre appareils) ----------
+function noteKey(a) { return a.dossard ? 'd' + a.dossard : 'n' + String(a.nom || '').toUpperCase().replace(/[^A-Z]/g, ''); }
+function noteOf(a) { return (S.notes || {})[noteKey(a)] || ''; }
+
+// ---------- ce qu'il faut pour… (concours) ----------
+var SHORTREC = { RCH: 'record des champ.', RF: 'RF', MPF: 'MPF', MIN: 'minima' };
+function recShort(x) { return x.code === 'MIN' ? x.label.replace(/^minima /, 'minima ') : /^RF-/.test(x.code) ? 'RF ' + (E.CAT_LABEL[x.code.slice(3)] || '') : /^MPF-/.test(x.code) ? 'MPF ' + (E.CAT_LABEL[x.code.slice(4)] || '') : SHORTREC[x.code] || x.code; }
+function needHoriz(r, h, X, a) {
+  var rk = E.horizRanking(h, X), me = rk.filter(function (x) { return x.a === a; })[0] || { marks: [] }, my = me.marks[0], pos = rk.indexOf(me), out = [];
+  var lead = rk[0];
+  if (lead && lead.marks.length && lead.a !== a) out.push('<b>' + fp(lead.marks[0] + 1, 'm') + '</b> pour passer en tête');
+  else if (lead && lead.a === a && my != null) out.push('en tête');
+  var third = rk[2];
+  if (third && third.marks.length && pos > 2) out.push('<b>' + fp(third.marks[0] + 1, 'm') + '</b> pour le podium');
+  var st = E.horizState(h, X), eight = rk[7];
+  if (st.round <= 3 && h.ath.length > 8 && eight && eight.marks.length && pos > 7) out.push('<b>' + fp(eight.marks[0] + 1, 'm') + '</b> pour le top 8');
+  if (a.pb && (my == null || my <= a.pb.v)) out.push('<b>' + fp(a.pb.v + 1, 'm') + '</b> PB');
+  var ref = a.pb ? a.pb.v : my || 0;
+  r.records.forEach(function (x) {
+    if (!/^(RCH|RF|MPF|MIN)/.test(x.code) || (x.cat !== 'ALL' && x.cat !== a.catk)) return;
+    if (my != null && my >= x.v) return;
+    if (ref && x.v > ref * 1.06) return; // hors de portée
+    out.push('<b>' + fp(x.v, 'm') + '</b> ' + esc(recShort(x)));
+  });
+  return out.join(' · ');
+}
+function needVert(r, h, V, a, bar) {
+  if (bar == null || !a) return '';
+  var al = E.alertsFor(r, a, bar, null).filter(function (z) { return !z.weak; }).map(function (z) { return z.code === 'PB' ? 'PB' : z.code === 'SB' ? 'SB' : z.txt; });
+  var rk = E.vertRanking(h, V), lead = rk[0];
+  if (!lead || lead.best == null || bar > lead.best || lead.a === a) al.unshift('en tête');
+  return al.length ? 'Si ' + esc(a.name.split(' ')[0]) + ' passe <b>' + fp(bar, 'm') + '</b> : ' + al.map(esc).join(', ') : '';
+}
+
+// ---------- présentation d'une série / d'un concours ----------
+function presentSheet(r, h) {
+  var u = r.unit, list = h.ath.slice().sort(function (a, b) { return (+laneOf(h, a) || 99) - (+laneOf(h, b) || 99) || a.order - b.order; });
+  var fav = h.ath.filter(function (a) { return a.sb; }).sort(function (a, b) { return E.cmp(a.sb.v, b.sb.v, u); }).slice(0, 3);
+  var html = '<p class="big" style="font-size:30px">' + esc(r.title) + ' · ' + esc(h.label || r.phase) + ' <small style="font-size:18px;color:var(--muted)">' + fh(hStart(r, h)) + '</small></p>';
+  var rules = hasQ(r) && ruleOf(r) ? '<p><b>Qualification :</b> ' + esc(ruleOf(r)) + '</p>' : '';
+  var rec = r.records.filter(function (x) { return !/^(RM|RE|MPM|MPE)$/.test(x.code); });
+  html += rules + '<h4>En jeu</h4><div class="kv">' + rec.map(function (x) { return '<i>' + esc(x.label.charAt(0).toUpperCase() + x.label.slice(1)) + '</i><span><b>' + fp(x.v, u) + '</b> ' + (x.detail ? '<small>' + esc(x.detail) + '</small>' : '') + '</span>'; }).join('') + '</div>';
+  if (fav.length) html += '<h4>Favoris (meilleurs SB)</h4><p>' + fav.map(function (a, i) { return (i + 1) + '. <b>' + esc(a.name) + '</b> ' + fp(a.sb.v, u); }).join(' · ') + '</p>';
+  html += '<h4>' + (r.type === 'course' ? 'Couloir par couloir' : 'Ordre de passage') + '</h4>';
+  list.forEach(function (a) {
+    var st = E.topStats(a.src || {}, r.info).slice(0, 5), n = noteOf(a);
+    html += '<div class="pres"><div class="pl">' + esc(laneOf(h, a) || '–') + '</div><div class="pm"><b>' + esc(a.name) + '</b> <small>' + esc(a.cat) + (a.annee ? ' · ' + esc(a.annee) : '') + ' · ' + esc(a.club) + '</small>' +
+      '<div class="pr">SB <b>' + (a.sb ? fp(a.sb.v, u) : '–') + '</b> · PB <b>' + (a.pb ? fp(a.pb.v, u) : '–') + '</b>' + (a.pb && a.pb.y ? ' (' + esc(a.pb.y) + ')' : '') + (a.src && a.src.minima_status ? ' · ' + esc(a.src.minima_status) : '') + '</div>' +
+      (st.length ? '<div class="ps">' + st.map(function (x) { return '<span class="s-' + x.k + '">' + esc(x.t) + '</span>'; }).join(' · ') + '</div>' : '') +
+      (n ? '<div class="note1">📝 ' + esc(n) + '</div>' : '') + '</div></div>';
+  });
+  openSheet('Présentation', html);
+}
+
+// ---------- podium ----------
+function champYears(a, r) { // titres de champion(ne) de France élite sur l'épreuve, d'après le palmarès
+  var out = [];
+  String((a.src || {}).palmares_national || '').split(' / ').forEach(function (it) {
+    var m = it.trim().match(/^1\s+(CF|CFS)\s+(\d{2})\s+(.+)$/); if (!m) return;
+    var evt = E.nk(m[3]).replace(/[^a-z0-9]/g, ''); if (evt.indexOf(r.info.base.replace(/[^a-z0-9]/g, '')) !== 0) return;
+    out.push((m[1] === 'CFS' ? 'salle ' : '') + '20' + m[2]);
+  });
+  return out;
+}
+function podiumRows(r) {
+  var h = r.heats[r.heats.length - 1], rows = [];
+  if (r.type === 'course') rows = E.heatRanking(h, S.res[h.id] || {}, r.unit).map(function (x) { return { a: x.a, place: x.place, v: x.v, w: S.wind[h.id] }; });
+  else if (r.type === 'horiz') rows = E.horizRanking(h, S.ess[h.id] || {}).filter(function (x) { return x.marks.length; }).map(function (x) { var e = ((S.ess[h.id] || {})[x.a.key] || []).filter(function (z) { return z && z.v === x.marks[0]; })[0]; return { a: x.a, place: x.place, v: x.marks[0], w: e && e.w }; });
+  else if (r.type === 'vert') rows = E.vertRanking(h, vObj(h.id)).filter(function (x) { return x.best != null; }).map(function (x) { return { a: x.a, place: x.place, v: x.best }; });
+  else if (r.cmb) rows = combRanking(r, h).filter(function (x) { return x.n; }).map(function (x) { return { a: x.a, place: x.place, v: x.t, unit: 'pts' }; });
+  return { h: h, rows: rows.filter(function (x) { return x.place && x.place <= 3; }) };
+}
+function podiumSheet(r) {
+  var P = podiumRows(r), u = r.cmb ? 'pts' : r.unit, med = ['', '🥇', '🥈', '🥉'], champ = M.kind === 'championnat';
+  if (!P.rows.length) { openSheet('Podium', '<p class="empty">Pas encore de résultats pour ' + esc(r.title) + '.</p>'); return; }
+  var html = '<p class="big" style="font-size:30px">' + esc(r.title) + ' · ' + esc(P.h.label || r.phase) + '</p>';
+  P.rows.forEach(function (x) {
+    var a = x.a, al = E.alertsFor(r, a, x.v, x.w).filter(function (z) { return !z.weak; }), yrs = champYears(a, r), n = noteOf(a);
+    var titre = champ && x.place === 1 ? (yrs.length ? (yrs.length + 1) + 'e titre de champion' + (r.sexe === 'F' ? 'ne' : '') + ' de France (déjà en ' + yrs.join(', ') + ')' : '1er titre de champion' + (r.sexe === 'F' ? 'ne' : '') + ' de France sur l\'épreuve (d\'après son palmarès)') : '';
+    html += '<div class="pres pod"><div class="pl">' + med[x.place] + '</div><div class="pm"><b>' + esc(a.name) + '</b> <span class="c-p" style="font-size:28px">' + fp(x.v, u) + '</span>' + (x.w != null ? ' <small>vent ' + E.fmtWind(x.w) + '</small>' : '') +
+      '<div class="pr">' + esc(a.cat) + ' · ' + esc(a.club) + '</div>' + (titre ? '<div class="ps"><b>' + esc(titre) + '</b></div>' : '') +
+      (al.length ? '<div class="ps">' + al.map(function (z) { return esc(z.txt); }).join(' · ') + '</div>' : '') +
+      (n ? '<div class="note1">📝 ' + esc(n) + '</div>' : '') + '</div></div>';
+  });
+  openSheet('Podium', html);
+}
+
 // ---------- fenêtres (fiche, records, historique, réglages…) ----------
 function openSheet(title, html) { $('#sTitle').textContent = title; $('#sBody').innerHTML = html; $('#sheet').classList.remove('off'); $('#sBody').scrollTop = 0; pushLayer('sheet'); }
 function closeSheet(fromPop) { if ($('#sheet').classList.contains('off')) return; $('#sheet').classList.add('off'); if (!fromPop) popLayer('sheet'); }
@@ -768,6 +872,8 @@ function fiche(r, h, a) {
   if (s.bio) html += '<h4>Bio</h4><p>' + esc(s.bio) + '</p>';
   if (s.sb) html += '<details><summary><b>Toutes ses perfs de la saison</b></summary><p>' + esc(s.sb).replace(/''/g, '"').replace(/ \| /g, '<br>') + '</p></details>';
   if (s.pb) html += '<details><summary><b>Tous ses records personnels</b></summary><p>' + esc(s.pb).replace(/''/g, '"').replace(/ \| /g, '<br>') + '</p></details>';
+  html += '<h4>Ma note de speaker</h4><textarea class="txt" id="noteTxt" rows="3" style="width:100%" placeholder="Anecdote, prononciation du nom, à souligner…">' + esc(noteOf(a)) + '</textarea>' +
+    '<div class="row2"><button class="btn p" data-act="noteSave" data-r="' + r.id + '" data-h="' + h.id + '" data-k="' + esc(a.key) + '">Enregistrer la note</button><small>Visible sur sa ligne, partagée avec les autres appareils.</small></div>';
   var st = E.topStats(s, r.info);
   if (st.length) html = html.replace('</div>', '</div><h4>Meilleures stats</h4><p>' + st.map(function (x) { return esc(x.t); }).join('<br>') + '</p>');
   if (ficheUrl(a)) html += '<p><a class="btn" href="' + esc(ficheUrl(a)) + '" target="_blank" rel="noopener">Fiche ' + (/worldathletics/.test(s.url) ? 'World Athletics' : 'FFA') + ' ↗</a></p>';
@@ -812,7 +918,7 @@ function menuSheet(r) {
     (hasQ(r) && !fin && !finOf(r) ? '<button class="btn" data-act="mkfinal" data-r="' + r.id + '">Créer la finale avec les qualifiés</button>' : '') +
     (r.fromRound ? '<button class="btn r" data-act="rmfinal" data-r="' + r.id + '">Supprimer cette finale</button>' : '') +
     '<button class="btn' + (S.done[r.id] ? '' : ' p') + '" data-act="done" data-r="' + r.id + '">' + (S.done[r.id] ? 'Rouvrir l\'épreuve' : 'Marquer terminée') + '</button>' +
-    '<button class="btn" data-act="recs" data-r="' + r.id + '">Records et bilans</button></div>' +
+    '<button class="btn" data-act="recs" data-r="' + r.id + '">Records et bilans</button><button class="btn" data-act="present" data-r="' + r.id + '" data-h="' + r.heats[0].id + '">Présentation</button><button class="btn" data-act="podium" data-r="' + r.id + '">🏅 Podium</button></div>' +
     '<h4>Effacer</h4><div class="row2"><button class="btn r" data-act="wipe" data-r="' + r.id + '">Effacer toutes les saisies de cette épreuve</button></div>';
   openSheet('Options', html);
 }
@@ -1302,7 +1408,7 @@ document.addEventListener('click', function (ev) {
       openKp({ mode: 'cmb', r: r.id, h: h.id, k: a.key, d: dd, raw: xc && xc.v != null ? E.valueToRaw(xc.v, du) : '', st: xc && xc.st, w: xc && xc.w != null ? String(Math.round(Math.abs(xc.w) * 10)) : '', sign: xc && xc.w < 0 ? -1 : 1 });
       break;
     case 'dtime': openKp({ mode: 'time', r: r.id, h: r.heats[0].id, d: +el.dataset.d }); break;
-    case 'sortc': var sk = 'c' + r.id + el.dataset.d; S.sortRank[sk] = !S.sortRank[sk]; save(); renderPanels(); break;
+    case 'sortc': var sk = 'c' + r.id + el.dataset.d, cyc = { gen: 'epr', epr: 'ord', ord: 'gen' }; S.sortRank[sk] = cyc[S.sortRank[sk] === 'epr' || S.sortRank[sk] === 'ord' ? S.sortRank[sk] : 'gen']; save(); renderPanels(); break;
     case 'lane': if (r.fromRound) openKp({ mode: 'lane', r: r.id, h: h.id, k: a.key, raw: (S.lanes[h.id] || {})[a.key] || '' }); else { var x2 = (S.res[h.id] || {})[a.key] || {}; openKp({ mode: 'perf', r: r.id, h: h.id, k: a.key, raw: x2.v != null ? E.valueToRaw(x2.v, r.unit) : '', st: x2.st }); } break;
     case 'ess':
       var ess = (S.ess[h.id] || {})[a.key] || [], i = el.dataset.i != null ? +el.dataset.i : nextIdx(ess);
@@ -1357,6 +1463,9 @@ document.addEventListener('click', function (ev) {
     case 'undo': undo(+el.dataset.i); histSheet(); break;
     case 'settings': settingsSheet(); break;
     case 'sheetClose': closeSheet(); break;
+    case 'present': closeSheet(); presentSheet(r, h || r.heats[0]); break;
+    case 'podium': closeSheet(); podiumSheet(r); break;
+    case 'noteSave': var nv = ($('#noteTxt').value || '').trim(); commit(['notes', noteKey(a)], nv || null, 'Note · ' + a.name + (nv ? ' : ' + nv.slice(0, 40) : ' effacée'), '', r.id); closeSheet(); renderAll(); break;
     case 'rlSave':
       RL = { url: ($('#rlUrl').value || '').trim(), cle: ($('#rlCle').value || '').trim() }; lsSet('cis:relais', RL);
       if (RL.url && !/^https:\/\/script\.google(usercontent)?\.com\//.test(RL.url)) SHARE_MSG = 'Attention : l\'adresse doit commencer par https://script.google.com/…';

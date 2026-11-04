@@ -138,6 +138,21 @@ RF par catégorie, MPF par catégorie.
   **Combinés sur deux jours** : l'import va chercher dans le programme des autres journées les épreuves du
   combiné (ex. J2 de l'heptathlon quand on importe la J3) : leurs résultats remontent, sans les mettre dans
   l'horaire du jour. Il faut **réimporter** une réunion importée avant la V1.7 pour en profiter.
+- **Outils de micro (V1.8)** :
+  - **Présenter** (bouton sur chaque série / concours) : en jeu (records, MPF, minima), favoris (3 meilleurs SB),
+    puis couloir par couloir ou ordre de passage : nom, catégorie, année, club, SB/PB, minima, 5 meilleures stats, note.
+  - **Ce qu'il faut pour…** sous « À l'essai » en concours horizontal : marque pour passer en tête, pour le
+    podium, pour le top 8 (avant le 4e essai), PB, records / MPF / minima à portée (≤ 6 % au-dessus du PB) ;
+    en vertical : « Si X passe 5m90 : en tête, PB, record des championnats… ».
+  - **Podium** (bouton quand l'épreuve est finie, aussi dans ⋯) : 3 premiers, perf, vent, club, records/PB du jour,
+    et pour le vainqueur d'un championnat « 2e titre de champion(ne) de France (déjà en 2024) » d'après le palmarès.
+  - **Notes du speaker** : dans la fiche d'un athlète (« Ma note de speaker »), affichée en jaune sous son nom
+    partout, dans la présentation et le podium ; partagée entre appareils.
+  - **Combinés, onglet d'une épreuve** : classés par défaut au **classement général**, colonne **Ord.** (ordre de
+    passage), place dans l'épreuve sous les points, « À suivre / Ensuite » mis en évidence ; le bouton Ordre
+    alterne général → épreuve → passage.
+  - Correctif : un combiné des autres jours (ex. décathlon vendredi-samedi) n'apparaît plus dans l'horaire du
+    jour importé ; seuls les combinés ayant une épreuve ce jour-là sont gardés.
 - **Horaire des combinés (V1.5)** : dans la colonne Horaire, une ligne par épreuve du combiné avec son heure
   (« 14h05 Javelot · Heptathlon ») ; la toucher ouvre le panneau du combiné **directement sur l'onglet de
   cette épreuve** (les autres épreuves et le classement restent à un onglet). Heures tirées du Direct ; sinon
