@@ -29,12 +29,12 @@ var PAGES = [], SEEN = {}, BUNDLE = null;
 function log(t, c) { var d = document.createElement('div'); d.textContent = t; if (c) d.className = c; $('#log').appendChild(d); $('#log').scrollTop = 1e9; }
 function relais(url) {
   var q = RL.url + (RL.url.indexOf('?') < 0 ? '?' : '&') + 'cle=' + encodeURIComponent(RL.cle) + '&action=brut&ttl=60&url=' + encodeURIComponent(url);
-  return fetch(q).then(function (r) { return r.json(); });
+  return fetch(q).then(function (r) { return r.text(); }).then(function (t) { try { return JSON.parse(t); } catch (e) { return { ok: false, erreur: 'réponse illisible du relais : ' + t.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 200) }; } });
 }
 function get(url) {
   if (SEEN[url]) return Promise.resolve(SEEN[url]);
   return relais(url).then(function (x) {
-    var p = { url: url, ok: !!x.ok, code: x.code, type: x.type, erreur: x.erreur || '', texte: x.texte || '' };
+    var p = { url: url, ok: !!x.ok, code: x.code, type: x.type, erreur: x.erreur || (x.ok ? '' : JSON.stringify(x).slice(0, 300)), texte: x.texte || '' };
     PAGES.push(p); SEEN[url] = p;
     log((p.ok && p.code === 200 ? '✓ ' : '✗ ') + (p.code || p.erreur) + ' · ' + Math.round(p.texte.length / 1024) + ' ko · ' + url, p.ok && p.code === 200 ? 'ok' : 'ko');
     $('#st').textContent = PAGES.length + ' pages récupérées…';
@@ -74,24 +74,11 @@ async function matsport() {
   log('— Matsport ' + id);
   var c = await get(API + '/competitions/' + id + '?_withEvents=true');
   var j = {}; try { j = JSON.parse(c.texte); } catch (e) {}
-  var sch = (j.schedules || []).map(function (s) { return s.id; });
-  for (var i = 0; i < sch.length; i++) {
-    await get(API + '/schedules/' + sch[i] + '?_withEvents=true');
-    await get(API + '/schedules/' + sch[i]);
-  }
-  await get(API + '/competitions/' + id + '/events');
-  var ev = {};
-  PAGES.filter(function (p) { return /matsport/.test(p.url) && p.code === 200; }).forEach(function (p) {
-    try { uuids(JSON.parse(p.texte), []).forEach(function (u) { if (u.v !== id && sch.indexOf(u.v) < 0 && !/competition/i.test(u.k)) ev[u.v] = 1; }); } catch (e) {}
-  });
-  var evs = Object.keys(ev).slice(0, 12); log(Object.keys(ev).length + ' identifiants trouvés, essai de ' + evs.length + ' épreuves');
-  await pool(evs.map(function (x) { return API + '/events/' + x; }), 4);
-  // les séries / bilans liés aux premières épreuves
-  var more = {};
-  PAGES.filter(function (p) { return /\/events\//.test(p.url) && p.code === 200; }).slice(0, 4).forEach(function (p) {
-    try { (JSON.parse(p.texte).phaseLinks || []).forEach(function (l) { uuids(l, []).forEach(function (u) { more[u.v] = 1; }); }); } catch (e) {}
-  });
-  await pool(Object.keys(more).slice(0, 8).map(function (x) { return API + '/events/' + x; }), 4);
+  var date = $('#dDate').value.trim(), iso = date ? date.split('/').reverse().join('-') : '';
+  var evs = [];
+  (j.schedules || []).forEach(function (s) { if (!iso || String(s.date).slice(0, 10) === iso) (s.events || []).forEach(function (e) { evs.push(e.id); }); });
+  log(evs.length + ' épreuves / séries Matsport pour cette journée');
+  await pool(evs.map(function (x) { return API + '/events/' + x; }).filter(function (u) { return !SEEN[u]; }), 3);
 }
 $('#go').onclick = async function () {
   if (!(RL.url && RL.cle)) { alert('Relais non configuré sur cet appareil.'); return; }
