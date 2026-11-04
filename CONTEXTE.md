@@ -94,6 +94,20 @@ la même structure sur le domaine live, à vérifier lors d'une réunion en cour
 essais, vent) et garde nos stats et alertes ; sinon, saisie manuelle. Une saisie manuelle doit
 toujours pouvoir corriger ou compléter le live.
 
+Constats sur la capture du 4/11/2026 (via le relais) :
+- `GET /competitions/<id>?_withEvents=true` contient déjà `schedules[].events[]` : **horaire exact de chaque
+  série** (`date`), `event` (« 200m Femmes »), `phase` (« Tour 1 Série 2 », « Demi Finale 1 », « Finale »),
+  `type` (A = course en couloirs, B = course en ligne, E = saut horizontal, F = saut vertical, G = lancer),
+  `status`, `records` (rempli pour les épreuves individuelles), `idCombined` pour les épreuves des combinés.
+  Les finales absentes de Media Sheet (200 m, 110 m H) y sont.
+- `GET /events/<id>` : `trackResult.results[]` (athlete{longName, id_FFA, id_WA, club, country, photo},
+  bib, lane, rank, time « 10.69 », qualif, reactionTime, personalBest, seasonBest, bestChange, points),
+  `trackResult.wind`, `trackResult.summary` (classement des combinés) ; `horizontalResult.results[].attemptHorizontal[]`
+  (round_Result, round_Wind, round_Valide, round_Rank_After_Attempt, round_Points) ;
+  `verticalResult.heights[]` + `results[].attemptVertical[]` (ht, ht_Att1..3 « O/X/- ») ; `phaseLinks`.
+- Adresses `/schedules/…` et `/competitions/<id>/events` : 404 (inexistantes).
+- Programme du Direct athle.fr (`/ajax/direct.aspx…`) : non récupéré à la première capture (à revoir).
+
 ### Chaîne retenue
 Media Sheet (sur l'ordinateur, qui accède à la FFA) produit un **fichier unique pour le CIS** :
 programme + séries + règles de qualification + records par catégorie + MPF + stats Media Sheet.
@@ -157,7 +171,12 @@ Fichiers : `index.html` (écran), `style.css`, `app.js` (affichage, saisie), `en
   ordre inversé pour les essais 4-6, « À l'essai » / « Suivant », masquer les éliminés.
 - **Concours verticaux** : barres, O / X / –, rotation des sauteurs, éliminé après 3 échecs consécutifs,
   classement officiel, barre suivante proposée, barrage signalé.
-- **Combinés** : total de points (V1 simple).
+- **Combinés** (V1.3) : onglets par épreuve (jour 1 / jour 2) + « Classement » ; on saisit la **vraie perf**
+  (temps, marque, vent pour 100/200/haies/longueur ; DNS/DNF/DQ/NM), les **points** sont calculés avec les
+  tables World Athletics (vérifié sur les points Matsport : 10"69 = 931, 7m64 = 970) ; classement
+  intermédiaire avec le **détail des perfs** de chaque épreuve (pas les points) ; alertes PB/SB par épreuve,
+  et à la fin, total comparé aux records et au PB. Programmes : heptathlon F, décathlon H et F, pentathlon F
+  salle, heptathlon H salle.
 - **Alertes** : à chaque saisie, comparaison selon la catégorie de l'athlète (records), en tenant compte des
   perfs déjà réalisées dans le tour ; pastilles sur la ligne + bandeau prêt à lire ; vent > +2.0 signalé
   « non homologable ». Historique de toutes les saisies, chacune annulable.

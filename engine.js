@@ -263,6 +263,10 @@ function loadMeeting(file) {
       qualif: (g.items.map(function (x) { return x.e.qualification; }).filter(Boolean)[0]) || '',
       records: buildRecords(e0, info, allAth, opt.type_competition || 'championnat')
     };
+    if (r.type === 'comb') {
+      r.cmb = combProgram(e0.nom, e0.sexe, salle);
+      if (r.cmb) heats.forEach(function (h) { h.ath.forEach(function (a) { a.cref = r.cmb.map(function (d) { return { sb: bestFromList(a.src.sb, d.info), pb: bestFromList(a.src.pb, d.info) }; }); }); });
+    }
     r.dur = roundDuration(r);
     return r;
   });
@@ -464,6 +468,44 @@ function alertText(round, a, v, alerts, wind) {
   return t;
 }
 
+// ---------- épreuves combinées : épreuves, tables de cotation World Athletics ----------
+// points = A × (B − T)^C pour les courses (T en secondes), A × (M − B)^C pour les concours
+// (M en centimètres pour les sauts, en mètres pour les lancers).
+var CT = {
+  H: { '100m': [25.4347, 18, 1.81], 'Longueur': [0.14354, 220, 1.4], 'Poids': [51.39, 1.5, 1.05], 'Hauteur': [0.8465, 75, 1.42], '400m': [1.53775, 82, 1.81],
+    '110m Haies': [5.74352, 28.5, 1.92], 'Disque': [12.91, 4, 1.1], 'Perche': [0.2797, 100, 1.35], 'Javelot': [10.14, 7, 1.08], '1500m': [0.03768, 480, 1.85],
+    '60m': [58.015, 11.5, 1.81], '60m Haies': [20.5173, 15.5, 1.92], '1000m': [0.08713, 305.5, 1.85] },
+  F: { '200m': [4.99087, 42.5, 1.81], '100m Haies': [9.23076, 26.7, 1.835], 'Hauteur': [1.84523, 75, 1.348], 'Poids': [56.0211, 1.5, 1.05], 'Longueur': [0.188807, 210, 1.41],
+    'Javelot': [15.9803, 3.8, 1.04], '800m': [0.11193, 254, 1.88], '100m': [17.857, 21, 1.81], '400m': [1.34285, 91.7, 1.81], '1500m': [0.02883, 535, 1.88],
+    'Disque': [12.3311, 3, 1.1], 'Perche': [0.44125, 100, 1.35], '60m Haies': [20.0479, 17, 1.835] }
+};
+var CMB_PROG = {
+  'heptathlon|F|0': ['100m Haies', 'Hauteur', 'Poids', '200m', '|', 'Longueur', 'Javelot', '800m'],
+  'decathlon|H|0': ['100m', 'Longueur', 'Poids', 'Hauteur', '400m', '|', '110m Haies', 'Disque', 'Perche', 'Javelot', '1500m'],
+  'decathlon|F|0': ['100m', 'Disque', 'Perche', 'Javelot', '400m', '|', '100m Haies', 'Longueur', 'Poids', 'Hauteur', '1500m'],
+  'pentathlon|F|1': ['60m Haies', 'Hauteur', 'Poids', 'Longueur', '800m'],
+  'heptathlon|H|1': ['60m', 'Longueur', 'Poids', 'Hauteur', '|', '60m Haies', 'Perche', '1000m']
+};
+var CMB_SHORT = { '100m Haies': '100H', '110m Haies': '110H', '60m Haies': '60H', 'Hauteur': 'Haut.', 'Poids': 'Poids', 'Longueur': 'Long.', 'Javelot': 'Jav.', 'Disque': 'Disq.', 'Perche': 'Perche' };
+function combProgram(nom, sexe, salle) {
+  var n = nk(nom).replace(/[^a-z]/g, '').replace(/^(hepta|deca|penta)thlon.*/, '$1thlon');
+  var list = CMB_PROG[n + '|' + sexe + '|' + (salle ? 1 : 0)] || CMB_PROG[n + '|' + sexe + '|0'];
+  if (!list) return null;
+  var day = 1, out = [];
+  list.forEach(function (x) {
+    if (x === '|') { day = 2; return; }
+    var info = eventInfo(x, sexe, salle), t = CT[sexe === 'F' ? 'F' : 'H'][x];
+    out.push({ i: out.length, nom: x, lab: x.replace(/^(\d+)m/, '$1 m').replace('Haies', 'haies'), short: CMB_SHORT[x] || x.replace(/^(\d+)m$/, '$1 m'),
+      info: info, unit: info.unit, wind: info.wind, A: t[0], B: t[1], C: t[2], jump: /Hauteur|Longueur|Perche/.test(x), day: day });
+  });
+  return out;
+}
+function combPoints(d, v) {
+  if (v == null || !d) return 0;
+  var x = d.unit === 't' ? d.B - v / 100 : d.jump ? v - d.B : v / 100 - d.B;
+  return x > 0 ? Math.floor(d.A * Math.pow(x, d.C) + 1e-9) : 0;
+}
+
 // ---------- dictée vocale ----------
 var NUMS = { zero: 0, un: 1, une: 1, deux: 2, trois: 3, quatre: 4, cinq: 5, six: 6, sept: 7, huit: 8, neuf: 9, dix: 10, onze: 11, douze: 12, treize: 13, quatorze: 14, quinze: 15, seize: 16, vingt: 20, trente: 30, quarante: 40, cinquante: 50, soixante: 60, cent: 100, cents: 100, mille: 1000 };
 function motsEnNombre(t) {
@@ -549,7 +591,7 @@ root.CISE = {
   loadMeeting: loadMeeting, makeFinal: makeFinal, parseHour: parseHour, fmtHour: fmtHour, parseRule: parseRule,
   heatRanking: heatRanking, qualify: qualify, finalQ: finalQ, horizRanking: horizRanking, horizState: horizState,
   vertAthlete: vertAthlete, vertRanking: vertRanking, vertState: vertState, alertsFor: alertsFor, alertText: alertText,
-  speechToEntry: speechToEntry, topStats: topStats, displayName: displayName, STATUTS: STATUTS, CAT_LABEL: CAT_LABEL
+  speechToEntry: speechToEntry, topStats: topStats, combProgram: combProgram, combPoints: combPoints, displayName: displayName, STATUTS: STATUTS, CAT_LABEL: CAT_LABEL
 };
 if (typeof module !== 'undefined') module.exports = root.CISE;
 })(typeof window !== 'undefined' ? window : globalThis);
