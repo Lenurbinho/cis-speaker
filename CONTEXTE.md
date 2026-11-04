@@ -138,6 +138,10 @@ RF par catégorie, MPF par catégorie.
   **Combinés sur deux jours** : l'import va chercher dans le programme des autres journées les épreuves du
   combiné (ex. J2 de l'heptathlon quand on importe la J3) : leurs résultats remontent, sans les mettre dans
   l'horaire du jour. Il faut **réimporter** une réunion importée avant la V1.7 pour en profiter.
+- **Code administrateur (V1.15, relais version 6)** : `CODE_ADMIN` dans le relais, connu d'Alexandre seul. Saisi
+  dans Réglages → Partage sur ses appareils. Sans lui : pas de bouton « Retirer », et le relais refuse le retrait ;
+  les effacements qui touchent tous les appareils (« Effacer toutes les saisies de cette épreuve », « Tout effacer »
+  quand le partage est actif) sont aussi réservés à l'administrateur. Le lien d'invitation ne contient pas ce code.
 - **Ménage (V1.14)** : bouton **Retirer** sur chaque réunion de la liste partagée (Réglages → Partage) : la
   réunion et ses saisies partent à la corbeille du Drive (récupérables 30 jours ; relais version 5 pour les
   saisies). Réglages → Ménage : **Effacer les restes des anciennes réunions** (saisies et réglages locaux des

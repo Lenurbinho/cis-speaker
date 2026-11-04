@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 var E = window.CISE;
-var VERSION = 'V1.14 · 4 nov. 2026';
+var VERSION = 'V1.15 · 4 nov. 2026';
 var $ = function (s) { return document.querySelector(s); };
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
@@ -1090,9 +1090,10 @@ function pollShared() {
 }
 
 // ---------- ménage : réunions partagées et restes sur l'appareil ----------
+function isAdmin() { return !!lsGet('cis:admin', ''); }
 function removeShared(id) {
   SHARE_MSG = 'Retrait…'; refreshShareUi();
-  relaisPost({ action: 'retirer', id: id }).then(function (x) {
+  relaisPost({ action: 'retirer', id: id, admin: lsGet('cis:admin', '') }).then(function (x) {
     if (!x.ok) throw new Error(x.erreur);
     SHARE_MSG = 'Réunion retirée de la liste partagée.' + (M && M.id === id ? ' Elle reste ouverte sur cet appareil.' : '');
     lsSet('cis:maj:' + id, null); pollShared(); refreshShareUi();
@@ -1119,7 +1120,7 @@ function sharedListHtml() {
     var cur = M && r.id === M.id;
     return '<div class="hl"><div class="hm"><b>' + esc(r.nom) + '</b><small>' + esc(r.date) + ' · mise à jour ' + new Date(r.maj).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + '</small></div>' +
       (cur ? '<span class="st fini">Ouverte</span>' : '<button class="btn s p" data-act="openShared" data-id="' + esc(r.id) + '">Ouvrir</button>') +
-      '<button class="btn s r" data-act="rmShared" data-id="' + esc(r.id) + '">Retirer</button></div>';
+      (isAdmin() ? '<button class="btn s r" data-act="rmShared" data-id="' + esc(r.id) + '">Retirer</button>' : '') + '</div>';
   }).join('');
 }
 function shareSectionHtml() {
@@ -1129,6 +1130,7 @@ function shareSectionHtml() {
   if (relaisOk()) {
     h += '<div class="row2">' + (M && !/^demo/.test(M.id) ? '<button class="btn" data-act="share">Partager cette réunion</button>' : '') + '<button class="btn" data-act="invite">Copier le lien d\'invitation</button><button class="btn" data-act="rlOff">Arrêter le partage sur cet appareil</button></div>';
   }
+  if (relaisOk()) h += '<div class="row2"><input class="txt" id="admCode" type="password" placeholder="Code administrateur (réservé)" value="" style="flex:1;min-width:160px"><button class="btn" data-act="admSave">' + (isAdmin() ? '✓ Administrateur sur cet appareil' : 'Valider le code administrateur') + '</button>' + (isAdmin() ? '<button class="btn" data-act="admOff">Quitter le mode administrateur</button>' : '') + '</div>';
   h += '<div id="shareMsg" class="kpvox">' + esc(SHARE_MSG) + '</div><div id="sharedList">' + sharedListHtml() + '</div>';
   return h;
 }
@@ -1568,6 +1570,7 @@ document.addEventListener('click', function (ev) {
       break;
     case 'rmfinal': if (!confirm2('rm' + r.id, el, 'Toucher encore pour supprimer')) break; S.finals = S.finals.filter(function (f) { return 'f' + f.from !== r.id; }); S.pins = S.pins.filter(function (x) { return x !== r.id; }); save(); build(); closeSheet(); renderAll(); break;
     case 'wipe':
+      if (syncOn() && !isAdmin()) { el.textContent = 'Réservé à l\'administrateur (efface chez tous)'; break; }
       if (!confirm2('w' + r.id, el, syncOn() ? 'Toucher encore : efface aussi chez les autres' : 'Toucher encore pour tout effacer')) break;
       Object.keys(S.man || {}).forEach(function (k) { if (r.heats.some(function (x) { return k.indexOf('~' + x.id) >= 0; })) delete S.man[k]; });
       Object.keys(S.live || {}).forEach(function (k) { if (k.indexOf(r.id) === 0 || r.heats.some(function (x) { return k === x.id; })) delete S.live[k]; });
@@ -1590,6 +1593,14 @@ document.addEventListener('click', function (ev) {
     case 'rlOff': RL = { url: '', cle: '' }; lsSet('cis:relais', RL); SHARED = null; SY = null; SHARE_MSG = ''; settingsSheet(); break;
     case 'share': kvGet('meeting').then(function (j) { if (j) shareMeeting(j); }); break;
     case 'openShared': openShared(el.dataset.id); break;
+    case 'admSave':
+      var ac = ($('#admCode').value || '').trim(); if (!ac) { SHARE_MSG = 'Tape le code administrateur.'; refreshShareUi(); break; }
+      relaisPost({ action: 'admin', admin: ac }).then(function (x) {
+        if (x.ok) { lsSet('cis:admin', ac); SHARE_MSG = 'Mode administrateur activé sur cet appareil.'; } else SHARE_MSG = x.erreur === 'action' ? 'Mets à jour le relais (version 6) pour activer le code administrateur.' : 'Code administrateur refusé.';
+        settingsSheet();
+      }).catch(function () { SHARE_MSG = 'Relais injoignable.'; refreshShareUi(); });
+      break;
+    case 'admOff': lsSet('cis:admin', ''); SHARE_MSG = 'Mode administrateur désactivé.'; settingsSheet(); break;
     case 'rmShared': if (!confirm2('rs' + el.dataset.id, el, 'Toucher encore : retirer pour tous')) break; removeShared(el.dataset.id); break;
     case 'cleanOld': var nc = cleanDevice(false); el.textContent = nc ? nc + ' éléments effacés ✓' : 'Rien à effacer ✓'; break;
     case 'closeMeet': if (!confirm2('cm', el, 'Toucher encore pour fermer')) break; closeMeeting(); break;
@@ -1613,7 +1624,8 @@ document.addEventListener('click', function (ev) {
       var aL = document.createElement('a'); aL.href = URL.createObjectURL(blob); aL.download = 'saisies-' + M.id + '.json'; document.body.appendChild(aL); aL.click(); setTimeout(function () { URL.revokeObjectURL(aL.href); aL.remove(); }, 1000);
       break;
     case 'imp': $('#fileSaisies').click(); break;
-    case 'wipeAll': if (!confirm2('all', el, syncOn() ? 'Toucher encore : efface aussi sur les autres appareils' : 'Toucher encore : tout effacer')) break; var keep = { pins: S.pins, clock: S.clock }; S = blank(); S.pins = keep.pins; S.clock = keep.clock; save(); build(); closeSheet(); renderAll(); break;
+    case 'wipeAll': if (syncOn() && !isAdmin()) { el.textContent = 'Réservé à l\'administrateur (efface chez tous)'; break; }
+      if (!confirm2('all', el, syncOn() ? 'Toucher encore : efface aussi sur les autres appareils' : 'Toucher encore : tout effacer')) break; var keep = { pins: S.pins, clock: S.clock }; S = blank(); S.pins = keep.pins; S.clock = keep.clock; save(); build(); closeSheet(); renderAll(); break;
     case 'fs': var fs = act && +el.dataset.d ? Math.max(0.8, Math.min(1.5, (lsGet('cis:fs', 1) + +el.dataset.d))) : 1; lsSet('cis:fs', fs); document.documentElement.style.setProperty('--fsu', fs); renderAll(); break;
   }
 });

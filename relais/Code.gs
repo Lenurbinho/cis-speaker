@@ -4,6 +4,7 @@
    Mode d'emploi : relais/LISEZMOI.md */
 
 const CODE_EQUIPE = 'A-CHANGER';            // ← choisis un code (lettres et chiffres), à donner aux speakers
+const CODE_ADMIN = 'A-CHANGER-AUSSI';       // ← code réservé à toi : retirer une réunion de la liste partagée (ne le donne à personne)
 const DOSSIER = 'CIS speaker - réunions';   // dossier créé tout seul dans ton Drive
 
 function dossier_() { const it = DriveApp.getFoldersByName(DOSSIER); return it.hasNext() ? it.next() : DriveApp.createFolder(DOSSIER); }
@@ -31,7 +32,7 @@ function doGet(e) {
   }
   if (p.action === 'saisies') return rep_(changes_(propre_(p.id), +p.depuis || 0));
   if (p.action === 'brut') return rep_(brut_(p.url, +p.ttl || 5));
-  return rep_({ ok: true, version: 5 });
+  return rep_({ ok: true, version: 6 });
 }
 
 // ---------- saisies partagées : une case = un temps, un concours, un vent, une règle… ----------
@@ -79,7 +80,9 @@ function doPost(e) {
     return rep_({ ok: true, maj: f.getLastUpdated().getTime() });
   }
   if (b.action === 'saisir') return rep_(saisir_(b));
-  if (b.action === 'retirer') { // la réunion et ses saisies partent à la corbeille du Drive (récupérables 30 jours)
+  if (b.action === 'admin') return rep_({ ok: CODE_ADMIN !== 'A-CHANGER-AUSSI' && b.admin === CODE_ADMIN });
+  if (b.action === 'retirer') { // réservé à l'administrateur ; la réunion et ses saisies partent à la corbeille du Drive (30 jours)
+    if (CODE_ADMIN === 'A-CHANGER-AUSSI' || b.admin !== CODE_ADMIN) return rep_({ ok: false, erreur: 'réservé à l\'administrateur' });
     const id = propre_(b.id), f = fichier_(id); if (f) f.setTrashed(true);
     const it = dossier_().getFilesByName(id + '.saisies.json'); while (it.hasNext()) it.next().setTrashed(true);
     CacheService.getScriptCache().remove('n:' + id);
