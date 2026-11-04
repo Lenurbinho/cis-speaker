@@ -151,6 +151,8 @@ RF par catégorie, MPF par catégorie.
   - **Combinés, onglet d'une épreuve** : classés par défaut au **classement général**, colonne **Ord.** (ordre de
     passage), place dans l'épreuve sous les points, « À suivre / Ensuite » mis en évidence ; le bouton Ordre
     alterne général → épreuve → passage.
+  - Correctif V1.8.1 : un **réimport manuel** du Direct garde désormais les stats Media Sheet déjà fusionnées
+    (avant, il les perdait) ; « Présenter » signale quand aucune stat n'est chargée.
   - Correctif : un combiné des autres jours (ex. décathlon vendredi-samedi) n'apparaît plus dans l'horaire du
     jour importé ; seuls les combinés ayant une épreuve ce jour-là sont gardés.
 - **Horaire des combinés (V1.5)** : dans la colonne Horaire, une ligne par épreuve du combiné avec son heure

@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 var E = window.CISE;
-var VERSION = 'V1.8 · 4 nov. 2026';
+var VERSION = 'V1.8.1 · 4 nov. 2026';
 var $ = function (s) { return document.querySelector(s); };
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
@@ -801,6 +801,7 @@ function presentSheet(r, h) {
   var rec = r.records.filter(function (x) { return !/^(RM|RE|MPM|MPE)$/.test(x.code); });
   html += rules + '<h4>En jeu</h4><div class="kv">' + rec.map(function (x) { return '<i>' + esc(x.label.charAt(0).toUpperCase() + x.label.slice(1)) + '</i><span><b>' + fp(x.v, u) + '</b> ' + (x.detail ? '<small>' + esc(x.detail) + '</small>' : '') + '</span>'; }).join('') + '</div>';
   if (fav.length) html += '<h4>Favoris (meilleurs SB)</h4><p>' + fav.map(function (a, i) { return (i + 1) + '. <b>' + esc(a.name) + '</b> ' + fp(a.sb.v, u); }).join(' · ') + '</p>';
+  if (!h.ath.some(function (a) { return E.topStats(a.src || {}, r.info).length; })) html += '<p class="note">Pas de palmarès ni de records détenus pour ces athlètes : ouvre le fichier <b>Media Sheet</b> de la réunion (Réglages → Ouvrir un fichier) pour les ajouter.</p>';
   html += '<h4>' + (r.type === 'course' ? 'Couloir par couloir' : 'Ordre de passage') + '</h4>';
   list.forEach(function (a) {
     var st = E.topStats(a.src || {}, r.info).slice(0, 5), n = noteOf(a);
@@ -1230,9 +1231,9 @@ function doImportDirect() {
   CISI.importDirect(id, date, get, impMsg).then(function (file) {
     if (!file.meeting.epreuves.length) throw new Error('aucune épreuve pour cette date');
     var old = RAW && RAW.source === 'direct' && RAW.id === file.id ? RAW : null;
-    if (old && old.mediasheet && window._msLast) CISI.mergeMediaSheet(file, window._msLast);
+    if (old) CISI.mergeMediaSheet(file, old, true); // réimport : on garde les stats Media Sheet déjà ajoutées
     kvSet('meeting', file); closeSheet(); start(file, true);
-    S.last = { txt: 'Réunion importée du Direct : ' + file.meeting.epreuves.length + ' listes. Ouvre le fichier Media Sheet pour ajouter les stats.', t: Date.now() }; save(); renderBanner();
+    S.last = { txt: 'Réunion importée du Direct : ' + file.meeting.epreuves.length + ' listes. ' + (file.mediasheet ? 'Stats Media Sheet conservées.' : 'Ouvre le fichier Media Sheet pour ajouter les stats.'), t: Date.now() }; save(); renderBanner();
     IMP_MSG = ''; shareMeeting(file, true);
   }).catch(function (e) { impMsg('Import impossible : ' + (e.message || e)); });
 }
