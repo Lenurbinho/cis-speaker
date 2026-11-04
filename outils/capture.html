@@ -9,7 +9,7 @@ button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:12px 18p
 button:disabled{opacity:.5}#log{font-family:monospace;font-size:13px;white-space:pre-wrap;max-height:360px;overflow:auto;background:#f6f8f9;border-radius:8px;padding:8px}
 .ok{color:#0a7a3d}.ko{color:#e3001b}small{color:#55607a}
 </style></head><body>
-<h1>Capture des données sources</h1>
+<h1>Capture des données sources</h1><p><small>Version 3 : listes de départ + résultats du Direct, toutes les épreuves Matsport de la journée.</small></p>
 <p>Cette page récupère, <b>par ton relais</b>, les pages du Direct athle.fr et les données Matsport d'une réunion,
 et les rassemble dans <b>un fichier</b> à donner à Claude pour qu'il écrive l'import automatique.
 Le fichier reste sur ton appareil : rien n'est publié.</p>
@@ -65,8 +65,11 @@ async function direct() {
   var g = {}; (p.texte || '').replace(/frmepreuve=([0-9A-Fa-f-]{36})/g, function (a, x) { g[x.toUpperCase()] = 1; });
   var ids = Object.keys(g); log(ids.length + ' listes trouvées dans le programme');
   await pool(ids.slice(0, 60).map(function (x) { return 'https://www.athle.fr/bases/liste.aspx?frmbase=directs&frmmode=1&frmcompetition=' + id + '&frmepreuve=' + x; }), 4);
-  // une page de résultats pour voir sa forme
-  if (ids[0]) await get('https://www.athle.fr/bases/liste.aspx?frmbase=directs&frmmode=2&frmcompetition=' + id + '&frmepreuve=' + ids[0]);
+  // toutes les pages de résultats (et les tours trouvés dans les onglets : finales…)
+  var more = {};
+  PAGES.filter(function (p) { return /frmmode=1/.test(p.url); }).forEach(function (p) { (p.texte || '').replace(/frmepreuve=([0-9A-Fa-f-]{36})/g, function (a, x) { more[x.toUpperCase()] = 1; }); });
+  ids.forEach(function (x) { more[x] = 1; });
+  await pool(Object.keys(more).map(function (x) { return 'https://www.athle.fr/bases/liste.aspx?frmbase=directs&frmmode=2&frmcompetition=' + id + '&frmepreuve=' + x; }), 4);
 }
 async function matsport() {
   var id = $('#mId').value.trim(); if (!id) return;
