@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 var E = window.CISE;
-var VERSION = 'V1.3 · 4 nov. 2026';
+var VERSION = 'V1.4 · 4 nov. 2026';
 var $ = function (s) { return document.querySelector(s); };
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
@@ -255,6 +255,7 @@ function recChips(r) {
     pick.push(x);
   });
   if (!pick.length) return '';
+  pick.sort(function (a, b) { return a.rank - b.rank; });
   return '<div class="recs" data-act="recs" data-r="' + r.id + '">' + pick.map(function (x) {
     var lab = x.code === 'MIN' ? 'Min' + (/ [AB]$/.test(x.label) ? ' ' + x.label.slice(-1) : '') : /^RF-/.test(x.code) ? 'RF ' + (E.CAT_LABEL[x.code.slice(3)] || '').slice(0, 3) + '.' : x.code;
     return '<span class="rc"><i>' + esc(lab) + '</i>' + fp(x.v, r.unit) + '</span>';
@@ -432,7 +433,8 @@ function combHtml(r) {
   }).join('') + '<button class="htab' + (sel === 'cl' ? ' on' : '') + '" data-act="heat" data-r="' + r.id + '" data-h="cl">Classement<small>total</small></button></div>';
   if (sel === 'cl') {
     var rk = combRanking(r, ht), nMax = Math.max.apply(null, rk.map(function (x) { return x.n; }).concat([0]));
-    var h = '<div class="pinfo"><span class="up">Classement ' + (nMax ? 'après ' + nMax + ' épreuve' + (nMax > 1 ? 's' : '') : '') + '</span><span class="nx">' + r.cmb.length + ' épreuves · touche une épreuve pour saisir</span></div>';
+    var warn = r.cmbJeunes ? '<div class="sec" style="color:var(--red);text-transform:none">Catégorie jeunes : les tables de cotation jeunes ne sont pas encore intégrées, points calculés avec les tables adultes (indicatifs).</div>' : '';
+    var h = warn + '<div class="pinfo"><span class="up">Classement ' + (nMax ? 'après ' + nMax + ' épreuve' + (nMax > 1 ? 's' : '') : '') + '</span><span class="nx">' + r.cmb.length + ' épreuves · touche une épreuve pour saisir</span></div>';
     var body = '<div class="rw hd"><span>Pl</span><span>Athlète · perfs</span><span style="text-align:right">Points</span></div>';
     rk.forEach(function (x) {
       var a = x.a, c = cmbOf(ht, a);
@@ -792,7 +794,7 @@ function settingsSheet() {
   var html = '';
   if (M) html += '<h4>Réunion</h4><p><b>' + esc(M.nom) + '</b> · ' + esc(M.date) + ' · ' + M.rounds.length + ' épreuves</p>';
   html += '<div class="row2"><button class="btn p" data-act="open">Ouvrir un fichier de réunion</button><button class="btn" data-act="demo">Données de démonstration</button></div>' +
-    '<p class="note">Le fichier à ouvrir est celui de <b>Media Sheet</b> : dossier <b>store/meetings</b>, un fichier <b>.json</b> par réunion. ' + (relaisOk() ? 'Ouvert ici, il est aussi envoyé dans ton Drive pour tous les appareils du partage.' : 'Il reste sur cet appareil.') + '</p>' + shareSectionHtml();
+    '<p class="note">Le fichier à ouvrir est celui de <b>Media Sheet</b> : dossier <b>store/meetings</b>, un fichier <b>.json</b> par réunion. ' + (relaisOk() ? 'Ouvert ici, il est aussi envoyé dans ton Drive pour tous les appareils du partage.' : 'Il reste sur cet appareil.') + '</p>' + importSectionHtml() + shareSectionHtml();
   if (M) {
     html += '<h4>Horloge</h4><p>' + (sim ? 'Heure <b>simulée</b> (pour tester ou rejouer une réunion) : ' : 'Heure <b>réelle</b> de l\'appareil : ') + '<b>' + fh(nowMin()) + '</b></p>' +
       '<div class="row2"><input class="txt" type="time" id="simT" value="' + fh(nowMin()).replace('h', ':') + '"><button class="btn p" data-act="simSet">Simuler à partir de cette heure</button>' + (sim ? '<button class="btn" data-act="simOff">Revenir à l\'heure réelle</button>' : '') + '</div>';
@@ -807,7 +809,7 @@ function welcome() {
   $('#panels').style.setProperty('--n', 1);
   $('#panels').innerHTML = '<div class="welcome" style="grid-column:1/-1"><h1>CIS speaker</h1><p>Écran d\'information de compétition pour le speaker : horaire, épreuves en cours côte à côte, saisie des perfs, Q/q et alertes (PB, SB, records, minima).</p>' +
     '<div class="row2"><button class="btn p" data-act="open">Ouvrir le fichier de la réunion</button><button class="btn" data-act="demo">Essayer avec la démo</button></div>' +
-    '<p class="note">Le fichier vient de Media Sheet (dossier <b>store/meetings</b>, un fichier .json par réunion). Il n\'est jamais publié sur Internet.</p><div id="welcomeShared">' + (relaisOk() ? '<h4>Réunions partagées</h4>' + sharedListHtml() : '') + '</div></div>';
+    '<p class="note">Le fichier vient de Media Sheet (dossier <b>store/meetings</b>, un fichier .json par réunion). Il n\'est jamais publié sur Internet.</p>' + (relaisOk() ? '<div class="note" style="margin-top:10px">' + importSectionHtml() + '</div>' : '') + '<div id="welcomeShared">' + (relaisOk() ? '<h4>Réunions partagées</h4>' + sharedListHtml() : '') + '</div></div>';
   document.body.classList.add('nomeet');
 }
 
@@ -836,6 +838,13 @@ function loadText(txt) {
   try { j = JSON.parse(txt); } catch (e) { alert('Ce fichier n\'est pas lisible (JSON attendu).'); return; }
   var mt = j.meeting || j;
   if (!mt.epreuves || !mt.epreuves.length) { alert('Ce fichier ne contient pas d\'épreuves : choisis le fichier de réunion Media Sheet (store/meetings/….json).'); return; }
+  if (RAW && RAW.source === 'direct' && j.source !== 'direct' &&
+      confirm('Ajouter les stats de ce fichier Media Sheet à la réunion importée du Direct (« ' + M.nom + ' ») ?\n\nOK = compléter · Annuler = ouvrir ce fichier à la place')) {
+    var n = CISI.mergeMediaSheet(RAW, j); window._msLast = j;
+    kvSet('meeting', RAW); closeSheet(); start(RAW, true);
+    S.last = { txt: 'Stats Media Sheet ajoutées pour ' + n + ' athlètes.', t: Date.now() }; save(); renderBanner();
+    shareMeeting(RAW, true); return;
+  }
   kvSet('meeting', j); closeSheet(); start(j, true);
   shareMeeting(j);
 }
@@ -1042,6 +1051,37 @@ function syStatus() {
   return w ? ' · envoi…' : ' · partagé ✓';
 }
 
+
+// ---------- import automatique depuis le Direct athle.fr (par le relais) ----------
+var IMP_MSG = '';
+function importSectionHtml() {
+  var d = lsGet('cis:lastDirect', { id: '', date: '' });
+  var h = '<h4>Importer depuis le Direct athle.fr</h4>';
+  if (!relaisOk()) return h + '<p class="small">Nécessite le relais (partage entre appareils, ci-dessous).</p>';
+  return h + '<div class="row2"><input class="txt" id="impId" inputmode="numeric" placeholder="N° du Direct (ex. 314411)" value="' + esc(d.id) + '" style="flex:1;min-width:150px">' +
+    '<input class="txt" id="impDate" placeholder="Date JJ/MM/AAAA" value="' + esc(d.date) + '" style="flex:1;min-width:140px"><button class="btn p" data-act="impDirect">Importer</button></div>' +
+    '<p class="small">Programme, séries et couloirs, heures exactes, règles de qualification, records et meilleures perfs françaises par catégorie. ' +
+    'Ouvre ensuite le fichier <b>Media Sheet</b> de la réunion pour ajouter palmarès et bilans. La réunion importée est partagée avec tous les appareils.</p>' +
+    '<div id="impMsg" class="kpvox">' + esc(IMP_MSG) + '</div>';
+}
+function impMsg(t) { IMP_MSG = t; var m = $('#impMsg'); if (m) m.textContent = t; }
+function doImportDirect() {
+  var id = ($('#impId').value || '').replace(/\D/g, ''), date = ($('#impDate').value || '').trim();
+  if (!id) { impMsg('Indique le numéro du Direct (dans l\'adresse athle.fr/direct/…).'); return; }
+  if (date && !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(date)) { impMsg('Date au format JJ/MM/AAAA (ou vide pour toute la réunion).'); return; }
+  lsSet('cis:lastDirect', { id: id, date: date });
+  var get = function (url) { return relaisGet({ action: 'brut', url: url, ttl: 30 }).then(function (x) { if (!x.ok) throw new Error(x.erreur || 'relais'); if (x.code !== 200) throw new Error('page ' + x.code); return x.texte; }); };
+  impMsg('Import en cours…');
+  CISI.importDirect(id, date, get, impMsg).then(function (file) {
+    if (!file.meeting.epreuves.length) throw new Error('aucune épreuve pour cette date');
+    var old = RAW && RAW.source === 'direct' && RAW.id === file.id ? RAW : null;
+    if (old && old.mediasheet && window._msLast) CISI.mergeMediaSheet(file, window._msLast);
+    kvSet('meeting', file); closeSheet(); start(file, true);
+    S.last = { txt: 'Réunion importée du Direct : ' + file.meeting.epreuves.length + ' listes. Ouvre le fichier Media Sheet pour ajouter les stats.', t: Date.now() }; save(); renderBanner();
+    IMP_MSG = ''; shareMeeting(file, true);
+  }).catch(function (e) { impMsg('Import impossible : ' + (e.message || e)); });
+}
+
 // ---------- actions (un seul écouteur pour tout l'écran) ----------
 var CONFIRM = null;
 function confirm2(key, btn, msg) { if (CONFIRM === key) { CONFIRM = null; return true; } CONFIRM = key; btn.textContent = msg; setTimeout(function () { if (CONFIRM === key) CONFIRM = null; }, 4000); return false; }
@@ -1134,6 +1174,7 @@ document.addEventListener('click', function (ev) {
     case 'rlOff': RL = { url: '', cle: '' }; lsSet('cis:relais', RL); SHARED = null; SY = null; SHARE_MSG = ''; settingsSheet(); break;
     case 'share': kvGet('meeting').then(function (j) { if (j) shareMeeting(j); }); break;
     case 'openShared': openShared(el.dataset.id); break;
+    case 'impDirect': doImportDirect(); break;
     case 'invite':
       var link = location.origin + location.pathname + '#relais=' + encodeURIComponent(RL.url) + '&code=' + encodeURIComponent(RL.cle);
       (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(function () { SHARE_MSG = 'Lien copié : envoie-le aux autres speakers (SMS, mail…).'; refreshShareUi(); })

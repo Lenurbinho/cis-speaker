@@ -170,6 +170,7 @@ function buildRecords(src, ev, athletes, kind) {
     var v = parsePerf(r.perf, ev.unit); if (v == null) return;
     var cat = r.cat ? catOf(r.cat) : 'ALL';
     add(r.code || 'REC', r.label || r.code, cat, v, r.detail || '', r.rank || 5);
+    R[R.length - 1].cis = true;
   });
   var rc = parsePerf(src.record_meeting, ev.unit);
   if (rc != null) add('RCH', kind === 'championnat' ? 'record des championnats' : 'record du meeting', 'ALL', rc, String(src.record_meeting).split(' — ').slice(1).join(' — '), 5);
@@ -177,6 +178,7 @@ function buildRecords(src, ev, athletes, kind) {
   if ((h = headPerf(src['top_europe_' + y], ev))) add('MPE', 'meilleure perf européenne ' + y, 'ALL', h.v, h.who + ' (' + h.nat + ')', 7);
   // MPF de l'année : la liste Media Sheet peut être en retard, on la complète avec les SB des engagés français
   h = headPerf(src['top_france_' + y], ev);
+  if (!h && R.some(function (x) { return x.cis && x.code === 'MPF'; })) athletes = [];
   (athletes || []).forEach(function (a) {
     if (a.nat && a.nat !== 'FRA') return;
     var sb = bestFromList(a.sb, ev);
@@ -189,6 +191,10 @@ function buildRecords(src, ev, athletes, kind) {
       if (v != null) add('MIN', 'minima ' + b.nom + (b.B ? ' ' + L : ''), 'ALL', v, '', 9);
     });
   });
+  if (src.records_cis && src.records_cis.length) { // les records officiels du Direct remplacent ceux déduits des bilans
+    var off = {}; R.forEach(function (x) { if (x.cis) off[x.code + '|' + x.cat] = 1; });
+    R = R.filter(function (x) { return x.cis || !off[x.code + '|' + x.cat]; });
+  }
   return R;
 }
 
@@ -211,7 +217,7 @@ function roundDuration(r) {
   return 240;
 }
 function eventTitle(nom, sexe) {
-  var n = String(nom).replace(/^(\d+)\s*m\b/i, '$1 m').replace(/Haies/i, 'haies').replace(/Saut/, 'saut');
+  var n = String(nom).replace(/\s*\([^)]*\)/g, '').replace(/^(\d)\s(\d{3})/, '$1$2').replace(/^(\d+)\s*m\b/i, '$1 m').replace(/Haies/i, 'haies').replace(/Saut/, 'saut');
   return n + ' ' + (sexe === 'F' ? 'F' : 'H');
 }
 
@@ -223,7 +229,7 @@ function loadMeeting(file) {
   var groups = [], byKey = {};
   eps.forEach(function (e, i) {
     var info = eventInfo(e.nom, e.sexe, salle);
-    var key = info.type === 'course' ? [nk(e.nom), e.sexe, e.categorie, e.horaire].join('|') : 'i' + i;
+    var key = e.cis_round ? 'c|' + e.cis_round : info.type === 'course' ? [nk(e.nom), e.sexe, e.categorie, e.horaire].join('|') : 'i' + i;
     if (!byKey[key]) { byKey[key] = { idx: i, items: [] }; groups.push(byKey[key]); }
     byKey[key].items.push({ e: e, i: i });
   });
@@ -252,19 +258,21 @@ function loadMeeting(file) {
         return o;
       });
       return {
-        id: 'e' + x.i, label: n > 1 ? heatWord + ' ' + (k + 1) : (info.type === 'course' ? phase : ''),
+        id: e.cis_id ? 'g' + e.cis_id : 'e' + x.i, label: n > 1 ? heatWord + ' ' + (k + 1) : (info.type === 'course' ? phase : ''),
         time: t0 == null ? null : (sameTime ? t0 + k * heatInterval(info) : parseHour(e.horaire)), est: sameTime && k > 0,
         ath: ath
       };
     });
     var r = {
-      id: 'r' + g.idx, nom: e0.nom, sexe: e0.sexe, cat: e0.categorie || '', title: eventTitle(e0.nom, e0.sexe), phase: phase,
+      id: e0.cis_id ? 'rg' + e0.cis_id : 'r' + g.idx, nom: e0.nom, sexe: e0.sexe, cat: e0.categorie || '', title: eventTitle(e0.nom, e0.sexe), phase: phase,
       type: info.type, unit: info.unit, wind: info.wind, info: info, time: t0, heats: heats, src: e0,
       qualif: (g.items.map(function (x) { return x.e.qualification; }).filter(Boolean)[0]) || '',
       records: buildRecords(e0, info, allAth, opt.type_competition || 'championnat')
     };
     if (r.type === 'comb') {
       r.cmb = combProgram(e0.nom, e0.sexe, salle);
+      // catégories jeunes : tables et épreuves propres (FFA), pas encore intégrées
+      r.cmbJeunes = /^(CA|MI|BE|PO)/.test(e0.categorie || '') || /\b(U1[268]|CF|CM|MF|MM|cadet|minime)\b/i.test(e0.nom || '');
       if (r.cmb) heats.forEach(function (h) { h.ath.forEach(function (a) { a.cref = r.cmb.map(function (d) { return { sb: bestFromList(a.src.sb, d.info), pb: bestFromList(a.src.pb, d.info) }; }); }); });
     }
     r.dur = roundDuration(r);

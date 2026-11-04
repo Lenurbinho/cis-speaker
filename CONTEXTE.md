@@ -106,7 +106,23 @@ Constats sur la capture du 4/11/2026 (via le relais) :
   (round_Result, round_Wind, round_Valide, round_Rank_After_Attempt, round_Points) ;
   `verticalResult.heights[]` + `results[].attemptVertical[]` (ht, ht_Att1..3 « O/X/- ») ; `phaseLinks`.
 - Adresses `/schedules/…` et `/competitions/<id>/events` : 404 (inexistantes).
-- Programme du Direct athle.fr (`/ajax/direct.aspx…`) : non récupéré à la première capture (à revoir).
+- Direct athle.fr (2e capture, OK) : chaque liste de départ (`frmmode=1`) contient tout : titre
+  (`.mainheaders` « 200m TCF », combinés « Heptathlon JSF | Longueur TCF »), records (`td.recordsDatas` :
+  RF SEF, RF ESF, RCH…, puis « MPF 2026 » par catégorie), `.headers4` (« 26 JUILLET 14:08 »,
+  « Qualif : 2Q + 2q »), les tours de l'épreuve (`.navDatas` / `.navActive`, avec leurs GUID : séries,
+  1/2 finales, finale), et les lignes `tr.trlive` (ordre/couloir, dossard, lien fiche FFA, « SEF/02 »,
+  club, dépt, ligue, SB, PB « 24''00 (26) »). `frmmode=2` = résultats (colonnes Pl., Perf, …, Pts).
+
+**Import du Direct (V1.4, `import.js`)** : Réglages → « Importer depuis le Direct athle.fr » (n° + date) ;
+lit par le relais le programme puis toutes les listes (et les finales trouvées dans les onglets), et fabrique
+un fichier au format Media Sheet (ids stables tirés des GUID, pour que les saisies restent attachées même
+si on réimporte après l'ajout des finales). Ensuite, ouvrir le fichier Media Sheet de la réunion propose de
+**compléter** la réunion importée (palmarès, records détenus, bilans, minima, podium N-1) : jointure par
+dossard + nom. La réunion importée est partagée avec tous les appareils.
+Testé sur la J3 : 16 tours dont les finales du 200 m F/H et du 110 m H, heures exactes, règles 2Q+2q / 3Q+2q,
+RF par catégorie, MPF par catégorie.
+- Combinés en catégorie jeunes (CA, MI…) : tables FFA jeunes **pas encore intégrées** ; message d'avertissement
+  et points indicatifs (tables adultes). À faire si le cas se présente (remarque d'Alexandre, 4/11/2026).
 
 ### Chaîne retenue
 Media Sheet (sur l'ordinateur, qui accède à la FFA) produit un **fichier unique pour le CIS** :
