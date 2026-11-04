@@ -17,7 +17,7 @@ function doGet(e) {
   if (p.action === 'liste') {
     const L = [], it = dossier_().getFiles();
     while (it.hasNext()) {
-      const f = it.next(), n = f.getName(); if (!/\.json$/.test(n)) continue;
+      const f = it.next(), n = f.getName(); if (!/\.json$/.test(n) || /\.saisies\.json$/.test(n)) continue;
       let info = {}; try { info = JSON.parse(f.getDescription() || '{}'); } catch (x) { }
       L.push({ id: n.replace(/\.json$/, ''), nom: info.nom || n, date: info.date || '', maj: f.getLastUpdated().getTime(), taille: f.getSize() });
     }
@@ -29,7 +29,41 @@ function doGet(e) {
     return ContentService.createTextOutput('{"ok":true,"maj":' + f.getLastUpdated().getTime() + ',"reunion":' + f.getBlob().getDataAsString() + '}')
       .setMimeType(ContentService.MimeType.JSON);
   }
-  return rep_({ ok: true, version: 1 });
+  if (p.action === 'saisies') return rep_(changes_(propre_(p.id), +p.depuis || 0));
+  return rep_({ ok: true, version: 2 });
+}
+
+// ---------- saisies partagées : une case = un temps, un concours, un vent, une règle… ----------
+// Fichier <id>.saisies.json : { n: compteur, c: { "res|e0|727": { v: valeur, t: heure appareil, n: numéro, by: appareil } } }
+function lireSaisies_(id) {
+  const it = dossier_().getFilesByName(id + '.saisies.json');
+  if (!it.hasNext()) return { f: null, d: { n: 0, c: {} } };
+  const f = it.next(); let d; try { d = JSON.parse(f.getBlob().getDataAsString()); } catch (x) { d = { n: 0, c: {} }; }
+  return { f: f, d: d };
+}
+function changes_(id, depuis) {
+  const cache = CacheService.getScriptCache(), n = +(cache.get('n:' + id) || -1);
+  if (n >= 0 && n <= depuis) return { ok: true, n: n, items: [] }; // rien de neuf : réponse immédiate
+  const d = lireSaisies_(id).d, items = [];
+  Object.keys(d.c).forEach(function (k) { const x = d.c[k]; if (x.n > depuis) items.push({ p: k, v: x.v, t: x.t, by: x.by }); });
+  cache.put('n:' + id, String(d.n), 21600);
+  return { ok: true, n: d.n, items: items };
+}
+function saisir_(b) {
+  const id = propre_(b.id); if (!id) return { ok: false, erreur: 'vide' };
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const r = lireSaisies_(id), d = r.d;
+    (b.items || []).forEach(function (it) {
+      const old = d.c[it.p];
+      if (old && old.t > it.t) return; // une saisie plus récente existe déjà
+      d.n++; d.c[it.p] = { v: it.v, t: it.t, n: d.n, by: b.by || '' };
+    });
+    const txt = JSON.stringify(d);
+    if (r.f) r.f.setContent(txt); else dossier_().createFile(id + '.saisies.json', txt, 'application/json');
+    CacheService.getScriptCache().put('n:' + id, String(d.n), 21600);
+  } finally { lock.releaseLock(); }
+  return changes_(id, +b.depuis || 0);
 }
 
 function doPost(e) {
@@ -43,6 +77,7 @@ function doPost(e) {
     f.setDescription(JSON.stringify({ nom: b.nom || id, date: b.date || '' }));
     return rep_({ ok: true, maj: f.getLastUpdated().getTime() });
   }
+  if (b.action === 'saisir') return rep_(saisir_(b));
   if (b.action === 'retirer') { const f = fichier_(propre_(b.id)); if (f) f.setTrashed(true); return rep_({ ok: true }); }
   return rep_({ ok: false, erreur: 'action' });
 }

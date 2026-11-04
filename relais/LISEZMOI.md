@@ -20,6 +20,15 @@ Gratuit. À faire une seule fois (5 minutes).
 7. Bouton **Copier le lien d'invitation** : envoie ce lien aux autres speakers ; en l'ouvrant, leur
    appareil est réglé tout seul.
 
+## Mettre à jour le relais (nouvelle version du code)
+1. Ouvre ton projet « Relais CIS speaker » sur https://script.google.com.
+2. **Note ton code d'équipe** (ligne `CODE_EQUIPE`), puis remplace tout le contenu de `Code.gs` par le
+   nouveau fichier `relais/Code.gs` ; remets ton code d'équipe à la place de `A-CHANGER` ; 💾.
+3. **Déployer** → **Gérer les déploiements** → ✏️ (crayon) → Version : **Nouvelle version** → **Déployer**.
+   L'adresse `/exec` ne change pas : rien à refaire sur les appareils.
+
+Si le CIS affiche « relais à mettre à jour » à côté de la date, c'est que cette étape manque.
+
 ## Modifier le script plus tard
 Après une modification : **Déployer** → **Gérer les déploiements** → ✏️ → Version : **Nouvelle version** →
 **Déployer** (l'URL reste la même).

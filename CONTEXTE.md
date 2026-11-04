@@ -172,8 +172,24 @@ Ajouts V1.1 (3/11/2026) :
   (`relais/Code.gs`, mode d'emploi `relais/LISEZMOI.md`), protégé par un **code d'équipe**. Une réunion
   ouverte sur un appareil est envoyée au relais ; les autres appareils la voient dans Réglages (et l'ouvrent
   d'office s'ils n'ont rien d'ouvert), et reçoivent ses mises à jour (vérification toutes les 2 min).
-  Un **lien d'invitation** règle un nouvel appareil d'un coup. Les **saisies** ne sont pas encore partagées
-  (étape suivante, même relais).
+  Un **lien d'invitation** règle un nouvel appareil d'un coup. Relais installé par Alexandre le 4/11/2026.
+
+Ajouts V1.2 (4/11/2026) — **saisies partagées en direct** (relais version 2) :
+- chaque « case » (temps d'un athlète, essais d'un athlète, concours vertical, vent, règle de qualif, Q/q
+  corrigé, couloir de finale, retard, épreuve terminée, finales créées) part au relais dès qu'elle change ;
+  les cases des autres appareils arrivent toutes les **3 s** ; nouvelle réunion / mise à jour vérifiée
+  toutes les **5 s** ;
+- même case saisie en même temps sur deux appareils : la plus récente gagne ;
+- sans réseau : en attente sur l'appareil, envoi au retour du réseau ; état affiché à côté de la date
+  (« partagé ✓ », « envoi… », « hors ligne (n en attente) ») ;
+- alertes et historique aussi pour les saisies venues d'un autre appareil ;
+- restent propres à chaque appareil : épreuves affichées, ordre d'affichage, horloge simulée, bandeau.
+- Côté relais : fichier `<réunion>.saisies.json` dans le dossier Drive, verrou contre les écritures
+  simultanées, mémoire cache pour répondre tout de suite quand rien n'a changé.
+
+**Live Matsport (à venir)** : même principe, avec le relais qui interroge Matsport et garde la réponse en
+cache quelques secondes, pour que tous les speakers partagent **une seule** interrogation de Matsport
+(rythme visé : environ 5 s, seulement pour les épreuves en cours, à confirmer avec Matsport).
 
 Limites connues : règles de qualification absentes des fichiers Media Sheet actuels (à choisir au bouton
 « Qualif ») ; RF et MPF par catégorie partiels tant que l'export CIS (Direct FFA) n'existe pas ; combinés

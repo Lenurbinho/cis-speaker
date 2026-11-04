@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 var E = window.CISE;
-var VERSION = 'V1.1 · 3 nov. 2026';
+var VERSION = 'V1.2 · 4 nov. 2026';
 var $ = function (s) { return document.querySelector(s); };
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
@@ -26,7 +26,7 @@ function kvSet(k, v) { return idb().then(function (db) { return new Promise(func
 var RAW = null, M = null, S = null, ROUNDS = {}, KP = null;
 function blank() { return { res: {}, wind: {}, ess: {}, vert: {}, rules: {}, qov: {}, off: {}, done: {}, finals: [], lanes: {}, pins: null, ptab: null, heatSel: {}, sortRank: {}, hide: {}, hist: [], clock: null, last: null }; }
 function skey() { return 'cis:s:' + M.id; }
-function save() { lsSet(skey(), S); }
+function save() { lsSet(skey(), S); if (SY && syncOn()) syDiff(); }
 function build() {
   M = E.loadMeeting(RAW);
   (S.finals || []).forEach(function (f) {
@@ -173,7 +173,7 @@ var lastMinute = -1;
 function renderTop() {
   if (!M) { $('#mName').textContent = 'CIS speaker'; $('#mDate').textContent = ''; $('#clockT').textContent = fh(realMin()); $('#clockSim').textContent = ''; return; }
   $('#mName').textContent = M.nom;
-  $('#mDate').textContent = (M.date || '') + (M.salle ? ' · salle' : '');
+  $('#mDate').textContent = (M.date || '') + (M.salle ? ' · salle' : '') + syStatus();
   $('#clockT').textContent = fh(Math.floor(nowMin()));
   $('#clockSim').textContent = S.clock && S.clock.sim ? 'heure simulée' : '';
 }
@@ -741,7 +741,8 @@ function start(raw, isNew) {
     var sg = suggestions();
     S.pins = (sg.length ? sg : M.rounds).slice(0, window.innerWidth > 700 ? 2 : 3).map(function (r) { return r.id; });
   }
-  save(); renderAll();
+  if (syncOn()) syLoad(); else SY = null;
+  save(); renderAll(); syTick();
 }
 function loadText(txt) {
   var j;
@@ -799,23 +800,27 @@ function openShared(id) {
     closeSheet(); start(x.reunion, true); return true;
   }).catch(function (e) { SHARE_MSG = 'Téléchargement impossible : ' + (e.message || 'réseau'); refreshShareUi(); });
 }
+var POLLING = false;
 function pollShared() {
-  if (!relaisOk() || !navigator.onLine) return;
+  if (!relaisOk() || !navigator.onLine || POLLING) return;
+  POLLING = true; setTimeout(function () { POLLING = false; }, 20000);
   relaisGet({ action: 'liste' }).then(function (x) {
+    POLLING = false;
     if (!x.ok) { SHARE_MSG = x.erreur === 'code' ? 'Code d\'équipe refusé par le relais.' : 'Relais : ' + x.erreur; SHARED = null; refreshShareUi(); return; }
     SHARED = x.reunions || [];
-    if (!M && SHARED.length) { openShared(SHARED[0].id); return; } // rien d'ouvert : on prend la plus récente
+    if (!M && SHARED.length) { POLLING = true; openShared(SHARED[0].id).then(function () { POLLING = false; }); return; } // rien d'ouvert : on prend la plus récente
     if (M) {
       var me = SHARED.filter(function (r) { return r.id === M.id; })[0];
       if (me && me.maj > (lsGet('cis:maj:' + M.id, 0) || 0) && !KP) {
+        POLLING = true;
         relaisGet({ action: 'lire', id: M.id }).then(function (y) {
-          if (!y.ok) return; lsSet('cis:maj:' + M.id, y.maj); kvSet('meeting', y.reunion); start(y.reunion);
+          POLLING = false; if (!y.ok) return; lsSet('cis:maj:' + M.id, y.maj); kvSet('meeting', y.reunion); start(y.reunion);
           S.last = { txt: 'Réunion mise à jour depuis le partage (les saisies sont conservées).', t: Date.now() }; save(); renderBanner();
         });
       }
     }
     refreshShareUi();
-  }).catch(function () { });
+  }).catch(function () { POLLING = false; });
 }
 function sharedListHtml() {
   if (!relaisOk()) return '';
@@ -841,6 +846,113 @@ function refreshShareUi() {
   var m = $('#shareMsg'); if (m) m.textContent = SHARE_MSG;
   var l = $('#sharedList'); if (l) l.innerHTML = sharedListHtml();
   var w = $('#welcomeShared'); if (w) w.innerHTML = relaisOk() ? '<h4>Réunions partagées</h4>' + sharedListHtml() : '';
+}
+
+
+// ---------- saisies partagées en direct (même relais) ----------
+// Chaque « case » (un temps, les essais d'un athlète, un concours vertical, un vent, une règle, un retard…)
+// est envoyée au relais dès qu'elle change ; les cases des autres appareils arrivent toutes les 3 s.
+// En cas de saisie simultanée de la même case, la plus récente gagne.
+var DEV = lsGet('cis:dev', null) || (function () { var d = 'd' + Math.random().toString(36).slice(2, 8); lsSet('cis:dev', d); return d; })();
+var SY = null, SY_BUSY = false, SY_STATE = '';
+var SY_K2 = ['res', 'ess', 'qov', 'lanes'], SY_K1 = ['wind', 'vert', 'rules', 'off', 'done'];
+function syncOn() { return relaisOk() && M && !/^demo/.test(M.id); }
+function slotsOf() {
+  var o = {};
+  SY_K2.forEach(function (k) { var A = S[k] || {}; for (var h in A) for (var a in A[h]) if (A[h][a] != null) o[k + '|' + h + '|' + a] = JSON.stringify(A[h][a]); });
+  SY_K1.forEach(function (k) { var A = S[k] || {}; for (var h in A) if (A[h] != null) o[k + '|' + h] = JSON.stringify(A[h]); });
+  if (S.finals && S.finals.length) o.finals = JSON.stringify(S.finals);
+  return o;
+}
+function syLoad() { SY = lsGet('cis:sync:' + M.id, null) || { n: 0, base: {}, out: {}, first: true }; SY.id = M.id; SY_STATE = ''; }
+function sySave() { if (SY) lsSet('cis:sync:' + SY.id, SY); }
+function syDiff() {
+  if (!SY || SY.first || SY.id !== M.id) return;
+  var cur = slotsOf(), b = SY.base, t = Date.now(), ch = false, keys = {}, k;
+  for (k in cur) keys[k] = 1; for (k in b) keys[k] = 1;
+  for (k in keys) if (cur[k] !== b[k]) {
+    SY.out[k] = { v: cur[k] === undefined ? null : JSON.parse(cur[k]), t: t };
+    if (cur[k] === undefined) delete b[k]; else b[k] = cur[k];
+    ch = true;
+  }
+  if (ch) { sySave(); setTimeout(syTick, 50); }
+}
+function heatOf(hid) { for (var i = 0; i < M.rounds.length; i++) { var h = getH(M.rounds[i], hid); if (h) return { r: M.rounds[i], h: h }; } return null; }
+function syApply(items) {
+  var changed = false, fin = false;
+  (items || []).forEach(function (it) {
+    var mine = SY.out[it.p];
+    if (mine && mine.t > it.t) return; // ma saisie est plus récente : elle partira au prochain envoi
+    delete SY.out[it.p];
+    var js = it.v == null ? undefined : JSON.stringify(it.v);
+    if (SY.base[it.p] === js && JSON.stringify(getPath(it.p.split('|'))) === (js || undefined)) return;
+    var path = it.p.split('|'), prev = clone(getPath(path));
+    if (it.p === 'finals') { S.finals = it.v || []; fin = true; } else setPath(path, clone(it.v));
+    if (js === undefined) delete SY.base[it.p]; else SY.base[it.p] = js;
+    changed = true;
+    if (it.by === DEV) return;
+    // annonce et historique des saisies faites sur un autre appareil
+    var x = (path[0] === 'res' || path[0] === 'ess') ? heatOf(path[1]) : null, a = x && getA(x.h, path[2]);
+    if (!a) return;
+    var txt = heatText(x.r, x.h) + ' · ' + a.name + ' · ', al = { list: [], txt: '' };
+    if (path[0] === 'res') {
+      var v = it.v && it.v.v;
+      txt += it.v ? (it.v.st || fp(v, x.r.unit)) : 'effacé';
+      if (v != null) al = alertsAt(x.r, x.h, a, v, S.wind[x.h.id], 0);
+    } else {
+      var arr = it.v || [], li = arr.length - 1, e = arr[li];
+      txt += e ? 'essai ' + (li + 1) + ' : ' + essTxt(e, x.r) : 'essais effacés';
+      if (e && e.v != null && JSON.stringify(e) !== JSON.stringify((prev || [])[li])) al = alertsAt(x.r, x.h, a, e.v, e.w, li);
+    }
+    S.hist.unshift({ t: Date.now(), clk: nowMin(), path: path, prev: prev, val: clone(it.v), txt: txt + ' (autre appareil)', al: al.txt, rid: x.r.id });
+    if (al.txt) announce(al.txt, al.list, Date.now());
+  });
+  if (changed) {
+    lsSet(skey(), S); sySave();
+    if (fin) build();
+    renderAll();
+  }
+}
+function syTick() {
+  if (!SY || !syncOn() || SY_BUSY || !navigator.onLine || SY.id !== M.id) return;
+  SY_BUSY = true;
+  var done = function () { SY_BUSY = false; renderTop(); };
+  var fail = function (e) { SY_STATE = e && e.message === 'action' ? 'relais à mettre à jour' : 'synchro en attente'; done(); };
+  var check = function (x) {
+    if (!x || !x.ok) throw new Error(x && x.erreur === 'action' ? 'action' : (x && x.erreur) || 'réseau');
+    SY_STATE = ''; return x;
+  };
+  if (SY.first) { // première fois sur cette réunion : on récupère tout, puis on envoie ce que le relais n'a pas
+    relaisGet({ action: 'saisies', id: SY.id, depuis: 0 }).then(check).then(function (x) {
+      var have = {}; (x.items || []).forEach(function (it) { have[it.p] = 1; });
+      SY.first = false; SY.base = {};
+      (x.items || []).forEach(function (it) { if (it.v != null) SY.base[it.p] = JSON.stringify(it.v); });
+      var local = slotsOf(), t = Date.now();
+      for (var k in local) if (!have[k]) SY.out[k] = { v: JSON.parse(local[k]), t: t };
+      SY.n = x.n || 0;
+      (x.items || []).forEach(function (it) { if (!SY.out[it.p]) setPath(it.p.split('|'), it.p === 'finals' ? null : clone(it.v)); if (it.p === 'finals') S.finals = it.v || []; });
+      SY.base = Object.assign(slotsOf(), {}); for (var k2 in SY.out) delete SY.base[k2];
+      lsSet(skey(), S); sySave(); build(); renderAll(); done(); syDiff();
+    }).catch(fail);
+    return;
+  }
+  var keys = Object.keys(SY.out);
+  if (keys.length) {
+    var sent = keys.map(function (k) { return { p: k, v: SY.out[k].v, t: SY.out[k].t }; });
+    relaisPost({ action: 'saisir', id: SY.id, by: DEV, depuis: SY.n, items: sent }).then(check).then(function (x) {
+      sent.forEach(function (it) { if (SY.out[it.p] && SY.out[it.p].t === it.t) delete SY.out[it.p]; });
+      SY.n = x.n; sySave(); syApply(x.items); done();
+    }).catch(fail);
+  } else {
+    relaisGet({ action: 'saisies', id: SY.id, depuis: SY.n }).then(check).then(function (x) { SY.n = x.n; sySave(); syApply(x.items); done(); }).catch(fail);
+  }
+}
+function syStatus() {
+  if (!SY || !syncOn()) return '';
+  var w = Object.keys(SY.out).length;
+  if (!navigator.onLine) return ' · hors ligne' + (w ? ' (' + w + ' en attente)' : '');
+  if (SY_STATE) return ' · ' + SY_STATE;
+  return w ? ' · envoi…' : ' · partagé ✓';
 }
 
 // ---------- actions (un seul écouteur pour tout l'écran) ----------
@@ -914,7 +1026,7 @@ document.addEventListener('click', function (ev) {
       break;
     case 'rmfinal': if (!confirm2('rm' + r.id, el, 'Toucher encore pour supprimer')) break; S.finals = S.finals.filter(function (f) { return 'f' + f.from !== r.id; }); S.pins = S.pins.filter(function (x) { return x !== r.id; }); save(); build(); closeSheet(); renderAll(); break;
     case 'wipe':
-      if (!confirm2('w' + r.id, el, 'Toucher encore pour tout effacer')) break;
+      if (!confirm2('w' + r.id, el, syncOn() ? 'Toucher encore : efface aussi chez les autres' : 'Toucher encore pour tout effacer')) break;
       r.heats.forEach(function (x) { delete S.res[x.id]; delete S.ess[x.id]; delete S.vert[x.id]; delete S.wind[x.id]; delete S.qov[x.id]; });
       delete S.done[r.id]; save(); closeSheet(); renderAll(); break;
     case 'hist': if (el.id === 'banner' || el.closest('#banner')) { histSheet(); } else histSheet(); break;
@@ -926,8 +1038,8 @@ document.addEventListener('click', function (ev) {
       RL = { url: ($('#rlUrl').value || '').trim(), cle: ($('#rlCle').value || '').trim() }; lsSet('cis:relais', RL);
       if (RL.url && !/^https:\/\/script\.google(usercontent)?\.com\//.test(RL.url)) SHARE_MSG = 'Attention : l\'adresse doit commencer par https://script.google.com/…';
       else SHARE_MSG = relaisOk() ? 'Réglage enregistré. Recherche des réunions partagées…' : 'Partage désactivé.';
-      SHARED = null; settingsSheet(); pollShared(); break;
-    case 'rlOff': RL = { url: '', cle: '' }; lsSet('cis:relais', RL); SHARED = null; SHARE_MSG = ''; settingsSheet(); break;
+      SHARED = null; if (M && syncOn()) { syLoad(); syTick(); } settingsSheet(); pollShared(); break;
+    case 'rlOff': RL = { url: '', cle: '' }; lsSet('cis:relais', RL); SHARED = null; SY = null; SHARE_MSG = ''; settingsSheet(); break;
     case 'share': kvGet('meeting').then(function (j) { if (j) shareMeeting(j); }); break;
     case 'openShared': openShared(el.dataset.id); break;
     case 'invite':
@@ -946,7 +1058,7 @@ document.addEventListener('click', function (ev) {
       var aL = document.createElement('a'); aL.href = URL.createObjectURL(blob); aL.download = 'saisies-' + M.id + '.json'; document.body.appendChild(aL); aL.click(); setTimeout(function () { URL.revokeObjectURL(aL.href); aL.remove(); }, 1000);
       break;
     case 'imp': $('#fileSaisies').click(); break;
-    case 'wipeAll': if (!confirm2('all', el, 'Toucher encore : tout effacer')) break; var keep = { pins: S.pins, clock: S.clock }; S = blank(); S.pins = keep.pins; S.clock = keep.clock; save(); build(); closeSheet(); renderAll(); break;
+    case 'wipeAll': if (!confirm2('all', el, syncOn() ? 'Toucher encore : efface aussi sur les autres appareils' : 'Toucher encore : tout effacer')) break; var keep = { pins: S.pins, clock: S.clock }; S = blank(); S.pins = keep.pins; S.clock = keep.clock; save(); build(); closeSheet(); renderAll(); break;
     case 'fs': var fs = act && +el.dataset.d ? Math.max(0.8, Math.min(1.5, (lsGet('cis:fs', 1) + +el.dataset.d))) : 1; lsSet('cis:fs', fs); document.documentElement.style.setProperty('--fs', fs); renderAll(); break;
   }
 });
@@ -980,7 +1092,9 @@ setInterval(function () {
 if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(function () { });
 renderTop();
 kvGet('meeting').then(function (j) { if (j && (j.meeting || j.epreuves)) start(j); else welcome(); pollShared(); }).catch(function () { welcome(); pollShared(); });
-setInterval(pollShared, 120000);
+setInterval(pollShared, 5000);
+setInterval(syTick, 3000);
+window.addEventListener('online', syTick);
 window.addEventListener('online', pollShared);
 window.CIS = { get S() { return S; }, get M() { return M; }, nowMin: nowMin, render: function () { save(); renderAll(); } };
 })();
