@@ -285,13 +285,10 @@ réduits au total de points.
 - **Photos des athlètes** comme sur le fichier final de Media Sheet (champ `photo` du fichier) : petite photo
   dans la fiche, voire sur la ligne. Demandé le 4/11/2026, accessoire.
 
-## Prochaines étapes
-1. Retours d'Alexandre sur la V1 en conditions réelles. (Partage réunion + saisies testé avec succès le 4/11/2026.)
-   Import automatique en cours : relais version 3 (action `brut` : lecture des seuls sites athle.fr et
-   matsport.com, réponse gardée en cache quelques secondes pour tous les speakers) et page
-   `outils/capture.html` qui rassemble les pages sources d'une réunion dans un fichier pour écrire l'import.
-2. Export « CIS » depuis Media Sheet ou import direct (Direct FFA / Matsport) : règles de qualification,
-   heures exactes des séries, RF et MPF par catégorie (champ `records_cis` déjà lu par `engine.js`) ;
-   corriger le bug de phase des séries dans Media Sheet.
-3. Relais Google Apps Script (déjà en place pour les réunions) : synchronisation des saisies entre
-   appareils, lecture du live Matsport, import athle.fr, pour tous les speakers.
+## Prochaines étapes (point du 4/11/2026)
+Fait et vérifié par Alexandre : relais version 4 installé ; heptathlon complet (7 épreuves, jours 1 et 2) sur la J3.
+En attente d'une vraie compétition : test du live Matsport (adresse de l'interface live), accord de Matsport
+sur le rythme (≈ 10 s, une seule interrogation pour tous via le cache du relais), retours terrain.
+Ensuite, au choix : relais 4x100 / 4x400 ; réunions en salle ; Q/q Matsport quand aucune règle de qualif ;
+finitions (noms coupés à 4 épreuves côte à côte, catégories absentes en Matsport seul) ; plus tard tables des
+combinées jeunes et photos.
