@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 var E = window.CISE;
-var VERSION = 'V1.10 · 4 nov. 2026';
+var VERSION = 'V1.11 · 4 nov. 2026';
 var $ = function (s) { return document.querySelector(s); };
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
@@ -158,6 +158,16 @@ function pillsHtml(r, a, v, w) {
 function refHtml(r, a) {
   return '<span class="c-r">' + (a.sb ? 'SB <b>' + fp(a.sb.v, r.unit) + '</b>' : 'SB –') + '<br>' + (a.pb ? 'PB <b>' + fp(a.pb.v, r.unit) + '</b>' : 'PB –') + '</span>';
 }
+
+// ---------- photos (fichier Media Sheet : portraits intégrés, utilisables hors connexion) ----------
+function photosOn() { return lsGet('cis:photos', true); }
+function avatar(a, cls) {
+  var p = a.src && a.src.photo;
+  if (p && /^(data:image\/|https:\/\/)/.test(p)) return '<img class="av ' + cls + '" src="' + esc(p) + '" alt="" loading="lazy">';
+  var w = String(a.name || '').split(' '), up = w.filter(function (x) { return x === x.toUpperCase() && /[A-Z]/.test(x); });
+  var ini = ((w[0] || '').charAt(0) + ((up[0] || w[1] || '').charAt(0))).toUpperCase();
+  return '<span class="av ini ' + cls + '">' + esc(ini) + '</span>';
+}
 function ficheUrl(a) { var u = a.src && a.src.url; return u && /^https?:\/\//.test(u) ? u : ''; }
 function statsHtml(r, h, a) {
   if (!a._st) a._st = E.topStats(a.src || {}, r.info);
@@ -170,7 +180,8 @@ function nameHtml(r, h, a, extra) {
   var parts = String(a.name).split(' '), up = parts.filter(function (w) { return w === w.toUpperCase() && /[A-Z]/.test(w); });
   var pre = parts.slice(0, parts.length - up.length).join(' '), nmH = up.length && pre ? '<span class="pn">' + esc(pre) + '</span><span class="pi">' + esc(pre.charAt(0)) + '.</span> ' + esc(up.join(' ')) : esc(a.name);
   var u = ficheUrl(a), nm = u ? '<a class="nl" href="' + esc(u) + '" target="_blank" rel="noopener">' + nmH + '</a>' : nmH;
-  return '<span class="c-n"><b>' + nm + '<button class="fi" data-act="fiche" data-r="' + r.id + '" data-h="' + h.id + '" data-k="' + esc(a.key) + '" aria-label="Fiche de l\'athlète">i</button></b><small><span class="ct">' + esc(a.cat) + '</span> · ' + esc(a.club || a.nat) + '</small>' + statsHtml(r, h, a) + (noteOf(a) ? '<small class="note1">📝 ' + esc(noteOf(a)) + '</small>' : '') + (extra || '') + '</span>';
+  var ph = photosOn() && M && M.rounds.some(function (x) { return x.heats.some(function (y) { return y.ath.some(function (z) { return z.src && z.src.photo; }); }); });
+  return '<span class="c-n' + (ph ? ' hasav' : '') + '">' + (ph ? avatar(a, 'avr') : '') + '<b>' + nm + '<button class="fi" data-act="fiche" data-r="' + r.id + '" data-h="' + h.id + '" data-k="' + esc(a.key) + '" aria-label="Fiche de l\'athlète">i</button></b><small><span class="ct">' + esc(a.cat) + '</span> · ' + esc(a.club || a.nat) + '</small>' + statsHtml(r, h, a) + (noteOf(a) ? '<small class="note1">📝 ' + esc(noteOf(a)) + '</small>' : '') + (extra || '') + '</span>';
 }
 function isEdit(h, a) { return KP && KP.h === h.id && KP.k === a.key; }
 function ruleOf(r) { return S.rules[r.id] != null ? S.rules[r.id] : r.qualif; }
@@ -807,7 +818,7 @@ function presentSheet(r, h) {
   html += '<h4>' + (r.type === 'course' ? 'Couloir par couloir' : 'Ordre de passage') + '</h4>';
   list.forEach(function (a) {
     var st = E.topStats(a.src || {}, r.info).slice(0, 5), n = noteOf(a);
-    html += '<div class="pres"><div class="pl">' + esc(laneOf(h, a) || '–') + '</div><div class="pm"><b>' + esc(a.name) + '</b> <small>' + esc(a.cat) + (a.annee ? ' · ' + esc(a.annee) : '') + ' · ' + esc(a.club) + '</small>' +
+    html += '<div class="pres"><div class="pl">' + esc(laneOf(h, a) || '–') + '</div>' + (photosOn() ? avatar(a, 'avp') : '') + '<div class="pm"><b>' + esc(a.name) + '</b> <small>' + esc(a.cat) + (a.annee ? ' · ' + esc(a.annee) : '') + ' · ' + esc(a.club) + '</small>' +
       '<div class="pr">SB <b>' + (a.sb ? fp(a.sb.v, u) : '–') + '</b> · PB <b>' + (a.pb ? fp(a.pb.v, u) : '–') + '</b>' + (a.pb && a.pb.y ? ' (' + esc(a.pb.y) + ')' : '') + (a.src && a.src.minima_status ? ' · ' + esc(a.src.minima_status) : '') + '</div>' +
       (st.length ? '<div class="ps">' + st.map(function (x) { return '<span class="s-' + x.k + '">' + esc(x.t) + '</span>'; }).join(' · ') + '</div>' : '') +
       (n ? '<div class="note1">📝 ' + esc(n) + '</div>' : '') + '</div></div>';
@@ -840,7 +851,7 @@ function podiumSheet(r) {
   P.rows.forEach(function (x) {
     var a = x.a, al = E.alertsFor(r, a, x.v, x.w).filter(function (z) { return !z.weak; }), yrs = champYears(a, r), n = noteOf(a);
     var titre = champ && x.place === 1 ? (yrs.length ? (yrs.length + 1) + 'e titre de champion' + (r.sexe === 'F' ? 'ne' : '') + ' de France (déjà en ' + yrs.join(', ') + ')' : '1er titre de champion' + (r.sexe === 'F' ? 'ne' : '') + ' de France sur l\'épreuve (d\'après son palmarès)') : '';
-    html += '<div class="pres pod"><div class="pl">' + med[x.place] + '</div><div class="pm"><b>' + esc(a.name) + '</b> <span class="c-p" style="font-size:28px">' + fp(x.v, u) + '</span>' + (x.w != null ? ' <small>vent ' + E.fmtWind(x.w) + '</small>' : '') +
+    html += '<div class="pres pod"><div class="pl">' + med[x.place] + '</div>' + (photosOn() ? avatar(a, 'avp') : '') + '<div class="pm"><b>' + esc(a.name) + '</b> <span class="c-p" style="font-size:28px">' + fp(x.v, u) + '</span>' + (x.w != null ? ' <small>vent ' + E.fmtWind(x.w) + '</small>' : '') +
       '<div class="pr">' + esc(a.cat) + ' · ' + esc(a.club) + '</div>' + (titre ? '<div class="ps"><b>' + esc(titre) + '</b></div>' : '') +
       (al.length ? '<div class="ps">' + al.map(function (z) { return esc(z.txt); }).join(' · ') + '</div>' : '') +
       (n ? '<div class="note1">📝 ' + esc(n) + '</div>' : '') + '</div></div>';
@@ -863,7 +874,7 @@ window.addEventListener('popstate', function () {
 function fiche(r, h, a) {
   var s = a.src || {}, u = r.unit;
   var lien = ficheUrl(a) ? '<a class="btn p" href="' + esc(ficheUrl(a)) + '" target="_blank" rel="noopener">Fiche ' + (/worldathletics/.test(s.url) ? 'World Athletics' : 'FFA') + ' ↗</a>' : '';
-  var html = '<div class="fhead"><p class="big">' + esc(a.name) + '</p>' + lien + '</div><div class="kv">' +
+  var html = '<div class="fhead">' + (photosOn() ? avatar(a, 'avf') : '') + '<p class="big">' + esc(a.name) + '</p>' + lien + '</div><div class="kv">' +
     '<i>Catégorie</i><span>' + esc(a.cat) + (a.annee ? ' · né(e) en ' + esc(a.annee) : '') + ' · ' + esc(s.pays || a.nat) + '</span>' +
     '<i>Club</i><span>' + esc(a.club) + '</span>' + (s.entraineur ? '<i>Entraîneur</i><span>' + esc(s.entraineur) + '</span>' : '') +
     '<i>Dossard</i><span>' + esc(a.dossard) + (laneOf(h, a) ? ' · ' + (r.type === 'course' ? 'couloir ' : 'ordre ') + esc(laneOf(h, a)) : '') + '</span>' +
@@ -937,7 +948,7 @@ function settingsSheet() {
     html += '<h4>Mes saisies</h4><div class="row2"><button class="btn" data-act="exp">Exporter mes saisies</button><button class="btn" data-act="imp">Importer des saisies</button><button class="btn r" data-act="wipeAll">Tout effacer</button></div>' +
       '<p class="small">L\'export est un petit fichier à garder en sauvegarde ou à transmettre à un collègue qui a ouvert le même fichier de réunion.</p>';
   }
-  html += '<h4>Affichage</h4><div class="row2"><button class="btn" data-act="fs" data-d="-0.08">A−</button><button class="btn" data-act="fs" data-d="0">Taille normale</button><button class="btn" data-act="fs" data-d="0.08">A+</button></div>';
+  html += '<h4>Affichage</h4><div class="row2"><button class="btn' + (photosOn() ? ' p' : '') + '" data-act="photosTog">' + (photosOn() ? '✓ Photos des athlètes' : 'Photos : masquées') + '</button></div><div class="row2"><button class="btn" data-act="fs" data-d="-0.08">A−</button><button class="btn" data-act="fs" data-d="0">Taille normale</button><button class="btn" data-act="fs" data-d="0.08">A+</button></div>';
   html += '<h4>À propos</h4><p>CIS speaker ' + VERSION + ' · fonctionne hors connexion une fois ouvert.</p>';
   openSheet('Réglages', html);
 }
@@ -1521,6 +1532,7 @@ document.addEventListener('click', function (ev) {
     case 'undo': undo(+el.dataset.i); histSheet(); break;
     case 'settings': settingsSheet(); break;
     case 'sheetClose': closeSheet(); break;
+    case 'photosTog': lsSet('cis:photos', !photosOn()); settingsSheet(); renderAll(); break;
     case 'present': closeSheet(); presentSheet(r, h || r.heats[0]); break;
     case 'podium': closeSheet(); podiumSheet(r); break;
     case 'noteSave': var nv = ($('#noteTxt').value || '').trim(); commit(['notes', noteKey(a)], nv || null, 'Note · ' + a.name + (nv ? ' : ' + nv.slice(0, 40) : ' effacée'), '', r.id); closeSheet(); renderAll(); break;

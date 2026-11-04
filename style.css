@@ -150,6 +150,15 @@ main{flex:1;min-width:0;padding:8px 8px calc(12px + var(--kph))}
 .sec{padding:8px 10px;font-weight:800;color:var(--muted);font-size:13px;text-transform:uppercase;background:#fafcfc;border-bottom:1px solid var(--line)}
 .pfoot{display:flex;gap:6px;flex-wrap:wrap;padding:8px}
 
+/* photos */
+.av{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;object-fit:cover;background:var(--pale);color:var(--blue);font-family:'Barlow Condensed',sans-serif;font-weight:800;flex:none;box-shadow:0 0 0 2px #fff,0 0 0 3px var(--line)}
+.c-n.hasav{position:relative}
+.avr{display:none;position:absolute;left:0;top:50%;transform:translateY(-50%);width:44px;height:44px;font-size:17px}
+@container (min-width:640px){ .c-n.hasav{padding-left:54px;min-height:46px} .avr{display:inline-flex} } /* photo sur la ligne seulement s'il y a la place */
+.avf{width:96px;height:96px;font-size:36px}
+.avp{width:64px;height:64px;font-size:24px;align-self:flex-start}
+.pres.pod .avp{width:80px;height:80px}
+
 /* présentation, podium, notes, ce qu'il faut pour */
 .need{flex-basis:100%;font-size:calc(16px*var(--fs));color:var(--blue);font-weight:600}
 .need b{color:var(--ink);font-family:'Barlow Condensed',sans-serif;font-size:1.15em}
@@ -205,7 +214,6 @@ textarea.txt{font:inherit;border:1px solid var(--line);border-radius:10px;paddin
   .best{font-size:calc(22px*var(--fs))}
   .vert .rw{grid-template-columns:26px minmax(0,1fr) repeat(var(--nb,3),46px) 58px}
   .vert .c-f{display:none}
-  .c-n small{white-space:normal}
 }
 
 /* très étroit (4 épreuves côte à côte avec l'horaire) : l'essentiel seulement */
@@ -222,6 +230,7 @@ textarea.txt{font:inherit;border:1px solid var(--line);border-radius:10px;paddin
   .c-n small{white-space:nowrap!important}
   .c-n small .ct~*{display:none}
   .fi{display:none}  /* fiche accessible par le bouton « Fiche » du pavé */
+
   .course .rw,.course.fin .rw{grid-template-columns:28px minmax(0,1fr) 70px 30px}
   .course.fin .rw{grid-template-columns:28px minmax(0,1fr) 74px}
   .course .c-pl,.course.fin .c-pl{display:none}

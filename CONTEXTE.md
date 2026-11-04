@@ -138,6 +138,11 @@ RF par catégorie, MPF par catégorie.
   **Combinés sur deux jours** : l'import va chercher dans le programme des autres journées les épreuves du
   combiné (ex. J2 de l'heptathlon quand on importe la J3) : leurs résultats remontent, sans les mettre dans
   l'horaire du jour. Il faut **réimporter** une réunion importée avant la V1.7 pour en profiter.
+- **Photos (V1.11)** : portraits intégrés au fichier Media Sheet (champ `photo`, JPEG 160×160 en base64, ~4 Ko,
+  hors connexion ; 119 athlètes sur 168 pour la J3). Affichées dans la fiche (grande), la présentation et le
+  podium, et sur les lignes **seulement quand le panneau est large** (≥ 640 px : 1 épreuve, ou 2 sur grand écran) ;
+  sinon masquées pour garder les noms lisibles. Initiales à la place quand il n'y a pas de photo. Bouton
+  « Photos des athlètes » dans Réglages → Affichage. (Matsport a aussi des photos, en ligne seulement : non utilisées.)
 - **V1.10** :
   - **Règle de qualification déduite** des Q/q officiels (Matsport ou Direct) quand aucune règle n'est connue
     (ex. Matsport seul : 2Q+2q, 3Q+2q retrouvées sur la J3) ; une règle choisie à la main n'est jamais remplacée.
@@ -294,12 +299,11 @@ Limites connues : règles de qualification absentes des fichiers Media Sheet act
 réduits au total de points.
 
 ## Améliorations pour plus tard (une fois tout le reste en place)
-- **Photos des athlètes** comme sur le fichier final de Media Sheet (champ `photo` du fichier) : petite photo
-  dans la fiche, voire sur la ligne. Demandé le 4/11/2026, accessoire.
+- ~~Photos des athlètes~~ : faites en V1.11.
 
 ## Prochaines étapes (point du 4/11/2026)
 Fait et vérifié par Alexandre : relais version 4 installé ; heptathlon complet (7 épreuves, jours 1 et 2) sur la J3.
 En attente d'une vraie compétition : test du live Matsport (adresse de l'interface live), accord de Matsport
 sur le rythme (≈ 10 s, une seule interrogation pour tous via le cache du relais), retours terrain.
 Faits en V1.10 : Q/q Matsport sans règle, finitions, bases salle et relais. À valider avec une capture d'une
-réunion en salle et d'une réunion avec relais. Plus tard : tables FFA des combinés U16 et moins, photos.
+réunion en salle et d'une réunion avec relais. Plus tard : tables FFA des combinés U16 et moins. Photos : faites en V1.11.
