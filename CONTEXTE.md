@@ -138,6 +138,11 @@ RF par catégorie, MPF par catégorie.
   **Combinés sur deux jours** : l'import va chercher dans le programme des autres journées les épreuves du
   combiné (ex. J2 de l'heptathlon quand on importe la J3) : leurs résultats remontent, sans les mettre dans
   l'horaire du jour. Il faut **réimporter** une réunion importée avant la V1.7 pour en profiter.
+- **Ménage (V1.14)** : bouton **Retirer** sur chaque réunion de la liste partagée (Réglages → Partage) : la
+  réunion et ses saisies partent à la corbeille du Drive (récupérables 30 jours ; relais version 5 pour les
+  saisies). Réglages → Ménage : **Effacer les restes des anciennes réunions** (saisies et réglages locaux des
+  réunions qui ne sont plus ouvertes) et **Fermer cette réunion** (l'enlève de l'appareil ; pas de réouverture
+  automatique d'une réunion partagée ensuite).
 - **Règle (4/11/2026, Alexandre) : le nom de l'athlète et son club ne sont JAMAIS tronqués.** V1.13 : le nom est
   réduit automatiquement jusqu'à tenir sur sa ligne (`fitNames`, jusqu'à −40 %), puis passe sur 2 lignes en
   dernier recours ; le club va à la ligne ; plus d'initiale à la place du prénom ; le bouton « i » est passé

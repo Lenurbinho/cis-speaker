@@ -31,7 +31,7 @@ function doGet(e) {
   }
   if (p.action === 'saisies') return rep_(changes_(propre_(p.id), +p.depuis || 0));
   if (p.action === 'brut') return rep_(brut_(p.url, +p.ttl || 5));
-  return rep_({ ok: true, version: 4 });
+  return rep_({ ok: true, version: 5 });
 }
 
 // ---------- saisies partagées : une case = un temps, un concours, un vent, une règle… ----------
@@ -79,7 +79,12 @@ function doPost(e) {
     return rep_({ ok: true, maj: f.getLastUpdated().getTime() });
   }
   if (b.action === 'saisir') return rep_(saisir_(b));
-  if (b.action === 'retirer') { const f = fichier_(propre_(b.id)); if (f) f.setTrashed(true); return rep_({ ok: true }); }
+  if (b.action === 'retirer') { // la réunion et ses saisies partent à la corbeille du Drive (récupérables 30 jours)
+    const id = propre_(b.id), f = fichier_(id); if (f) f.setTrashed(true);
+    const it = dossier_().getFilesByName(id + '.saisies.json'); while (it.hasNext()) it.next().setTrashed(true);
+    CacheService.getScriptCache().remove('n:' + id);
+    return rep_({ ok: true });
+  }
   return rep_({ ok: false, erreur: 'action' });
 }
 

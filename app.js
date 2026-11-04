@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 var E = window.CISE;
-var VERSION = 'V1.13 · 4 nov. 2026';
+var VERSION = 'V1.14 · 4 nov. 2026';
 var $ = function (s) { return document.querySelector(s); };
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
@@ -966,7 +966,9 @@ function settingsSheet() {
     html += '<h4>Horloge</h4><p>' + (sim ? 'Heure <b>simulée</b> (pour tester ou rejouer une réunion) : ' : 'Heure <b>réelle</b> de l\'appareil : ') + '<b>' + fh(nowMin()) + '</b></p>' +
       '<div class="row2"><input class="txt" type="time" id="simT" value="' + fh(nowMin()).replace('h', ':') + '"><button class="btn p" data-act="simSet">Simuler à partir de cette heure</button>' + (sim ? '<button class="btn" data-act="simOff">Revenir à l\'heure réelle</button>' : '') + '</div>';
     html += '<h4>Mes saisies</h4><div class="row2"><button class="btn" data-act="exp">Exporter mes saisies</button><button class="btn" data-act="imp">Importer des saisies</button><button class="btn r" data-act="wipeAll">Tout effacer</button></div>' +
-      '<p class="small">L\'export est un petit fichier à garder en sauvegarde ou à transmettre à un collègue qui a ouvert le même fichier de réunion.</p>';
+      '<p class="small">L\'export est un petit fichier à garder en sauvegarde ou à transmettre à un collègue qui a ouvert le même fichier de réunion.</p>' +
+      '<h4>Ménage</h4><div class="row2"><button class="btn" data-act="cleanOld">Effacer les restes des anciennes réunions</button><button class="btn r" data-act="closeMeet">Fermer cette réunion</button></div>' +
+      '<p class="small">« Effacer les restes » supprime de cet appareil les saisies et réglages des réunions qui ne sont plus ouvertes. « Fermer cette réunion » l\'enlève de cet appareil (elle reste dans la liste partagée tant que tu ne la retires pas). Pour l\'enlever de tous les appareils : bouton « Retirer » dans la liste des réunions partagées.</p>';
   }
   html += '<h4>Affichage</h4><div class="row2"><button class="btn' + (photosOn() ? ' p' : '') + '" data-act="photosTog">' + (photosOn() ? '✓ Photos des athlètes' : 'Photos : masquées') + '</button></div><div class="row2"><button class="btn" data-act="fs" data-d="-0.08">A−</button><button class="btn" data-act="fs" data-d="0">Taille normale</button><button class="btn" data-act="fs" data-d="0.08">A+</button></div>';
   html += '<h4>À propos</h4><p>CIS speaker ' + VERSION + ' · fonctionne hors connexion une fois ouvert.</p>';
@@ -982,7 +984,7 @@ function welcome() {
 
 // ---------- chargement ----------
 function start(raw, isNew) {
-  RAW = raw;
+  RAW = raw; lsSet('cis:noAuto', false);
   var m0 = E.loadMeeting(raw);
   M = m0;
   S = lsGet('cis:s:' + m0.id, null) || blank();
@@ -1072,7 +1074,7 @@ function pollShared() {
     POLLING = false;
     if (!x.ok) { SHARE_MSG = x.erreur === 'code' ? 'Code d\'équipe refusé par le relais.' : 'Relais : ' + x.erreur; SHARED = null; refreshShareUi(); return; }
     SHARED = x.reunions || [];
-    if (!M && SHARED.length) { POLLING = true; openShared(SHARED[0].id).then(function () { POLLING = false; }); return; } // rien d'ouvert : on prend la plus récente
+    if (!M && SHARED.length && !lsGet('cis:noAuto', false)) { POLLING = true; openShared(SHARED[0].id).then(function () { POLLING = false; }); return; } // rien d'ouvert : on prend la plus récente
     if (M) {
       var me = SHARED.filter(function (r) { return r.id === M.id; })[0];
       if (me && me.maj > (lsGet('cis:maj:' + M.id, 0) || 0) && !KP) {
@@ -1086,6 +1088,29 @@ function pollShared() {
     refreshShareUi();
   }).catch(function () { POLLING = false; });
 }
+
+// ---------- ménage : réunions partagées et restes sur l'appareil ----------
+function removeShared(id) {
+  SHARE_MSG = 'Retrait…'; refreshShareUi();
+  relaisPost({ action: 'retirer', id: id }).then(function (x) {
+    if (!x.ok) throw new Error(x.erreur);
+    SHARE_MSG = 'Réunion retirée de la liste partagée.' + (M && M.id === id ? ' Elle reste ouverte sur cet appareil.' : '');
+    lsSet('cis:maj:' + id, null); pollShared(); refreshShareUi();
+  }).catch(function (e) { SHARE_MSG = 'Retrait impossible : ' + (e.message || 'réseau'); refreshShareUi(); });
+}
+function cleanDevice(all) { // efface les saisies et réglages des autres réunions (ou de toutes)
+  var n = 0, keep = !all && M ? M.id : null;
+  Object.keys(localStorage).forEach(function (k) {
+    var m = k.match(/^cis:(s|sync|maj):(.+)$/); if (!m) return;
+    if (keep && m[2] === keep) return;
+    localStorage.removeItem(k); n++;
+  });
+  return n;
+}
+function closeMeeting() { // ferme la réunion ouverte et efface tout ce qui la concerne sur cet appareil
+  cleanDevice(true); kvSet('meeting', null); lsSet('cis:noAuto', true); // ne pas rouvrir d'office une réunion partagée RAW = null; M = null; S = null; SY = null;
+  closeSheet(); renderAll(); welcome(); pollShared();
+}
 function sharedListHtml() {
   if (!relaisOk()) return '';
   if (!SHARED) return '<p class="small">Liste des réunions partagées : en attente du relais…</p>';
@@ -1093,7 +1118,8 @@ function sharedListHtml() {
   return SHARED.map(function (r) {
     var cur = M && r.id === M.id;
     return '<div class="hl"><div class="hm"><b>' + esc(r.nom) + '</b><small>' + esc(r.date) + ' · mise à jour ' + new Date(r.maj).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + '</small></div>' +
-      (cur ? '<span class="st fini">Ouverte</span>' : '<button class="btn s p" data-act="openShared" data-id="' + esc(r.id) + '">Ouvrir</button>') + '</div>';
+      (cur ? '<span class="st fini">Ouverte</span>' : '<button class="btn s p" data-act="openShared" data-id="' + esc(r.id) + '">Ouvrir</button>') +
+      '<button class="btn s r" data-act="rmShared" data-id="' + esc(r.id) + '">Retirer</button></div>';
   }).join('');
 }
 function shareSectionHtml() {
@@ -1564,6 +1590,9 @@ document.addEventListener('click', function (ev) {
     case 'rlOff': RL = { url: '', cle: '' }; lsSet('cis:relais', RL); SHARED = null; SY = null; SHARE_MSG = ''; settingsSheet(); break;
     case 'share': kvGet('meeting').then(function (j) { if (j) shareMeeting(j); }); break;
     case 'openShared': openShared(el.dataset.id); break;
+    case 'rmShared': if (!confirm2('rs' + el.dataset.id, el, 'Toucher encore : retirer pour tous')) break; removeShared(el.dataset.id); break;
+    case 'cleanOld': var nc = cleanDevice(false); el.textContent = nc ? nc + ' éléments effacés ✓' : 'Rien à effacer ✓'; break;
+    case 'closeMeet': if (!confirm2('cm', el, 'Toucher encore pour fermer')) break; closeMeeting(); break;
     case 'impDirect': doImportDirect(); break;
     case 'impMats': doImportMats(); break;
     case 'liveTog': lsSet('cis:live', !lsGet('cis:live', true)); settingsSheet(); renderTop(); break;
