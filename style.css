@@ -274,7 +274,11 @@ textarea.txt{font:inherit;border:1px solid var(--line);border-radius:10px;paddin
 .sbody{overflow:auto;padding:12px 14px calc(16px + env(safe-area-inset-bottom))}
 .sbody h4{margin:14px 0 6px;font-size:14px;text-transform:uppercase;color:var(--muted)}
 .sbody p{margin:6px 0}
-.row2{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.fhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.fhead .big{flex:1;min-width:200px}
+a.btn{display:inline-flex;align-items:center;text-decoration:none;color:inherit}
+a.btn.p{color:#fff}
+.row2{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
 .kv i{font-style:normal;color:var(--muted);font-weight:700}
 .hl{border-bottom:1px solid var(--line);padding:8px 0;display:flex;gap:10px;align-items:center}

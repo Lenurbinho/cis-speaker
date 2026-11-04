@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 var E = window.CISE;
-var VERSION = 'V1.8.1 · 4 nov. 2026';
+var VERSION = 'V1.8.2 · 4 nov. 2026';
 var $ = function (s) { return document.querySelector(s); };
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
@@ -860,12 +860,13 @@ window.addEventListener('popstate', function () {
 
 function fiche(r, h, a) {
   var s = a.src || {}, u = r.unit;
-  var html = '<p class="big">' + esc(a.name) + '</p><div class="kv">' +
+  var lien = ficheUrl(a) ? '<a class="btn p" href="' + esc(ficheUrl(a)) + '" target="_blank" rel="noopener">Fiche ' + (/worldathletics/.test(s.url) ? 'World Athletics' : 'FFA') + ' ↗</a>' : '';
+  var html = '<div class="fhead"><p class="big">' + esc(a.name) + '</p>' + lien + '</div><div class="kv">' +
     '<i>Catégorie</i><span>' + esc(a.cat) + (a.annee ? ' · né(e) en ' + esc(a.annee) : '') + ' · ' + esc(s.pays || a.nat) + '</span>' +
     '<i>Club</i><span>' + esc(a.club) + '</span>' + (s.entraineur ? '<i>Entraîneur</i><span>' + esc(s.entraineur) + '</span>' : '') +
     '<i>Dossard</i><span>' + esc(a.dossard) + (laneOf(h, a) ? ' · ' + (r.type === 'course' ? 'couloir ' : 'ordre ') + esc(laneOf(h, a)) : '') + '</span>' +
     '<i>' + esc(r.title) + '</i><span>SB <b>' + (a.sb ? fp(a.sb.v, u) : '–') + '</b> · PB <b>' + (a.pb ? fp(a.pb.v, u) : '–') + '</b>' + (a.pb && a.pb.y ? ' (' + esc(a.pb.y) + ')' : '') + '</span>' +
-    (s.minima_status ? '<i>Minima</i><span>' + esc(s.minima_status) + '</span>' : '') + '</div>';
+    (s.minima_status ? '<i>Minima</i><span>' + esc(s.minima_status) + '</span>' : '') + '</div><!--kv-->';
   if (s.records) html += '<h4>Records détenus</h4><p>' + esc(s.records).replace(/ · /g, '<br>') + '</p>';
   if (s.palmares_international && s.palmares_international !== 'Aucun') html += '<h4>Palmarès international</h4><p>' + esc(s.palmares_international).replace(/ \/ /g, '<br>') + '</p>';
   if (s.palmares_national && s.palmares_national !== 'Aucun') html += '<h4>Palmarès national</h4><p>' + esc(s.palmares_national).replace(/ \/ /g, '<br>') + '</p>';
@@ -876,8 +877,7 @@ function fiche(r, h, a) {
   html += '<h4>Ma note de speaker</h4><textarea class="txt" id="noteTxt" rows="3" style="width:100%" placeholder="Anecdote, prononciation du nom, à souligner…">' + esc(noteOf(a)) + '</textarea>' +
     '<div class="row2"><button class="btn p" data-act="noteSave" data-r="' + r.id + '" data-h="' + h.id + '" data-k="' + esc(a.key) + '">Enregistrer la note</button><small>Visible sur sa ligne, partagée avec les autres appareils.</small></div>';
   var st = E.topStats(s, r.info);
-  if (st.length) html = html.replace('</div>', '</div><h4>Meilleures stats</h4><p>' + st.map(function (x) { return esc(x.t); }).join('<br>') + '</p>');
-  if (ficheUrl(a)) html += '<p><a class="btn" href="' + esc(ficheUrl(a)) + '" target="_blank" rel="noopener">Fiche ' + (/worldathletics/.test(s.url) ? 'World Athletics' : 'FFA') + ' ↗</a></p>';
+  if (st.length) html = html.replace('<!--kv-->', '<h4>Meilleures stats</h4><p>' + st.map(function (x) { return esc(x.t); }).join('<br>') + '</p>');
   openSheet(a.name, html);
 }
 function recordsSheet(r) {
