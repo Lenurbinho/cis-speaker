@@ -1596,7 +1596,10 @@ document.addEventListener('click', function (ev) {
     case 'admSave':
       var ac = ($('#admCode').value || '').trim(); if (!ac) { SHARE_MSG = 'Tape le code administrateur.'; refreshShareUi(); break; }
       relaisPost({ action: 'admin', admin: ac }).then(function (x) {
-        if (x.ok) { lsSet('cis:admin', ac); SHARE_MSG = 'Mode administrateur activé sur cet appareil.'; } else SHARE_MSG = x.erreur === 'action' ? 'Mets à jour le relais (version 6) pour activer le code administrateur.' : 'Code administrateur refusé.';
+        if (x.ok) { lsSet('cis:admin', ac); SHARE_MSG = 'Mode administrateur activé sur cet appareil.'; }
+        else SHARE_MSG = x.erreur === 'action' ? 'Mets à jour le relais (version 6) pour activer le code administrateur.'
+          : x.erreur === 'non réglé' ? 'Le relais n\'a pas encore de code administrateur : remplace A-CHANGER-AUSSI dans Code.gs, enregistre, puis Déployer → Gérer les déploiements → ✏️ → Nouvelle version.'
+          : 'Code refusé par le relais. Vérifie : majuscules/minuscules et espaces identiques ; après avoir changé CODE_ADMIN, il faut redéployer une « Nouvelle version » (Déployer → Gérer les déploiements → ✏️), sinon l\'ancien code reste actif.';
         settingsSheet();
       }).catch(function () { SHARE_MSG = 'Relais injoignable.'; refreshShareUi(); });
       break;

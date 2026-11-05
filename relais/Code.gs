@@ -80,7 +80,10 @@ function doPost(e) {
     return rep_({ ok: true, maj: f.getLastUpdated().getTime() });
   }
   if (b.action === 'saisir') return rep_(saisir_(b));
-  if (b.action === 'admin') return rep_({ ok: CODE_ADMIN !== 'A-CHANGER-AUSSI' && b.admin === CODE_ADMIN });
+  if (b.action === 'admin') {
+    if (CODE_ADMIN === 'A-CHANGER-AUSSI') return rep_({ ok: false, erreur: 'non réglé' });
+    return rep_(b.admin === CODE_ADMIN ? { ok: true } : { ok: false, erreur: 'différent', longueur: String(b.admin || '').length });
+  }
   if (b.action === 'retirer') { // réservé à l'administrateur ; la réunion et ses saisies partent à la corbeille du Drive (30 jours)
     if (CODE_ADMIN === 'A-CHANGER-AUSSI' || b.admin !== CODE_ADMIN) return rep_({ ok: false, erreur: 'réservé à l\'administrateur' });
     const id = propre_(b.id), f = fichier_(id); if (f) f.setTrashed(true);
