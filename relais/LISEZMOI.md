@@ -10,7 +10,7 @@ Gratuit. À faire une seule fois (5 minutes).
 2. Efface le contenu de `Code.gs` et colle tout le contenu du fichier `relais/Code.gs` de ce dépôt.
 3. Ligne `const CODE_EQUIPE = 'A-CHANGER';` : remplace `A-CHANGER` par ton code (ex. `SpeakerBZH2026`).
    Ligne `const CODE_ADMIN = 'A-CHANGER-AUSSI';` : mets un **autre** code, connu de toi seul. Il sert à retirer
-   une réunion de la liste partagée et à effacer des saisies chez tout le monde.
+   une réunion de la liste partagée, à envoyer une réunion aux autres et à effacer des saisies chez tout le monde.
 4. Clique sur 💾 (Enregistrer). En haut, choisis la fonction **autoriser** puis **▶ Exécuter** :
    Google demande l'autorisation d'accéder à ton Drive → accepte (« Paramètres avancés » → « Accéder à… »
    si Google affiche un avertissement : c'est ton propre script).
@@ -39,7 +39,10 @@ Si le CIS affiche « relais à mettre à jour » à côté de la date, c'est que
 Après une modification : **Déployer** → **Gérer les déploiements** → ✏️ → Version : **Nouvelle version** →
 **Déployer** (l'URL reste la même).
 
-## Code administrateur (relais version 6)
+## Code administrateur (relais version 7)
 Dans le CIS, sur **tes** appareils seulement : Réglages → Partage entre appareils → « Code administrateur » →
 **Valider**. Le bouton **Retirer** n'apparaît que sur ces appareils, et le relais refuse le retrait sans ce code.
 Le lien d'invitation ne contient pas ce code.
+
+Depuis la **version 7** du relais, l'envoi d'une réunion (« Partager cette réunion », imports) est aussi réservé
+à l'administrateur : le relais refuse tout envoi sans ce code.

@@ -142,6 +142,11 @@ RF par catégorie, MPF par catégorie.
   dans Réglages → Partage sur ses appareils. Sans lui : pas de bouton « Retirer », et le relais refuse le retrait ;
   les effacements qui touchent tous les appareils (« Effacer toutes les saisies de cette épreuve », « Tout effacer »
   quand le partage est actif) sont aussi réservés à l'administrateur. Le lien d'invitation ne contient pas ce code.
+- **Imports réservés à l'administrateur (V1.16, relais version 7)** : dès que le partage est actif, seul un appareil
+  avec le code administrateur peut charger ou remplacer une réunion (fichier Media Sheet, import du Direct FFA,
+  Matsport, « Partager cette réunion », réimport automatique des finales). Les collègues ouvrent les réunions depuis
+  la liste partagée ; ils gardent les résultats en direct, la saisie partagée et la démo. Le relais (v7) refuse tout
+  envoi de réunion (`deposer`) sans le code administrateur. Sans partage réglé, l'appareil reste libre (usage seul).
 - **Ménage (V1.14)** : bouton **Retirer** sur chaque réunion de la liste partagée (Réglages → Partage) : la
   réunion et ses saisies partent à la corbeille du Drive (récupérables 30 jours ; relais version 5 pour les
   saisies). Réglages → Ménage : **Effacer les restes des anciennes réunions** (saisies et réglages locaux des

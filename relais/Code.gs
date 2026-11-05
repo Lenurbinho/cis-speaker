@@ -32,7 +32,7 @@ function doGet(e) {
   }
   if (p.action === 'saisies') return rep_(changes_(propre_(p.id), +p.depuis || 0));
   if (p.action === 'brut') return rep_(brut_(p.url, +p.ttl || 5));
-  return rep_({ ok: true, version: 6 });
+  return rep_({ ok: true, version: 7 });
 }
 
 // ---------- saisies partagées : une case = un temps, un concours, un vent, une règle… ----------
@@ -71,7 +71,8 @@ function saisir_(b) {
 function doPost(e) {
   let b; try { b = JSON.parse(e.postData.contents); } catch (x) { return rep_({ ok: false, erreur: 'json' }); }
   if (b.cle !== CODE_EQUIPE) return rep_({ ok: false, erreur: 'code' });
-  if (b.action === 'deposer') {
+  if (b.action === 'deposer') { // envoi d'une réunion : réservé à l'administrateur (dès que CODE_ADMIN est réglé)
+    if (CODE_ADMIN !== 'A-CHANGER-AUSSI' && b.admin !== CODE_ADMIN) return rep_({ ok: false, erreur: 'réservé à l\'administrateur' });
     const id = propre_(b.id); if (!id || !b.reunion) return rep_({ ok: false, erreur: 'vide' });
     const txt = JSON.stringify(b.reunion);
     let f = fichier_(id);

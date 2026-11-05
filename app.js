@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 var E = window.CISE;
-var VERSION = 'V1.15 · 4 nov. 2026';
+var VERSION = 'V1.16 · 5 nov. 2026';
 var $ = function (s) { return document.querySelector(s); };
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
@@ -960,7 +960,7 @@ function settingsSheet() {
   var c = S && S.clock, sim = c && c.sim;
   var html = '';
   if (M) html += '<h4>Réunion</h4><p><b>' + esc(M.nom) + '</b> · ' + esc(M.date) + ' · ' + M.rounds.length + ' épreuves</p>';
-  html += '<div class="row2"><button class="btn p" data-act="open">Ouvrir un fichier de réunion</button><button class="btn" data-act="demo">Données de démonstration</button></div>' +
+  html += (canImport() ? '<div class="row2"><button class="btn p" data-act="open">Ouvrir un fichier de réunion</button><button class="btn" data-act="demo">Données de démonstration</button></div>' : '<p class="note">Les réunions sont chargées par l\'administrateur : choisis-en une dans la liste des réunions partagées ci-dessous.</p>') +
     '<p class="note">Le fichier à ouvrir est celui de <b>Media Sheet</b> : dossier <b>store/meetings</b>, un fichier <b>.json</b> par réunion. ' + (relaisOk() ? 'Ouvert ici, il est aussi envoyé dans ton Drive pour tous les appareils du partage.' : 'Il reste sur cet appareil.') + '</p>' + importSectionHtml() + shareSectionHtml();
   if (M) {
     html += '<h4>Horloge</h4><p>' + (sim ? 'Heure <b>simulée</b> (pour tester ou rejouer une réunion) : ' : 'Heure <b>réelle</b> de l\'appareil : ') + '<b>' + fh(nowMin()) + '</b></p>' +
@@ -977,7 +977,7 @@ function settingsSheet() {
 function welcome() {
   $('#panels').style.setProperty('--n', 1);
   $('#panels').innerHTML = '<div class="welcome" style="grid-column:1/-1"><h1>CIS speaker</h1><p>Écran d\'information de compétition pour le speaker : horaire, épreuves en cours côte à côte, saisie des perfs, Q/q et alertes (PB, SB, records, minima).</p>' +
-    '<div class="row2"><button class="btn p" data-act="open">Ouvrir le fichier de la réunion</button><button class="btn" data-act="demo">Essayer avec la démo</button></div>' +
+    (canImport() ? '<div class="row2"><button class="btn p" data-act="open">Ouvrir le fichier de la réunion</button><button class="btn" data-act="demo">Essayer avec la démo</button></div>' : '<div class="row2"><button class="btn" data-act="demo">Essayer avec la démo</button></div><p class="note">Choisis la réunion dans la liste des réunions partagées ci-dessous (elles sont chargées par l\'administrateur).</p>') +
     '<p class="note">Le fichier vient de Media Sheet (dossier <b>store/meetings</b>, un fichier .json par réunion). Il n\'est jamais publié sur Internet.</p>' + (relaisOk() ? '<div class="note" style="margin-top:10px">' + importSectionHtml() + '</div>' : '') + '<div id="welcomeShared">' + (relaisOk() ? '<h4>Réunions partagées</h4>' + sharedListHtml() : '') + '</div></div>';
   document.body.classList.add('nomeet');
 }
@@ -1004,6 +1004,7 @@ function start(raw, isNew) {
   save(); renderAll(); syTick();
 }
 function loadText(txt) {
+  if (!canImport()) { alert('Réservé à l\'administrateur : choisis la réunion dans la liste des réunions partagées.'); return; }
   var j;
   try { j = JSON.parse(txt); } catch (e) { alert('Ce fichier n\'est pas lisible (JSON attendu).'); return; }
   var mt = j.meeting || j;
@@ -1047,11 +1048,11 @@ function relaisPost(body) {
   return fetch(RL.url, { method: 'POST', body: JSON.stringify(body), redirect: 'follow' }).then(function (r) { return r.json(); });
 }
 function shareMeeting(j, silent) {
-  if (!relaisOk() || !navigator.onLine) return Promise.resolve(false);
+  if (!relaisOk() || !navigator.onLine || !isAdmin()) return Promise.resolve(false);
   var m = E.loadMeeting(j);
   if (/^demo/.test(m.id)) return Promise.resolve(false);
   SHARE_MSG = 'Envoi de la réunion…'; if (!silent) refreshShareUi();
-  return relaisPost({ action: 'deposer', id: m.id, nom: m.nom, date: m.date, reunion: j }).then(function (x) {
+  return relaisPost({ action: 'deposer', id: m.id, nom: m.nom, date: m.date, reunion: j, admin: lsGet('cis:admin', '') }).then(function (x) {
     if (!x.ok) throw new Error(x.erreur === 'code' ? 'code d\'équipe refusé' : x.erreur);
     lsSet('cis:maj:' + m.id, x.maj); SHARE_MSG = 'Réunion partagée : elle apparaît sur tous les appareils du partage.';
     if (S) { S.last = { txt: '« ' + m.nom + ' » est partagée avec tous les appareils.', t: Date.now() }; save(); renderBanner(); }
@@ -1091,6 +1092,7 @@ function pollShared() {
 
 // ---------- ménage : réunions partagées et restes sur l'appareil ----------
 function isAdmin() { return !!lsGet('cis:admin', ''); }
+function canImport() { return !relaisOk() || isAdmin(); } // en partage, seul l'administrateur charge / remplace une réunion
 function removeShared(id) {
   SHARE_MSG = 'Retrait…'; refreshShareUi();
   relaisPost({ action: 'retirer', id: id, admin: lsGet('cis:admin', '') }).then(function (x) {
@@ -1128,7 +1130,7 @@ function shareSectionHtml() {
   if (!relaisOk()) h += '<p class="note">Pour qu\'une réunion ouverte sur un appareil apparaisse chez tous les speakers, installe le relais une fois (voir <a href="https://github.com/Lenurbinho/cis-speaker/blob/main/relais/LISEZMOI.md" target="_blank" rel="noopener">mode d\'emploi</a>), puis colle son adresse et le code d\'équipe ci-dessous. Les autres speakers n\'auront qu\'à ouvrir le lien d\'invitation.</p>';
   h += '<div class="row2"><input class="txt" id="rlUrl" placeholder="Adresse du relais (…/exec)" value="' + esc(RL.url) + '" style="flex:2;min-width:220px"><input class="txt" id="rlCle" placeholder="Code d\'équipe" value="' + esc(RL.cle) + '" style="flex:1;min-width:120px"><button class="btn p" data-act="rlSave">Enregistrer</button></div>';
   if (relaisOk()) {
-    h += '<div class="row2">' + (M && !/^demo/.test(M.id) ? '<button class="btn" data-act="share">Partager cette réunion</button>' : '') + '<button class="btn" data-act="invite">Copier le lien d\'invitation</button><button class="btn" data-act="rlOff">Arrêter le partage sur cet appareil</button></div>';
+    h += '<div class="row2">' + (M && !/^demo/.test(M.id) && isAdmin() ? '<button class="btn" data-act="share">Partager cette réunion</button>' : '') + '<button class="btn" data-act="invite">Copier le lien d\'invitation</button><button class="btn" data-act="rlOff">Arrêter le partage sur cet appareil</button></div>';
   }
   if (relaisOk()) h += '<div class="row2"><input class="txt" id="admCode" type="password" placeholder="Code administrateur (réservé)" value="" style="flex:1;min-width:160px"><button class="btn" data-act="admSave">' + (isAdmin() ? '✓ Administrateur sur cet appareil' : 'Valider le code administrateur') + '</button>' + (isAdmin() ? '<button class="btn" data-act="admOff">Quitter le mode administrateur</button>' : '') + '</div>';
   h += '<div id="shareMsg" class="kpvox">' + esc(SHARE_MSG) + '</div><div id="sharedList">' + sharedListHtml() + '</div>';
@@ -1253,6 +1255,7 @@ var IMP_MSG = '';
 function importSectionHtml() {
   var d = lsGet('cis:lastDirect', { id: '', date: '' });
   var h = '<h4>Importer depuis le Direct athle.fr</h4>';
+  if (!canImport()) return h.replace('Importer depuis le Direct athle.fr', 'Import des réunions') + '<p class="small">Réservé à l\'administrateur (Direct FFA, Matsport, fichier Media Sheet). Les résultats en direct arrivent quand même sur cet appareil.</p>' + (RAW && ((RAW.source === 'direct' && RAW.direct) || RAW.mats) ? '<div class="row2"><button class="btn' + (lsGet('cis:live', true) ? ' p' : '') + '" data-act="liveTog">' + (lsGet('cis:live', true) ? '✓ Résultats en direct' : 'Résultats en direct : arrêtés') + '</button></div>' : '');
   if (RAW && ((RAW.source === 'direct' && RAW.direct) || RAW.mats)) h += '<div class="row2"><button class="btn' + (lsGet('cis:live', true) ? ' p' : '') + '" data-act="liveTog">' + (lsGet('cis:live', true) ? '✓ Résultats du Direct en direct (toutes les 10 s)' : 'Résultats du Direct : arrêtés') + '</button><button class="btn" data-act="liveNow">Mettre à jour maintenant</button></div>' +
     '<p class="small">Les cases saisies à la main ne sont jamais écrasées par le Direct. Avec l\'heure simulée, une réunion passée se rejoue : chaque épreuve se remplit une fois son heure passée.</p>';
   if (!relaisOk()) return h + '<p class="small">Nécessite le relais (partage entre appareils, ci-dessous).</p>';
@@ -1304,7 +1307,7 @@ function pageGet(url) { return relaisGet({ action: 'brut', url: url, ttl: 30 }).
 var REIMP_BUSY = false, REIMP_T = Date.now();
 function sigOf(f) { return (f.meeting || f).epreuves.map(function (e) { return (e.cis_id || e.nom) + ':' + (e.startlist || []).length; }).sort().join(','); }
 function autoReimport(force) {
-  if (!M || !liveOn() || !RAW.direct || REIMP_BUSY || KP || (!force && Date.now() - REIMP_T < 180000)) return;
+  if (!M || !liveOn() || !RAW.direct || !canImport() || REIMP_BUSY || KP || (!force && Date.now() - REIMP_T < 180000)) return;
   if (!force && M.dateISO !== todayISO()) return; // réunion du jour seulement (une réunion passée a déjà ses finales)
   REIMP_T = Date.now(); REIMP_BUSY = true;
   var old = RAW, oldIds = {}; (old.meeting || old).epreuves.forEach(function (e) { oldIds[e.cis_id] = (e.startlist || []).length; });
@@ -1591,7 +1594,7 @@ document.addEventListener('click', function (ev) {
       else SHARE_MSG = relaisOk() ? 'Réglage enregistré. Recherche des réunions partagées…' : 'Partage désactivé.';
       SHARED = null; if (M && syncOn()) { syLoad(); syTick(); } settingsSheet(); pollShared(); break;
     case 'rlOff': RL = { url: '', cle: '' }; lsSet('cis:relais', RL); SHARED = null; SY = null; SHARE_MSG = ''; settingsSheet(); break;
-    case 'share': kvGet('meeting').then(function (j) { if (j) shareMeeting(j); }); break;
+    case 'share': if (isAdmin()) kvGet('meeting').then(function (j) { if (j) shareMeeting(j); }); break;
     case 'openShared': openShared(el.dataset.id); break;
     case 'admSave':
       var ac = ($('#admCode').value || '').trim(); if (!ac) { SHARE_MSG = 'Tape le code administrateur.'; refreshShareUi(); break; }
@@ -1607,8 +1610,8 @@ document.addEventListener('click', function (ev) {
     case 'rmShared': if (!confirm2('rs' + el.dataset.id, el, 'Toucher encore : retirer pour tous')) break; removeShared(el.dataset.id); break;
     case 'cleanOld': var nc = cleanDevice(false); el.textContent = nc ? nc + ' éléments effacés ✓' : 'Rien à effacer ✓'; break;
     case 'closeMeet': if (!confirm2('cm', el, 'Toucher encore pour fermer')) break; closeMeeting(); break;
-    case 'impDirect': doImportDirect(); break;
-    case 'impMats': doImportMats(); break;
+    case 'impDirect': if (canImport()) doImportDirect(); break;
+    case 'impMats': if (canImport()) doImportMats(); break;
     case 'liveTog': lsSet('cis:live', !lsGet('cis:live', true)); settingsSheet(); renderTop(); break;
     case 'liveNow': S.live = {}; save(); closeSheet(); liveTick(); autoReimport(true); break;
     case 'invite':
@@ -1616,7 +1619,7 @@ document.addEventListener('click', function (ev) {
       (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(function () { SHARE_MSG = 'Lien copié : envoie-le aux autres speakers (SMS, mail…).'; refreshShareUi(); })
         .catch(function () { SHARE_MSG = 'Lien à envoyer : ' + link; refreshShareUi(); });
       break;
-    case 'open': $('#file').click(); break;
+    case 'open': if (canImport()) $('#file').click(); break;
     case 'demo':
       fetch('data/demo.json').then(function (x) { return x.json(); }).then(function (j) { kvSet('meeting', j); closeSheet(); start(j, true); }).catch(function () { alert('Démo indisponible hors connexion (ouvre le site une fois en ligne).'); });
       break;
